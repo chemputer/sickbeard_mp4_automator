@@ -711,7 +711,7 @@ class MkvtoMp4:
                 if vcodec == 'copy':
                     vcodec = self.video_codec[0]
             # Make sure its not an image based codec
-            if s.codec.lower() not in bad_subtitle_codecs and self.embedsubs:
+            if self.embedsubs and ( s.codec.lower() not in bad_subtitle_codecs or self.output_extension == 'mkv' ):
                 # Proceed if no whitelist is set, or if the language is in the whitelist
                 if self.swl is None or s.metadata['language'].lower() in self.swl:
                     subtitle_settings.update({l: {
@@ -728,7 +728,8 @@ class MkvtoMp4:
                     }})
                     self.log.info("Creating subtitle stream %s from source stream %s." % (l, s.index))
                     l = l + 1
-            elif s.codec.lower() in bad_subtitle_codecs and self.embedsubs == True and forced_sub > 0 and self.burn_in_forced_subs == True: # This overlays forced picture subtitles on top of the video stream. Slows down conversion significantly.
+            
+            if s.codec.lower() in bad_subtitle_codecs and self.embedsubs == True and forced_sub > 0 and self.burn_in_forced_subs == True: # This overlays forced picture subtitles on top of the video stream. Slows down conversion significantly.
                 if vwidth == None:
                     overlay_stream = "[0:v][0:%s]overlay" % ( s.index )
                 else: # The resolution has changed, we must use scale2ref to resize the picture subtitles or they'll end up in weird places.

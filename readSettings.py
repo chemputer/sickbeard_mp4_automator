@@ -494,13 +494,17 @@ class ReadSettings:
         else:
             self.scodec = self.scodec.replace(' ', '').split(',')
 
-        if self.embedsubs:
+        if self.embedsubs and self.output_extension == 'mp4':
             if len(self.scodec) > 1:
                 log.warning("Can only embed one subtitle type, defaulting to 'mov_text'.")
                 self.scodec = ['mov_text']
             if self.scodec[0] not in valid_internal_subcodecs:
-                log.warning("Invalid interal subtitle codec %s, defaulting to 'mov_text'." % self.scodec[0])
+                log.warning("Invalid internal subtitle codec %s, defaulting to 'mov_text'." % self.scodec[0])
                 self.scodec = ['mov_text']
+        elif self.output_extension == 'mkv':
+            if self.scodec[0] not in valid_internal_subcodecs_mkv:
+                log.warning("Invalid internal subtitle codec %s, defaulting to 'ass'." % self.scodec[0])
+                self.scodec = ['ass']
         else:
             for codec in self.scodec:
                 if codec not in valid_external_subcodecs:

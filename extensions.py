@@ -7,6 +7,7 @@ valid_formats = ['mp4', 'mov', 'mkv']
 bad_subtitle_codecs = ['pgssub', 'dvdsub', 's_hdmv/pgs', 'hdmv_pgs_subtitle', 'dvd_subtitle', 'pgssub', 'dvb_teletext', 'dvb_subtitle' ]
 tmdb_api_key = "45e408d2851e968e6e4d0353ce621c66"
 valid_internal_subcodecs = ['mov_text']
+valid_internal_subcodecs_mkv = ['ass','srt','ssa']
 valid_external_subcodecs = ['srt', 'webvtt', 'ass']
 subtitle_codec_extensions = {'srt': 'srt',
                              'webvtt': 'vtt',
