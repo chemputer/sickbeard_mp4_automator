@@ -434,7 +434,7 @@ class MkvtoMp4:
             if self.video_profile:
                 vprofile = self.video_profile[0]
         else:
-            pix_fmt = None
+            pix_fmt = info.video.pix_fmt.lower()
 
         if self.video_bitrate is not None and vbr > self.video_bitrate:
             self.log.debug("Overriding video bitrate. Codec cannot be copied because video bitrate is too high.")
