@@ -499,14 +499,10 @@ class MkvtoMp4:
             self.log.info("Audio detected for stream #%s: %s [%s]." % (a.index, a.codec, a.metadata['language']))
 
             if self.output_extension == 'mp4':
-                if a.codec.lower() == 'truehd': # Need to skip it early so that it flags the next track as default.
-                    if num_desired_language_audio_streams < 2 or overrideLang == True:
-                        self.log.info( "MP4 does not support truehd audio, as this is the only audio track in the desired language we will attempt to convert it, but be warned that there may be audio syncing issues.")
-                        self.audio_copyoriginal = False #Need to disable copying this or it will just fail anyway.
-                    else: 
-                        self.log.info( "MP4 containers do not support truehd audio, and converting it is inconsistent due to video/audio sync issues. Skipping stream %s as typically the 2nd audio track is the AC3 core of the truehd stream." % a.index )
-                        continue
-                if a.codec.startswith( 'pcm' ): #pcm formats also cannot be container in a .mp4 file
+                if a.codec.lower() == 'truehd':
+                    self.log.info( "MP4 does not support truehd audio, converting to a usable format but be warned that there may be audio syncing issues with older versions of ffmpeg.")
+                    self.audio_copyoriginal = False #Need to disable copying this or it will just fail anyway.
+                elif a.codec.startswith( 'pcm' ): #pcm formats also cannot be container in a .mp4 file
                     self.audio_copyoriginal = False
 
             # Set undefined language to default language if specified
