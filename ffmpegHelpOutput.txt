@@ -3366,6 +3366,7 @@ AVFormatContext AVOptions:
   -protocol_whitelist <string>     .D....... List of protocols that are allowed to be used
   -protocol_blacklist <string>     .D....... List of protocols that are not allowed to be used
   -max_streams       <int>        .D....... maximum number of streams (from 0 to INT_MAX) (default 1000)
+  -skip_estimate_duration_from_pts <boolean>    .D....... skip duration calculation in estimate_timings_from_pts (default false)
 
 AVIOContext AVOptions:
   -protocol_whitelist <string>     .D....... List of protocols that are allowed to be used
@@ -3415,9 +3416,9 @@ http AVOptions:
   -http_proxy        <string>     ED....... set HTTP proxy to tunnel through
   -headers           <string>     ED....... set custom HTTP headers, can override built in default headers
   -content_type      <string>     ED....... set a specific content type for the POST messages
-  -user_agent        <string>     .D....... override User-Agent header (default "Lavf/58.13.102")
+  -user_agent        <string>     .D....... override User-Agent header (default "Lavf/58.17.100")
   -referer           <string>     .D....... override referer header
-  -user-agent        <string>     .D....... use the "user_agent" option instead (default "Lavf/58.13.102")
+  -user-agent        <string>     .D....... use the "user_agent" option instead (default "Lavf/58.17.100")
   -multiple_requests <boolean>    ED....... use persistent connections (default false)
   -post_data         <binary>     ED....... set custom HTTP post data
   -cookies           <string>     .D....... set cookies to be sent in applicable future requests, use newline delimited Set-Cookie HTTP field value syntax
@@ -3444,9 +3445,9 @@ https AVOptions:
   -http_proxy        <string>     ED....... set HTTP proxy to tunnel through
   -headers           <string>     ED....... set custom HTTP headers, can override built in default headers
   -content_type      <string>     ED....... set a specific content type for the POST messages
-  -user_agent        <string>     .D....... override User-Agent header (default "Lavf/58.13.102")
+  -user_agent        <string>     .D....... override User-Agent header (default "Lavf/58.17.100")
   -referer           <string>     .D....... override referer header
-  -user-agent        <string>     .D....... use the "user_agent" option instead (default "Lavf/58.13.102")
+  -user-agent        <string>     .D....... use the "user_agent" option instead (default "Lavf/58.17.100")
   -multiple_requests <boolean>    ED....... use persistent connections (default false)
   -post_data         <binary>     ED....... set custom HTTP post data
   -cookies           <string>     .D....... set cookies to be sent in applicable future requests, use newline delimited Set-Cookie HTTP field value syntax
@@ -3942,6 +3943,8 @@ mpegts demuxer AVOptions:
   -fix_teletext_pts  <boolean>    .D....... try to fix pts values of dvb teletext streams (default true)
   -ts_packetsize     <int>        .D....XR. output option carrying the raw packet size (from 0 to 0) (default 0)
   -scan_all_pmts     <boolean>    .D....... scan and combine all PMTs (default auto)
+  -skip_unknown_pmt  <boolean>    .D....... skip PMTs for programs not advertised in the PAT (default false)
+  -merge_pmt_versions <boolean>    .D....... re-use streams when PMT's version/pids change (default false)
 
 mpegtsraw demuxer AVOptions:
   -resync_size       <int>        .D....... set size limit for looking up a new synchronization (from 0 to INT_MAX) (default 65536)
@@ -4074,8 +4077,8 @@ RTSP demuxer AVOptions:
   -stimeout          <int>        .D....... set timeout (in microseconds) of socket TCP I/O operations (from INT_MIN to INT_MAX) (default 0)
   -reorder_queue_size <int>        .D....... set number of packets to buffer for handling of reordered packets (from -1 to INT_MAX) (default -1)
   -buffer_size       <int>        ED....... Underlying protocol send/receive buffer size (from -1 to INT_MAX) (default -1)
-  -user_agent        <string>     .D....... override User-Agent header (default "Lavf58.13.102")
-  -user-agent        <string>     .D....... override User-Agent header (deprecated, use user_agent) (default "Lavf58.13.102")
+  -user_agent        <string>     .D....... override User-Agent header (default "Lavf58.17.100")
+  -user-agent        <string>     .D....... override User-Agent header (deprecated, use user_agent) (default "Lavf58.17.100")
 
 sbg_demuxer AVOptions:
   -sample_rate       <int>        .D.......  (from 0 to INT_MAX) (default 0)
@@ -4549,6 +4552,24 @@ xpm demuxer AVOptions:
      sec                          .D....... second precision
      ns                           .D....... nano second precision
 
+xwd demuxer AVOptions:
+  -framerate         <video_rate> .D....... set the video framerate (default "25")
+  -loop              <boolean>    .D....... force loop over input file sequence (default false)
+  -pattern_type      <int>        .D....... set pattern type (from 0 to INT_MAX) (default 4)
+     glob_sequence                .D....... select glob/sequence pattern type
+     glob                         .D....... select glob pattern type
+     sequence                     .D....... select sequence pattern type
+     none                         .D....... disable pattern matching
+  -pixel_format      <string>     .D....... set video pixel format
+  -start_number      <int>        .D....... set first number in the sequence (from INT_MIN to INT_MAX) (default 0)
+  -start_number_range <int>        .D....... set range for looking at the first sequence number (from 1 to INT_MAX) (default 5)
+  -video_size        <image_size> .D....... set video size
+  -frame_size        <int>        .D....... force frame size in bytes (from 0 to INT_MAX) (default 0)
+  -ts_from_file      <int>        .D....... set frame timestamp from file's one (from 0 to 2) (default none)
+     none                         .D....... none
+     sec                          .D....... second precision
+     ns                           .D....... nano second precision
+
 Game Music Emu demuxer AVOptions:
   -track_index       <int>        .D..A.... set track that should be played (from 0 to INT_MAX) (default 0)
   -sample_rate       <int>        .D..A.... set sample rate (from 1000 to 999999) (default 44100)
@@ -4715,6 +4736,10 @@ dash muxer AVOptions:
   -streaming         <boolean>    E........ Enable/Disable streaming mode of output. Each frame will be moof fragment (default false)
   -timeout           <duration>   E........ set timeout for socket I/O operations (default -0.000001)
   -index_correction  <boolean>    E........ Enable/Disable segment index correction logic (default false)
+  -format_options    <string>     E........ set list of options for the container format (mp4/webm) used for dash
+  -dash_segment_type <int>        E........ set dash segment files type (from 0 to 1) (default mp4)
+     mp4                          E........ make segment file in ISOBMFF format
+     webm                         E........ make segment file in WebM format
 
 f4v muxer AVOptions:
   -movflags          <flags>      E........ MOV muxer flags (default 0)
@@ -4763,6 +4788,9 @@ f4v muxer AVOptions:
   -encryption_kid    <binary>     E........ The media encryption key identifier (hex)
   -use_stream_ids_as_track_ids <boolean>    E........ use stream ids as track ids (default false)
   -write_tmcd        <boolean>    E........ force or disable writing tmcd (default auto)
+  -write_prft        <int>        E........ Write producer reference time box with specified time source (from 0 to 2) (default 0)
+     wallclock                    E........
+     pts                          E........
 
 Fifo muxer AVOptions:
   -fifo_format       <string>     E........ Target muxer
@@ -4924,6 +4952,9 @@ ipod muxer AVOptions:
   -encryption_kid    <binary>     E........ The media encryption key identifier (hex)
   -use_stream_ids_as_track_ids <boolean>    E........ use stream ids as track ids (default false)
   -write_tmcd        <boolean>    E........ force or disable writing tmcd (default auto)
+  -write_prft        <int>        E........ Write producer reference time box with specified time source (from 0 to 2) (default 0)
+     wallclock                    E........
+     pts                          E........
 
 ismv muxer AVOptions:
   -movflags          <flags>      E........ MOV muxer flags (default 0)
@@ -4972,6 +5003,9 @@ ismv muxer AVOptions:
   -encryption_kid    <binary>     E........ The media encryption key identifier (hex)
   -use_stream_ids_as_track_ids <boolean>    E........ use stream ids as track ids (default false)
   -write_tmcd        <boolean>    E........ force or disable writing tmcd (default auto)
+  -write_prft        <int>        E........ Write producer reference time box with specified time source (from 0 to 2) (default 0)
+     wallclock                    E........
+     pts                          E........
 
 LATM/LOAS muxer AVOptions:
   -smc-interval      <int>        E........ StreamMuxConfig interval. (from 1 to 65535) (default 20)
@@ -5047,6 +5081,9 @@ mov muxer AVOptions:
   -encryption_kid    <binary>     E........ The media encryption key identifier (hex)
   -use_stream_ids_as_track_ids <boolean>    E........ use stream ids as track ids (default false)
   -write_tmcd        <boolean>    E........ force or disable writing tmcd (default auto)
+  -write_prft        <int>        E........ Write producer reference time box with specified time source (from 0 to 2) (default 0)
+     wallclock                    E........
+     pts                          E........
 
 MP3 muxer AVOptions:
   -id3v2_version     <int>        E........ Select ID3v2 version to write. Currently 3 and 4 are supported. (from 0 to 4) (default 4)
@@ -5100,6 +5137,9 @@ mp4 muxer AVOptions:
   -encryption_kid    <binary>     E........ The media encryption key identifier (hex)
   -use_stream_ids_as_track_ids <boolean>    E........ use stream ids as track ids (default false)
   -write_tmcd        <boolean>    E........ force or disable writing tmcd (default auto)
+  -write_prft        <int>        E........ Write producer reference time box with specified time source (from 0 to 2) (default 0)
+     wallclock                    E........
+     pts                          E........
 
 mpeg muxer AVOptions:
   -muxrate           <int>        E........ (from 0 to 1.67772e+009) (default 0)
@@ -5268,6 +5308,9 @@ psp muxer AVOptions:
   -encryption_kid    <binary>     E........ The media encryption key identifier (hex)
   -use_stream_ids_as_track_ids <boolean>    E........ use stream ids as track ids (default false)
   -write_tmcd        <boolean>    E........ force or disable writing tmcd (default auto)
+  -write_prft        <int>        E........ Write producer reference time box with specified time source (from 0 to 2) (default 0)
+     wallclock                    E........
+     pts                          E........
 
 RTP muxer AVOptions:
   -rtpflags          <flags>      E........ RTP muxer flags (default 0)
@@ -5310,8 +5353,8 @@ RTSP muxer AVOptions:
   -stimeout          <int>        .D....... set timeout (in microseconds) of socket TCP I/O operations (from INT_MIN to INT_MAX) (default 0)
   -reorder_queue_size <int>        .D....... set number of packets to buffer for handling of reordered packets (from -1 to INT_MAX) (default -1)
   -buffer_size       <int>        ED....... Underlying protocol send/receive buffer size (from -1 to INT_MAX) (default -1)
-  -user_agent        <string>     .D....... override User-Agent header (default "Lavf58.13.102")
-  -user-agent        <string>     .D....... override User-Agent header (deprecated, use user_agent) (default "Lavf58.13.102")
+  -user_agent        <string>     .D....... override User-Agent header (default "Lavf58.17.100")
+  -user-agent        <string>     .D....... override User-Agent header (deprecated, use user_agent) (default "Lavf58.17.100")
 
 segment muxer AVOptions:
   -reference_stream  <string>     E........ set reference stream (default "auto")
@@ -5457,6 +5500,9 @@ tg2 muxer AVOptions:
   -encryption_kid    <binary>     E........ The media encryption key identifier (hex)
   -use_stream_ids_as_track_ids <boolean>    E........ use stream ids as track ids (default false)
   -write_tmcd        <boolean>    E........ force or disable writing tmcd (default auto)
+  -write_prft        <int>        E........ Write producer reference time box with specified time source (from 0 to 2) (default 0)
+     wallclock                    E........
+     pts                          E........
 
 tgp muxer AVOptions:
   -movflags          <flags>      E........ MOV muxer flags (default 0)
@@ -5505,6 +5551,9 @@ tgp muxer AVOptions:
   -encryption_kid    <binary>     E........ The media encryption key identifier (hex)
   -use_stream_ids_as_track_ids <boolean>    E........ use stream ids as track ids (default false)
   -write_tmcd        <boolean>    E........ force or disable writing tmcd (default auto)
+  -write_prft        <int>        E........ Write producer reference time box with specified time source (from 0 to 2) (default 0)
+     wallclock                    E........
+     pts                          E........
 
 WAV muxer AVOptions:
   -write_bext        <boolean>    E........ Write BEXT chunk. (default false)
@@ -5574,6 +5623,7 @@ sdl2 outdev AVOptions:
   -window_size       <image_size> E........ set SDL window forced size
   -window_fullscreen <boolean>    E........ set SDL window fullscreen (default false)
   -window_borderless <boolean>    E........ set SDL window border off (default false)
+  -window_enable_quit <int>        E........ set if quit action is available (from 0 to 1) (default 1)
 
 SWScaler AVOptions:
   -sws_flags         <flags>      E..V..... scaler flags (default bicubic)
@@ -5928,7 +5978,10 @@ afir AVOptions:
   wet               <float>      ..F.A.... set wet gain (from 0 to 10) (default 1)
   length            <float>      ..F.A.... set IR length (from 0 to 1) (default 1)
   again             <boolean>    ..F.A.... enable auto gain (default true)
-  maxir             <float>      ..F.A.... set max ir length (from 0.1 to 60) (default 30)
+  maxir             <float>      ..F.A.... set max IR length (from 0.1 to 60) (default 30)
+  response          <boolean>    ..FV..... show IR frequency response (default false)
+  channel           <int>        ..FV..... set IR channel to display frequency response (from 0 to 1024) (default 0)
+  size              <image_size> ..FV..... set video size (default "hd720")
 
 aformat AVOptions:
   sample_fmts       <string>     ..F.A.... A '|'-separated list of sample formats.
@@ -5971,6 +6024,9 @@ aiir AVOptions:
      flt                          ..F.A.... single-precision floating-point
      i32                          ..F.A.... 32-bit integers
      i16                          ..F.A.... 16-bit integers
+  response          <boolean>    ..FV..... show IR frequency response (default false)
+  channel           <int>        ..FV..... set IR channel to display frequency response (from 0 to 1024) (default 0)
+  size              <image_size> ..FV..... set video size (default "hd720")
 
 ainterleave AVOptions:
   nb_inputs         <int>        ..F.A.... set number of inputs (from 1 to INT_MAX) (default 2)
@@ -8028,6 +8084,15 @@ fade AVOptions:
   color             <color>      ..FV..... set color (default "black")
   c                 <color>      ..FV..... set color (default "black")
 
+fftdnoiz AVOptions:
+  sigma             <float>      ..FV..... set denoise strength (from 0 to 30) (default 1)
+  amount            <float>      ..FV..... set amount of denoising (from 0.01 to 1) (default 1)
+  block             <int>        ..FV..... set block log2(size) (from 3 to 6) (default 4)
+  overlap           <float>      ..FV..... set block overlap (from 0.2 to 0.8) (default 0.5)
+  prev              <int>        ..FV..... set number of previous frames for temporal denoising (from 0 to 1) (default 0)
+  next              <int>        ..FV..... set number of next frames for temporal denoising (from 0 to 1) (default 0)
+  planes            <int>        ..FV..... set planes to filter (from 0 to 15) (default 7)
+
 fftfilt AVOptions:
   dc_Y              <int>        ..FV..... adjust gain in Y plane (from 0 to 1000) (default 0)
   dc_U              <int>        ..FV..... adjust gain in U plane (from 0 to 1000) (default 0)
@@ -9318,7 +9383,7 @@ AVDCT AVOptions:
      simpleauto                   ED.V..... experimental / for debugging
 
 srcnn AVOptions:
-  config_file       <string>     ..FV..... path to configuration file with network parameters
+  model_filename    <string>     ..FV..... path to model file specifying network architecture and its parameters
 
 ssim AVOptions:
   stats_file        <string>     ..FV..... Set file where to store per-frame difference information
@@ -10459,6 +10524,24 @@ mptestsrc AVOptions:
      all                          ..FV..... 
 
 nullsrc AVOptions:
+  size              <image_size> ..FV..... set video size (default "320x240")
+  s                 <image_size> ..FV..... set video size (default "320x240")
+  rate              <video_rate> ..FV..... set video rate (default "25")
+  r                 <video_rate> ..FV..... set video rate (default "25")
+  duration          <duration>   ..FV..... set video duration (default -0.000001)
+  d                 <duration>   ..FV..... set video duration (default -0.000001)
+  sar               <rational>   ..FV..... set video sample aspect ratio (from 0 to INT_MAX) (default 1/1)
+
+pal75bars AVOptions:
+  size              <image_size> ..FV..... set video size (default "320x240")
+  s                 <image_size> ..FV..... set video size (default "320x240")
+  rate              <video_rate> ..FV..... set video rate (default "25")
+  r                 <video_rate> ..FV..... set video rate (default "25")
+  duration          <duration>   ..FV..... set video duration (default -0.000001)
+  d                 <duration>   ..FV..... set video duration (default -0.000001)
+  sar               <rational>   ..FV..... set video sample aspect ratio (from 0 to INT_MAX) (default 1/1)
+
+pal100bars AVOptions:
   size              <image_size> ..FV..... set video size (default "320x240")
   s                 <image_size> ..FV..... set video size (default "320x240")
   rate              <video_rate> ..FV..... set video rate (default "25")
@@ -12722,6 +12805,7 @@ File formats:
  D  xmv             Microsoft XMV
  D  xpm_pipe        piped xpm sequence
  D  xvag            Sony PS3 XVAG
+ D  xwd_pipe        piped xwd sequence
  D  xwma            Microsoft xWMA
  D  yop             Psygnosis YOP
  DE yuv4mpegpipe    YUV4MPEG pipe
@@ -13185,6 +13269,7 @@ File formats:
  D  xmv             Microsoft XMV
  D  xpm_pipe        piped xpm sequence
  D  xvag            Sony PS3 XVAG
+ D  xwd_pipe        piped xwd sequence
  D  xwma            Microsoft xWMA
  D  yop             Psygnosis YOP
  D  yuv4mpegpipe    YUV4MPEG pipe
@@ -13211,15 +13296,17 @@ Filters:
  ... acrossfade        AA->A      Cross fade two input audio streams.
  ... acrusher          A->A       Reduce audio bit resolution.
  T.. adelay            A->A       Delay one or more audio channels.
+ ... aderivative       A->A       Compute derivative of input audio.
  ... aecho             A->A       Add echoing to the audio.
  ... aemphasis         A->A       Audio emphasis.
  ... aeval             A->A       Filter audio signal according to a specified expression.
  T.. afade             A->A       Fade in/out input audio.
  ... afftfilt          A->A       Apply arbitrary expressions to samples in frequency domain.
- .S. afir              AA->A      Apply Finite Impulse Response filter with supplied coefficients in 2nd stream.
+ .S. afir              AA->N      Apply Finite Impulse Response filter with supplied coefficients in 2nd stream.
  ... aformat           A->A       Convert the input audio to one of the specified formats.
  ... agate             A->A       Audio gate.
- .S. aiir              A->A       Apply Infinite Impulse Response filter with supplied coefficients.
+ .S. aiir              A->N       Apply Infinite Impulse Response filter with supplied coefficients.
+ ... aintegral         A->A       Compute integral of input audio.
  ... ainterleave       N->A       Temporally interleave audio inputs.
  ... alimiter          A->A       Audio lookahead limiter.
  .SC allpass           A->A       Apply a two-pole all-pass filter.
@@ -13338,7 +13425,7 @@ Filters:
  .S. datascope         V->V       Video data analysis.
  TS. dctdnoiz          V->V       Denoise frames using 2D DCT.
  TS. deband            V->V       Debands video.
- ... deblock           V->V       Deblock video.
+ T.. deblock           V->V       Deblock video.
  ... decimate          N->V       Decimate frames (post field matching filter).
  TS. deconvolve        VV->V      Deconvolve first video stream with second video stream.
  TS. deflate           V->V       Apply deflate effect.
@@ -13363,6 +13450,7 @@ Filters:
  TS. erosion           V->V       Apply erosion effect.
  ... extractplanes     V->N       Extract planes as grayscale frames.
  .S. fade              V->V       Fade in/out input video.
+ T.. fftdnoiz          V->V       Denoise frames using 3D FFT.
  T.. fftfilt           V->V       Apply arbitrary expressions to pixels in frequency domain.
  ... field             V->V       Extract a field from the input video.
  ... fieldhint         V->V       Field matching using hints.
@@ -13410,7 +13498,7 @@ Filters:
  T.. lutrgb            V->V       Compute and apply a lookup table to the RGB input video.
  T.. lutyuv            V->V       Compute and apply a lookup table to the YUV input video.
  TS. maskedclamp       VVV->V     Clamp first stream with second stream and third stream.
- T.. maskedmerge       VVV->V     Merge first stream with second stream using third stream as mask.
+ TS. maskedmerge       VVV->V     Merge first stream with second stream using third stream as mask.
  ... mcdeint           V->V       Apply motion compensating deinterlacing.
  ... mergeplanes       N->V       Merge planes.
  ... mestimate         V->V       Generate motion vectors.
@@ -13491,13 +13579,13 @@ Filters:
  ... super2xsai        V->V       Scale the input by 2x using the Super2xSaI pixel art algorithm.
  T.. swaprect          V->V       Swap 2 rectangular objects in video.
  T.. swapuv            V->V       Swap U and V components.
- .S. tblend            V->V       Blend successive frames.
+ TS. tblend            V->V       Blend successive frames.
  ... telecine          V->V       Apply a telecine pattern.
  T.. threshold         VVVV->V    Threshold first video stream using other video streams.
  ... thumbnail         V->V       Select the most representative frame in a given sequence of consecutive frames.
  ... tile              V->V       Tile several successive frames together.
  ... tinterlace        V->V       Perform temporal field interlacing.
- ... tlut2             V->V       Compute and apply a lookup table from two successive frames.
+ T.. tlut2             V->V       Compute and apply a lookup table from two successive frames.
  .S. tmix              V->V       Mix successive video frames.
  ... tonemap           V->V       Conversion to/from different dynamic ranges.
  .S. transpose         V->V       Transpose input video.
@@ -13516,7 +13604,7 @@ Filters:
  ... vpp_qsv           V->V       Quick Sync Video VPP.
  ... vstack            N->V       Stack video inputs vertically.
  TS. w3fdif            V->V       Apply Martin Weston three field deinterlace.
- ... waveform          V->V       Video waveform monitor.
+ .S. waveform          V->V       Video waveform monitor.
  ... weave             V->V       Weave input video fields into frames.
  .S. xbr               V->V       Scale the input using xBR algorithm.
  TS. yadif             V->V       Deinterlace the input image.
@@ -13532,6 +13620,8 @@ Filters:
  ... mandelbrot        |->V       Render a Mandelbrot fractal.
  ... mptestsrc         |->V       Generate various test pattern.
  ... nullsrc           |->V       Null video source, return unprocessed video frames.
+ ... pal75bars         |->V       Generate PAL 75% color bars.
+ ... pal100bars        |->V       Generate PAL 100% color bars.
  ... rgbtestsrc        |->V       Generate RGB test pattern.
  ... smptebars         |->V       Generate SMPTE color bars.
  ... smptehdbars       |->V       Generate SMPTE HD color bars.
@@ -13562,7 +13652,7 @@ Filters:
  ... abuffersink       A->|       Buffer audio frames, and make them available to the end of the filter graph.
  ... buffersink        V->|       Buffer video frames, and make them available to the end of the filter graph.
 Encoder nvenc_h264 [NVIDIA NVENC H.264 encoder]:
-    General capabilities: delay 
+    General capabilities: delay hardware 
     Threading capabilities: none
     Supported pixel formats: yuv420p nv12 p010le yuv444p p016le yuv444p16le bgr0 rgb0 cuda d3d11
 nvenc_h264 AVOptions:
@@ -13657,7 +13747,7 @@ nvenc_h264 AVOptions:
      middle                       E..V..... Only (number of B frames)/2 will be used for reference
 
 Encoder nvenc_hevc [NVIDIA NVENC hevc encoder]:
-    General capabilities: delay 
+    General capabilities: delay hardware 
     Threading capabilities: none
     Supported pixel formats: yuv420p nv12 p010le yuv444p p016le yuv444p16le bgr0 rgb0 cuda d3d11
 nvenc_hevc AVOptions:
@@ -13739,8 +13829,9 @@ nvenc_hevc AVOptions:
   -weighted_pred     <int>        E..V..... Set 1 to enable weighted prediction (from 0 to 1) (default 0)
 
 Decoder h264_cuvid [Nvidia CUVID H264 decoder]:
-    General capabilities: delay 
+    General capabilities: delay avoidprobe hardware 
     Threading capabilities: none
+    Supported hardware devices: cuda 
     Supported pixel formats: cuda nv12 p010le p016le
 h264_cuvid AVOptions:
   -deint             <int>        .D.V..... Set deinterlacing mode (from 0 to 2) (default weave)
@@ -13754,8 +13845,9 @@ h264_cuvid AVOptions:
   -resize            <string>     .D.V..... Resize (width)x(height)
 
 Decoder hevc_cuvid [Nvidia CUVID HEVC decoder]:
-    General capabilities: delay 
+    General capabilities: delay avoidprobe hardware 
     Threading capabilities: none
+    Supported hardware devices: cuda 
     Supported pixel formats: cuda nv12 p010le p016le
 hevc_cuvid AVOptions:
   -deint             <int>        .D.V..... Set deinterlacing mode (from 0 to 2) (default weave)
@@ -13769,8 +13861,9 @@ hevc_cuvid AVOptions:
   -resize            <string>     .D.V..... Resize (width)x(height)
 
 Decoder mjpeg_cuvid [Nvidia CUVID MJPEG decoder]:
-    General capabilities: delay 
+    General capabilities: delay avoidprobe hardware 
     Threading capabilities: none
+    Supported hardware devices: cuda 
     Supported pixel formats: cuda nv12 p010le p016le
 mjpeg_cuvid AVOptions:
   -deint             <int>        .D.V..... Set deinterlacing mode (from 0 to 2) (default weave)
@@ -13784,8 +13877,9 @@ mjpeg_cuvid AVOptions:
   -resize            <string>     .D.V..... Resize (width)x(height)
 
 Decoder mpeg1_cuvid [Nvidia CUVID MPEG1VIDEO decoder]:
-    General capabilities: delay 
+    General capabilities: delay avoidprobe hardware 
     Threading capabilities: none
+    Supported hardware devices: cuda 
     Supported pixel formats: cuda nv12 p010le p016le
 mpeg1_cuvid AVOptions:
   -deint             <int>        .D.V..... Set deinterlacing mode (from 0 to 2) (default weave)
@@ -13799,8 +13893,9 @@ mpeg1_cuvid AVOptions:
   -resize            <string>     .D.V..... Resize (width)x(height)
 
 Decoder mpeg2_cuvid [Nvidia CUVID MPEG2VIDEO decoder]:
-    General capabilities: delay 
+    General capabilities: delay avoidprobe hardware 
     Threading capabilities: none
+    Supported hardware devices: cuda 
     Supported pixel formats: cuda nv12 p010le p016le
 mpeg2_cuvid AVOptions:
   -deint             <int>        .D.V..... Set deinterlacing mode (from 0 to 2) (default weave)
@@ -13814,8 +13909,9 @@ mpeg2_cuvid AVOptions:
   -resize            <string>     .D.V..... Resize (width)x(height)
 
 Decoder mpeg4_cuvid [Nvidia CUVID MPEG4 decoder]:
-    General capabilities: delay 
+    General capabilities: delay avoidprobe hardware 
     Threading capabilities: none
+    Supported hardware devices: cuda 
     Supported pixel formats: cuda nv12 p010le p016le
 mpeg4_cuvid AVOptions:
   -deint             <int>        .D.V..... Set deinterlacing mode (from 0 to 2) (default weave)
@@ -13829,8 +13925,9 @@ mpeg4_cuvid AVOptions:
   -resize            <string>     .D.V..... Resize (width)x(height)
 
 Decoder vc1_cuvid [Nvidia CUVID VC1 decoder]:
-    General capabilities: delay 
+    General capabilities: delay avoidprobe hardware 
     Threading capabilities: none
+    Supported hardware devices: cuda 
     Supported pixel formats: cuda nv12 p010le p016le
 vc1_cuvid AVOptions:
   -deint             <int>        .D.V..... Set deinterlacing mode (from 0 to 2) (default weave)
@@ -13844,8 +13941,9 @@ vc1_cuvid AVOptions:
   -resize            <string>     .D.V..... Resize (width)x(height)
 
 Decoder vp8_cuvid [Nvidia CUVID VP8 decoder]:
-    General capabilities: delay 
+    General capabilities: delay avoidprobe hardware 
     Threading capabilities: none
+    Supported hardware devices: cuda 
     Supported pixel formats: cuda nv12 p010le p016le
 vp8_cuvid AVOptions:
   -deint             <int>        .D.V..... Set deinterlacing mode (from 0 to 2) (default weave)
@@ -13859,8 +13957,9 @@ vp8_cuvid AVOptions:
   -resize            <string>     .D.V..... Resize (width)x(height)
 
 Decoder vp9_cuvid [Nvidia CUVID VP9 decoder]:
-    General capabilities: delay 
+    General capabilities: delay avoidprobe hardware 
     Threading capabilities: none
+    Supported hardware devices: cuda 
     Supported pixel formats: cuda nv12 p010le p016le
 vp9_cuvid AVOptions:
   -deint             <int>        .D.V..... Set deinterlacing mode (from 0 to 2) (default weave)
