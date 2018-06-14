@@ -6,7 +6,7 @@ import sys
 import shutil
 import logging
 from converter import Converter, FFMpegConvertError
-from extensions import valid_input_extensions, valid_output_extensions, bad_subtitle_codecs, valid_subtitle_extensions, subtitle_codec_extensions
+from extensions import valid_input_extensions, valid_output_extensions, bad_subtitle_codecs, valid_subtitle_extensions, subtitle_codec_extensions, valid_tagging_extensions
 from babelfish import Language
 import datetime
 
@@ -54,6 +54,7 @@ class MkvtoMp4:
                  audio_bitrate=256,
                  audio_filter=None,
                  audio_copyoriginal=False,
+                 audio_first_language_track=False,
                  iOS=False,
                  iOSFirst=False,
                  iOSLast=False,
@@ -152,6 +153,7 @@ class MkvtoMp4:
         self.adl = adl
         self.aac_adtstoasc = aac_adtstoasc
         self.audio_copyoriginal = audio_copyoriginal
+        self.audio_first_language_track = audio_first_language_track
         self.sample_rate = sample_rate
         # Subtitle settings
         self.scodec = scodec
@@ -233,6 +235,7 @@ class MkvtoMp4:
         self.adl = settings.adl
         self.aac_adtstoasc = settings.aac_adtstoasc
         self.audio_copyoriginal = settings.audio_copyoriginal
+        self.audio_first_language_track = settings.audio_first_language_track
         self.sample_rate = settings.sample_rate
         # Subtitle settings
         self.scodec = settings.scodec
@@ -310,17 +313,21 @@ class MkvtoMp4:
                     self.log.debug("Unable to delete subtitle %s." % subfile)
 
         dim = self.getDimensions(outputfile)
+        input_extension = self.parseFile(inputfile)[2].lower()
+        output_extension = self.parseFile(outputfile)[2].lower()
 
         return {'input': inputfile,
-                'output': outputfile,
-                'options': options,
+                'input_extension': input_extension,
                 'input_deleted': deleted,
+                'output': outputfile,
+                'output_extension': output_extension,
+                'options': options,
                 'x': dim['x'],
                 'y': dim['y']}
 
     # Determine if a source video file is in a valid format
     def validSource(self, inputfile):
-        input_dir, filename, input_extension = self.parseFile(inputfile)
+        input_extension = self.parseFile(inputfile)[2]
         if input_extension.lower() == "m2ts" and not self.handle_m2ts_files:
             self.log.debug( "%2 is a m2ts file and handle_m2ts_files is not enabled" % inputfile )
             return False
@@ -338,7 +345,7 @@ class MkvtoMp4:
 
     # Determine if a file meets the criteria for processing
     def needProcessing(self, inputfile):
-        input_dir, filename, input_extension = self.parseFile(inputfile)
+        input_extension = self.parseFile(inputfile)[2]
         # Make sure input and output extensions are compatible. If processMP4 is true, then make sure the input extension is a valid output extension and allow to proceed as well
         if (input_extension.lower() in valid_input_extensions or (self.processMP4 is True and input_extension.lower() in valid_output_extensions)) and self.output_extension.lower() in valid_output_extensions:
             self.log.debug("%s needs processing." % inputfile)
@@ -498,12 +505,8 @@ class MkvtoMp4:
 
             self.log.info("Audio detected for stream #%s: %s [%s]." % (a.index, a.codec, a.metadata['language']))
 
-            if self.output_extension == 'mp4':
-                if a.codec.lower() == 'truehd':
-                    self.log.info( "MP4 does not support truehd audio, converting to a usable format but be warned that there may be audio syncing issues with older versions of ffmpeg.")
-                    self.audio_copyoriginal = False #Need to disable copying this or it will just fail anyway.
-                elif a.codec.startswith( 'pcm' ): #pcm formats also cannot be container in a .mp4 file
-                    self.audio_copyoriginal = False
+            if self.output_extension in valid_tagging_extensions and ( a.codec.lower() == 'truehd' or a.codec.startswith( 'pcm' ) ): #Truehd/pcm cannot be in a mp4 container
+                self.audio_copyoriginal = False 
 
             # Set undefined language to default language if specified
             if self.adl is not None and a.metadata['language'] == 'und':
@@ -632,6 +635,14 @@ class MkvtoMp4:
                     }})
                     if a.codec == 'flac' and self.output_extension == 'mp4': #flac in mp4 is experimental, ffmpeg requires adding strict -2 to do it.
                         audio_settings[l]['strict'] = '-2'
+
+                # Remove the language if we only want the first track from a given language
+                if self.audio_first_language_track and self.awl:
+                    try:
+                        self.awl.remove(a.metadata['language'].lower())
+                        self.log.debug("Removing language from whitelist to prevent multiple tracks of the same: %s." % a.metadata['language'])
+                    except:
+                        self.log.error("Unable to remove language %s from whitelist." % a.metadata['language'])
 
         # Subtitle streams
         subtitle_settings = {}
