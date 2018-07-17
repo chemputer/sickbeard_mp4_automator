@@ -79,7 +79,15 @@ except ImportError:
     sys.exit(0)
 
 # Setup Logging
-fileConfig(os.path.join(MP4folder, 'logging.ini'), defaults={'logfilename': os.path.join(MP4folder, 'info.log')})
+logpath = '/var/log/sickbeard_mp4_automator'
+if os.name == 'nt':
+    logpath = MP4folder
+elif not os.isdir(logpath):
+    try:
+        os.makedir(logpath)
+    except:
+        logpath = MP4folder
+fileConfig(os.path.join(MP4folder, 'logging.ini'), defaults={'logfilename': os.path.join(logpath, 'index.log')})
 log = logging.getLogger("NZBGetPostProcess")
 
 # Determine if conversion will take place

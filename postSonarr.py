@@ -12,7 +12,15 @@ from mkvtomp4 import MkvtoMp4
 from post_processor import PostProcessor
 from logging.config import fileConfig
 
-fileConfig(os.path.join(os.path.dirname(sys.argv[0]), 'logging.ini'), defaults={'logfilename': os.path.join(os.path.dirname(sys.argv[0]), 'info.log')})
+logpath = '/var/log/sickbeard_mp4_automator'
+if os.name == 'nt':
+    logpath = os.path.dirname(sys.argv[0])
+elif not os.isdir(logpath):
+    try:
+        os.makedir(logpath)
+    except:
+        logpath = os.path.dirname(sys.argv[0])
+fileConfig(os.path.join(os.path.dirname(sys.argv[0]), 'logging.ini'), defaults={'logfilename': os.path.join(logpath, 'index.log')})
 log = logging.getLogger("SonarrPostConversion")
 
 log.info("Sonarr extra script post processing started.")
