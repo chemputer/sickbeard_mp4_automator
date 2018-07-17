@@ -3168,7 +3168,7 @@ libopusdec AVOptions:
   -apply_phase_inv   <boolean>    .D..A.... Apply intensity stereo phase inversion (default true)
 
 libzvbi_teletextdec AVOptions:
-  -txt_page          <string>     .D...S... list of teletext page numbers to decode, * is all (default "*")
+  -txt_page          <string>     .D...S... page numbers to decode, subtitle for subtitles, * for all (default "*")
   -txt_chop_top      <int>        .D...S... discards the top teletext line (from 0 to 1) (default 1)
   -txt_format        <int>        .D...S... format of the subtitles (bitmap or text) (from 0 to 1) (default bitmap)
      bitmap                       .D...S...
@@ -3299,7 +3299,7 @@ AVFormatContext AVOptions:
      sortdts                      .D....... try to interleave outputted packets by dts
      keepside                     .D....... deprecated, does nothing
      fastseek                     .D....... fast but inaccurate seeks
-     latm                         E........ enable RTP MP4A-LATM payload
+     latm                         E........ deprecated, does nothing
      nobuffer                     .D....... reduce the latency introduced by optional buffering
      bitexact                     E........ do not write random/volatile data
      shortest                     E........ stop muxing with the shortest stream
@@ -3416,9 +3416,9 @@ http AVOptions:
   -http_proxy        <string>     ED....... set HTTP proxy to tunnel through
   -headers           <string>     ED....... set custom HTTP headers, can override built in default headers
   -content_type      <string>     ED....... set a specific content type for the POST messages
-  -user_agent        <string>     .D....... override User-Agent header (default "Lavf/58.17.100")
+  -user_agent        <string>     .D....... override User-Agent header (default "Lavf/58.17.101")
   -referer           <string>     .D....... override referer header
-  -user-agent        <string>     .D....... use the "user_agent" option instead (default "Lavf/58.17.100")
+  -user-agent        <string>     .D....... use the "user_agent" option instead (default "Lavf/58.17.101")
   -multiple_requests <boolean>    ED....... use persistent connections (default false)
   -post_data         <binary>     ED....... set custom HTTP post data
   -cookies           <string>     .D....... set cookies to be sent in applicable future requests, use newline delimited Set-Cookie HTTP field value syntax
@@ -3445,9 +3445,9 @@ https AVOptions:
   -http_proxy        <string>     ED....... set HTTP proxy to tunnel through
   -headers           <string>     ED....... set custom HTTP headers, can override built in default headers
   -content_type      <string>     ED....... set a specific content type for the POST messages
-  -user_agent        <string>     .D....... override User-Agent header (default "Lavf/58.17.100")
+  -user_agent        <string>     .D....... override User-Agent header (default "Lavf/58.17.101")
   -referer           <string>     .D....... override referer header
-  -user-agent        <string>     .D....... use the "user_agent" option instead (default "Lavf/58.17.100")
+  -user-agent        <string>     .D....... use the "user_agent" option instead (default "Lavf/58.17.101")
   -multiple_requests <boolean>    ED....... use persistent connections (default false)
   -post_data         <binary>     ED....... set custom HTTP post data
   -cookies           <string>     .D....... set cookies to be sent in applicable future requests, use newline delimited Set-Cookie HTTP field value syntax
@@ -4077,8 +4077,8 @@ RTSP demuxer AVOptions:
   -stimeout          <int>        .D....... set timeout (in microseconds) of socket TCP I/O operations (from INT_MIN to INT_MAX) (default 0)
   -reorder_queue_size <int>        .D....... set number of packets to buffer for handling of reordered packets (from -1 to INT_MAX) (default -1)
   -buffer_size       <int>        ED....... Underlying protocol send/receive buffer size (from -1 to INT_MAX) (default -1)
-  -user_agent        <string>     .D....... override User-Agent header (default "Lavf58.17.100")
-  -user-agent        <string>     .D....... override User-Agent header (deprecated, use user_agent) (default "Lavf58.17.100")
+  -user_agent        <string>     .D....... override User-Agent header (default "Lavf58.17.101")
+  -user-agent        <string>     .D....... override User-Agent header (deprecated, use user_agent) (default "Lavf58.17.101")
 
 sbg_demuxer AVOptions:
   -sample_rate       <int>        .D.......  (from 0 to INT_MAX) (default 0)
@@ -4609,6 +4609,15 @@ Blackmagic DeckLink demuxer AVOptions:
      unset                        .D.......
      half                         .D.......
      full                         .D.......
+  -timecode_format   <int>        .D....... timecode format (from 0 to 7) (default none)
+     none                         .D.......
+     rp188vitc                    .D.......
+     rp188vitc2                   .D.......
+     rp188ltc                     .D.......
+     rp188any                     .D.......
+     vitc                         .D.......
+     vitc2                        .D.......
+     serial                       .D.......
   -video_input       <int>        .D....... video input (from 0 to 6) (default unset)
      unset                        .D.......
      sdi                          .D.......
@@ -4791,6 +4800,7 @@ f4v muxer AVOptions:
   -write_prft        <int>        E........ Write producer reference time box with specified time source (from 0 to 2) (default 0)
      wallclock                    E........
      pts                          E........
+  -empty_hdlr_name   <boolean>    E........ write zero-length name string in hdlr atoms within mdia and minf atoms (default false)
 
 Fifo muxer AVOptions:
   -fifo_format       <string>     E........ Target muxer
@@ -4955,6 +4965,7 @@ ipod muxer AVOptions:
   -write_prft        <int>        E........ Write producer reference time box with specified time source (from 0 to 2) (default 0)
      wallclock                    E........
      pts                          E........
+  -empty_hdlr_name   <boolean>    E........ write zero-length name string in hdlr atoms within mdia and minf atoms (default false)
 
 ismv muxer AVOptions:
   -movflags          <flags>      E........ MOV muxer flags (default 0)
@@ -5006,6 +5017,7 @@ ismv muxer AVOptions:
   -write_prft        <int>        E........ Write producer reference time box with specified time source (from 0 to 2) (default 0)
      wallclock                    E........
      pts                          E........
+  -empty_hdlr_name   <boolean>    E........ write zero-length name string in hdlr atoms within mdia and minf atoms (default false)
 
 LATM/LOAS muxer AVOptions:
   -smc-interval      <int>        E........ StreamMuxConfig interval. (from 1 to 65535) (default 20)
@@ -5084,6 +5096,7 @@ mov muxer AVOptions:
   -write_prft        <int>        E........ Write producer reference time box with specified time source (from 0 to 2) (default 0)
      wallclock                    E........
      pts                          E........
+  -empty_hdlr_name   <boolean>    E........ write zero-length name string in hdlr atoms within mdia and minf atoms (default false)
 
 MP3 muxer AVOptions:
   -id3v2_version     <int>        E........ Select ID3v2 version to write. Currently 3 and 4 are supported. (from 0 to 4) (default 4)
@@ -5140,6 +5153,7 @@ mp4 muxer AVOptions:
   -write_prft        <int>        E........ Write producer reference time box with specified time source (from 0 to 2) (default 0)
      wallclock                    E........
      pts                          E........
+  -empty_hdlr_name   <boolean>    E........ write zero-length name string in hdlr atoms within mdia and minf atoms (default false)
 
 mpeg muxer AVOptions:
   -muxrate           <int>        E........ (from 0 to 1.67772e+009) (default 0)
@@ -5311,6 +5325,7 @@ psp muxer AVOptions:
   -write_prft        <int>        E........ Write producer reference time box with specified time source (from 0 to 2) (default 0)
      wallclock                    E........
      pts                          E........
+  -empty_hdlr_name   <boolean>    E........ write zero-length name string in hdlr atoms within mdia and minf atoms (default false)
 
 RTP muxer AVOptions:
   -rtpflags          <flags>      E........ RTP muxer flags (default 0)
@@ -5353,8 +5368,8 @@ RTSP muxer AVOptions:
   -stimeout          <int>        .D....... set timeout (in microseconds) of socket TCP I/O operations (from INT_MIN to INT_MAX) (default 0)
   -reorder_queue_size <int>        .D....... set number of packets to buffer for handling of reordered packets (from -1 to INT_MAX) (default -1)
   -buffer_size       <int>        ED....... Underlying protocol send/receive buffer size (from -1 to INT_MAX) (default -1)
-  -user_agent        <string>     .D....... override User-Agent header (default "Lavf58.17.100")
-  -user-agent        <string>     .D....... override User-Agent header (deprecated, use user_agent) (default "Lavf58.17.100")
+  -user_agent        <string>     .D....... override User-Agent header (default "Lavf58.17.101")
+  -user-agent        <string>     .D....... override User-Agent header (deprecated, use user_agent) (default "Lavf58.17.101")
 
 segment muxer AVOptions:
   -reference_stream  <string>     E........ set reference stream (default "auto")
@@ -5503,6 +5518,7 @@ tg2 muxer AVOptions:
   -write_prft        <int>        E........ Write producer reference time box with specified time source (from 0 to 2) (default 0)
      wallclock                    E........
      pts                          E........
+  -empty_hdlr_name   <boolean>    E........ write zero-length name string in hdlr atoms within mdia and minf atoms (default false)
 
 tgp muxer AVOptions:
   -movflags          <flags>      E........ MOV muxer flags (default 0)
@@ -5554,6 +5570,7 @@ tgp muxer AVOptions:
   -write_prft        <int>        E........ Write producer reference time box with specified time source (from 0 to 2) (default 0)
      wallclock                    E........
      pts                          E........
+  -empty_hdlr_name   <boolean>    E........ write zero-length name string in hdlr atoms within mdia and minf atoms (default false)
 
 WAV muxer AVOptions:
   -write_bext        <boolean>    E........ Write BEXT chunk. (default false)
@@ -5864,6 +5881,26 @@ acrusher AVOptions:
   lfo               <boolean>    ..F.A.... enable LFO (default false)
   lforange          <double>     ..F.A.... set LFO depth (from 1 to 250) (default 20)
   lforate           <double>     ..F.A.... set LFO rate (from 0.01 to 200) (default 0.3)
+
+adeclick AVOptions:
+  w                 <double>     ..F.A.... set window size (from 10 to 100) (default 55)
+  o                 <double>     ..F.A.... set window overlap (from 50 to 95) (default 75)
+  a                 <double>     ..F.A.... set autoregression order (from 0 to 25) (default 2)
+  t                 <double>     ..F.A.... set threshold (from 1 to 100) (default 2)
+  b                 <double>     ..F.A.... set burst fusion (from 0 to 10) (default 2)
+  m                 <int>        ..F.A.... set overlap method (from 0 to 1) (default a)
+     a                            ..F.A.... overlap-add
+     s                            ..F.A.... overlap-save
+
+adeclip AVOptions:
+  w                 <double>     ..F.A.... set window size (from 10 to 100) (default 55)
+  o                 <double>     ..F.A.... set window overlap (from 50 to 95) (default 75)
+  a                 <double>     ..F.A.... set autoregression order (from 0 to 25) (default 8)
+  t                 <double>     ..F.A.... set threshold (from 1 to 100) (default 10)
+  n                 <int>        ..F.A.... set histogram size (from 100 to 9999) (default 1000)
+  m                 <int>        ..F.A.... set overlap method (from 0 to 1) (default a)
+     a                            ..F.A.... overlap-add
+     s                            ..F.A.... overlap-save
 
 adelay AVOptions:
   delays            <string>     ..F.A.... set list of delays for each channel
@@ -6295,7 +6332,7 @@ astreamselect AVOptions:
   map               <string>     ..FVA.... input indexes to remap to outputs
 
 atempo AVOptions:
-  tempo             <double>     ..F.A.... set tempo scale factor (from 0.5 to 2) (default 1)
+  tempo             <double>     ..F.A.... set tempo scale factor (from 0.5 to 100) (default 1)
 
 atrim AVOptions:
   start             <duration>   ..F.A.... Timestamp of the first frame that should be passed (default INT64_MAX)
@@ -9382,7 +9419,13 @@ AVDCT AVOptions:
      faani                        ED.V..... floating point AAN IDCT (experimental / for debugging)
      simpleauto                   ED.V..... experimental / for debugging
 
-srcnn AVOptions:
+sr AVOptions:
+  model             <flags>      ..FV..... specifies what DNN model to use (default 0)
+     srcnn                        ..FV..... Super-Resolution Convolutional Neural Network model (scale factor should be specified for custom SRCNN model)
+     espcn                        ..FV..... Efficient Sub-Pixel Convolutional Neural Network model
+  dnn_backend       <flags>      ..FV..... DNN backend used for model execution (default 0)
+     native                       ..FV..... native backend flag
+  scale_factor      <int>        ..FV..... scale factor for SRCNN model (from 2 to 4) (default 2)
   model_filename    <string>     ..FV..... path to model file specifying network architecture and its parameters
 
 ssim AVOptions:
@@ -11220,7 +11263,7 @@ Encoders:
  VF.... libopenjpeg          OpenJPEG JPEG 2000 (codec jpeg2000)
  VF.... jpegls               JPEG-LS
  VF.... ljpeg                Lossless JPEG
- VF.X.. magicyuv             MagicYUV video
+ VF.... magicyuv             MagicYUV video
  VFS... mjpeg                MJPEG (Motion JPEG)
  V..... mjpeg_qsv            MJPEG (Intel Quick Sync Video acceleration) (codec mjpeg)
  V.S... mpeg1video           MPEG-1 video
@@ -11676,6 +11719,7 @@ Decoders:
  A....D atrac3al             ATRAC3 AL (Adaptive TRansform Acoustic Coding 3 Advanced Lossless)
  A....D atrac3plus           ATRAC3+ (Adaptive TRansform Acoustic Coding 3+) (codec atrac3p)
  A....D atrac3plusal         ATRAC3+ AL (Adaptive TRansform Acoustic Coding 3+ Advanced Lossless) (codec atrac3pal)
+ A....D atrac9               ATRAC9 (Adaptive TRansform Acoustic Coding 9)
  A....D on2avc               On2 Audio for Video Codec (codec avc)
  A....D binkaudio_dct        Bink Audio (DCT)
  A....D binkaudio_rdft       Bink Audio (RDFT)
@@ -12119,6 +12163,7 @@ Codecs:
  D.A..S atrac3al             ATRAC3 AL (Adaptive TRansform Acoustic Coding 3 Advanced Lossless)
  D.A.L. atrac3p              ATRAC3+ (Adaptive TRansform Acoustic Coding 3+) (decoders: atrac3plus )
  D.A..S atrac3pal            ATRAC3+ AL (Adaptive TRansform Acoustic Coding 3+ Advanced Lossless) (decoders: atrac3plusal )
+ D.A.L. atrac9               ATRAC9 (Adaptive TRansform Acoustic Coding 9)
  D.A.L. avc                  On2 Audio for Video Codec (decoders: on2avc )
  D.A.L. binkaudio_dct        Bink Audio (DCT)
  D.A.L. binkaudio_rdft       Bink Audio (RDFT)
@@ -12263,6 +12308,7 @@ Codecs:
  D.S... subviewer            SubViewer subtitle
  D.S... subviewer1           SubViewer v1 subtitle
  DES... text                 raw UTF-8 text
+ ..S... ttml                 Timed Text Markup Language
  D.S... vplayer              VPlayer subtitle
  DES... webvtt               WebVTT subtitle
  DES... xsub                 XSUB
@@ -13295,6 +13341,8 @@ Filters:
  ... acopy             A->A       Copy the input audio unchanged to the output.
  ... acrossfade        AA->A      Cross fade two input audio streams.
  ... acrusher          A->A       Reduce audio bit resolution.
+ .S. adeclick          A->A       Remove impulsive noise from input audio.
+ .S. adeclip           A->A       Remove clipping from input audio.
  T.. adelay            A->A       Delay one or more audio channels.
  ... aderivative       A->A       Compute derivative of input audio.
  ... aecho             A->A       Add echoing to the audio.
@@ -13571,7 +13619,7 @@ Filters:
  TS. sobel             V->V       Apply sobel operator.
  ... split             V->N       Pass on the input to N video outputs.
  T.C spp               V->V       Apply a simple post processing filter.
- TS. srcnn             V->V       Apply super resolution convolutional neural network to the input. Use bicubic upsamping with corresponding scaling factor before.
+ TS. sr                V->V       Apply DNN-based image super resolution to the input.
  ... ssim              VV->V      Calculate the SSIM between two video streams.
  .S. stereo3d          V->V       Convert video stereoscopic 3D view.
  ..C streamselect      N->N       Select video streams
