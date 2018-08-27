@@ -12,6 +12,7 @@ Brief explanation of added settings:
   This looks for the 'forced' flag in the subtitle metadata first, but failing that will go digging through the title metadata where the text may say "forced", "english subs for non-english parts", "non-english parts", or something of that nature. 
   This part uses a whitelist method that only flags a subtitle stream as forced if it matches one of the items on the whitelist.
   Enabling this option will discard all subtitle streams as overlaying subtitles over burned in subtitles is kind of a bad idea.
+  You must select a language under `subtitle-language` for this to function properly. 
 - `sample_rate` = By default ffmpeg will upsample to 96 KHz with some audio filters (loudnorm being an example). Internet explorer/Firefox/edge will not play any video with 96 KHz audio, so this will allow you to set it to something lower like 48KHz.
 - `handle_m2ts_files` = This will allow the script to process m2ts files by going through the folder where they are located, searching for the largest .m2ts file. Typically, the largest .m2ts file is the entire film without the extras. The script will delete all other m2ts files in the folder and convert the remaining m2ts file to mp4. Default is disabled. 
 - `resolution-bitrate-restriction` = Source bitrate restriction based on horizontal resolution. It MUST be done like this - horizontal resolution,bitrate, horizontal resolution,bitrate - With the lowest horizontal resolution first. 
@@ -40,7 +41,6 @@ Brief explanation of added settings:
 
 If you have multiple nvidia cards you can decode on one and encode on the other, but it doesn't seem to speed up the process at all.
 Decoding by itself does not count towards the nvenc 2 stream limit.
-
 
 Original README.md follows:
 

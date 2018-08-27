@@ -383,7 +383,7 @@ class MkvtoMp4:
         input_dir, filename, input_extension = self.parseFile(inputfile)
         drive_letter, directory = os.path.splitdrive( input_dir )
         drive_letter_no_colon = drive_letter.replace( ":", "" )
-        directory = directory.replace("\\", "\\\\");
+        directory = directory.replace("\\", "\\\\"); #This part is necessary because the subtitle filter requires double escapes....
 
         info = Converter(self.FFMPEG_PATH, self.FFPROBE_PATH).probe(inputfile)
 
@@ -670,7 +670,7 @@ class MkvtoMp4:
             if self.sdl is not None and s.metadata['language'] == 'und':
                 self.log.debug("Undefined language detected, defaulting to [%s]." % self.sdl)
                 s.metadata['language'] = self.sdl
-            if s.metadata['language'].lower() not in self.swl:
+            if self.swl is None or s.metadata['language'].lower() not in self.swl:
                 continue
             desired_language_streams += 1
             if s.sub_forced == 2 and s.sub_default == 1: ## Prefer subs that are flagged forced AND default by their disposition
@@ -731,8 +731,11 @@ class MkvtoMp4:
                         'burn_in_forced_subs': self.burn_in_forced_subs,
                         'subtitle_burn': drive_letter_no_colon + r"\:" + directory + "\\\\" + filename + "." + input_extension + \
                             ":si=" + str( subtitle_used ) + "'" #FFmpeg requires a very specific string of letters for -vf subtitles=
-                                                                #TODO: Check if this works on something other than windows- ie: escape character shenaningans.
-                    }})
+                    }} )
+                    if ( os.name != 'nt' ):  #TODO: Make this a bit less hacky... if possible?
+                        temp_directory = directory
+                        temp_directory = temp_directory.replace("\\", "//" )
+                        subtitle_settings['subtitle_burn'] = temp_directory + "//" + filename + "." + input_extension + ":si=" + str( subtitle_used ) + "'"
                     self.log.info("Creating subtitle stream %s from source stream %s." % (l, s.index))
                     l = l + 1
             
