@@ -735,7 +735,7 @@ class MkvtoMp4:
                     if ( os.name != 'nt' ):  #TODO: Make this a bit less hacky... if possible?
                         temp_directory = directory
                         temp_directory = temp_directory.replace("\\", "//" )
-                        subtitle_settings['subtitle_burn'] = temp_directory + "//" + filename + "." + input_extension + ":si=" + str( subtitle_used ) + "'"
+                        subtitle_settings[l]['subtitle_burn'] = temp_directory + "//" + filename + "." + input_extension + ":si=" + str( subtitle_used ) + "'"
                     self.log.info("Creating subtitle stream %s from source stream %s." % (l, s.index))
                     l = l + 1
             
