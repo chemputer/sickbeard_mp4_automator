@@ -3400,9 +3400,9 @@ http AVOptions:
   -http_proxy        <string>     ED....... set HTTP proxy to tunnel through
   -headers           <string>     ED....... set custom HTTP headers, can override built in default headers
   -content_type      <string>     ED....... set a specific content type for the POST messages
-  -user_agent        <string>     .D....... override User-Agent header (default "Lavf/58.17.103")
+  -user_agent        <string>     .D....... override User-Agent header (default "Lavf/58.17.104")
   -referer           <string>     .D....... override referer header
-  -user-agent        <string>     .D....... use the "user_agent" option instead (default "Lavf/58.17.103")
+  -user-agent        <string>     .D....... use the "user_agent" option instead (default "Lavf/58.17.104")
   -multiple_requests <boolean>    ED....... use persistent connections (default false)
   -post_data         <binary>     ED....... set custom HTTP post data
   -cookies           <string>     .D....... set cookies to be sent in applicable future requests, use newline delimited Set-Cookie HTTP field value syntax
@@ -3429,9 +3429,9 @@ https AVOptions:
   -http_proxy        <string>     ED....... set HTTP proxy to tunnel through
   -headers           <string>     ED....... set custom HTTP headers, can override built in default headers
   -content_type      <string>     ED....... set a specific content type for the POST messages
-  -user_agent        <string>     .D....... override User-Agent header (default "Lavf/58.17.103")
+  -user_agent        <string>     .D....... override User-Agent header (default "Lavf/58.17.104")
   -referer           <string>     .D....... override referer header
-  -user-agent        <string>     .D....... use the "user_agent" option instead (default "Lavf/58.17.103")
+  -user-agent        <string>     .D....... use the "user_agent" option instead (default "Lavf/58.17.104")
   -multiple_requests <boolean>    ED....... use persistent connections (default false)
   -post_data         <binary>     ED....... set custom HTTP post data
   -cookies           <string>     .D....... set cookies to be sent in applicable future requests, use newline delimited Set-Cookie HTTP field value syntax
@@ -4065,8 +4065,8 @@ RTSP demuxer AVOptions:
   -stimeout          <int>        .D....... set timeout (in microseconds) of socket TCP I/O operations (from INT_MIN to INT_MAX) (default 0)
   -reorder_queue_size <int>        .D....... set number of packets to buffer for handling of reordered packets (from -1 to INT_MAX) (default -1)
   -buffer_size       <int>        ED....... Underlying protocol send/receive buffer size (from -1 to INT_MAX) (default -1)
-  -user_agent        <string>     .D....... override User-Agent header (default "Lavf58.17.103")
-  -user-agent        <string>     .D....... override User-Agent header (deprecated, use user_agent) (default "Lavf58.17.103")
+  -user_agent        <string>     .D....... override User-Agent header (default "Lavf58.17.104")
+  -user-agent        <string>     .D....... override User-Agent header (deprecated, use user_agent) (default "Lavf58.17.104")
 
 sbg_demuxer AVOptions:
   -sample_rate       <int>        .D.......  (from 0 to INT_MAX) (default 0)
@@ -5356,8 +5356,8 @@ RTSP muxer AVOptions:
   -stimeout          <int>        .D....... set timeout (in microseconds) of socket TCP I/O operations (from INT_MIN to INT_MAX) (default 0)
   -reorder_queue_size <int>        .D....... set number of packets to buffer for handling of reordered packets (from -1 to INT_MAX) (default -1)
   -buffer_size       <int>        ED....... Underlying protocol send/receive buffer size (from -1 to INT_MAX) (default -1)
-  -user_agent        <string>     .D....... override User-Agent header (default "Lavf58.17.103")
-  -user-agent        <string>     .D....... override User-Agent header (deprecated, use user_agent) (default "Lavf58.17.103")
+  -user_agent        <string>     .D....... override User-Agent header (default "Lavf58.17.104")
+  -user-agent        <string>     .D....... override User-Agent header (deprecated, use user_agent) (default "Lavf58.17.104")
 
 segment muxer AVOptions:
   -reference_stream  <string>     E........ set reference stream (default "auto")
@@ -11481,6 +11481,7 @@ Decoders:
  V....D mts2                 MS Expression Encoder Screen
  V....D mvc1                 Silicon Graphics Motion Video Compressor 1
  V....D mvc2                 Silicon Graphics Motion Video Compressor 2
+ V....D mwsc                 MatchWare Screen Capture Codec
  V....D mxpeg                Mobotix MxPEG video
  V....D nuv                  NuppelVideo/RTJPEG
  V....D paf_video            Amazing Studio Packed Animation File Video
@@ -11572,6 +11573,7 @@ Decoders:
  VFS..D vp9                  Google VP9
  V....D libvpx-vp9           libvpx VP9 (codec vp9)
  V..... vp9_cuvid            Nvidia CUVID VP9 decoder (codec vp9)
+ V....D wcmv                 WinCAM Motion Video
  VF...D webp                 WebP image
  V...BD wmv1                 Windows Media Video 7
  V...BD wmv2                 Windows Media Video 8
@@ -11936,6 +11938,7 @@ Codecs:
  D.V.L. mts2                 MS Expression Encoder Screen
  D.VIL. mvc1                 Silicon Graphics Motion Video Compressor 1
  D.VIL. mvc2                 Silicon Graphics Motion Video Compressor 2
+ D.V..S mwsc                 MatchWare Screen Capture Codec
  D.V.L. mxpeg                Mobotix MxPEG video
  D.V.L. nuv                  NuppelVideo/RTJPEG
  D.V.L. paf_video            Amazing Studio Packed Animation File Video
@@ -12023,6 +12026,7 @@ Codecs:
  D.V.L. vp7                  On2 VP7
  DEV.L. vp8                  On2 VP8 (decoders: vp8 libvpx vp8_cuvid ) (encoders: libvpx )
  DEV.L. vp9                  Google VP9 (decoders: vp9 libvpx-vp9 vp9_cuvid ) (encoders: libvpx-vp9 )
+ D.V..S wcmv                 WinCAM Motion Video
  DEVILS webp                 WebP (encoders: libwebp )
  DEV.L. wmv1                 Windows Media Video 7
  DEV.L. wmv2                 Windows Media Video 8
