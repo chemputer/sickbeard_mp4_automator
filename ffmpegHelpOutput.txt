@@ -88,6 +88,7 @@ Advanced global options:
 -tvstd standard     deprecated, use -standard
 -isync              this option is deprecated and does nothing
 -sdp_file file      specify a file in which to print sdp information
+-qsv_device device  set QSV hardware device (DirectX adapter index, DRM path or X11 display name)
 -init_hw_device args  initialise hardware device
 -filter_hw_device device  set hardware device used when filtering
 
@@ -2015,7 +2016,6 @@ libaom-av1 encoder AVOptions:
   -lag-in-frames     <int>        E..V..... Number of frames to look ahead at for alternate reference frame selection (from -1 to INT_MAX) (default -1)
   -error-resilience  <flags>      E..V..... Error resilience configuration (default 0)
      default                      E..V..... Improve resiliency against losses of whole frames
-     partitions                   E..V..... The frame partitions are independently decodable by the bool decoder, meaning that partitions can be decoded even though earlier partitions have been lost. Note that intra predicition is still done over the partition boundary.
   -crf               <int>        E..V..... Select the quality for constant quality mode (from -1 to 63) (default -1)
   -static-thresh     <int>        E..V..... A change threshold on blocks below which they will be skipped by the encoder (from 0 to INT_MAX) (default 0)
   -drop-threshold    <int>        E..V..... Frame drop threshold (from INT_MIN to INT_MAX) (default 0)
@@ -2024,6 +2024,7 @@ libaom-av1 encoder AVOptions:
 libfdk_aac AVOptions:
   -afterburner       <int>        E...A.... Afterburner (improved quality) (from 0 to 1) (default 1)
   -eld_sbr           <int>        E...A.... Enable SBR for ELD (for SBR in other configurations, use the -profile parameter) (from 0 to 1) (default 0)
+  -eld_v2            <int>        E...A.... Enable ELDv2 (LD-MPS extension for ELD stereo signals) (from 0 to 1) (default 0)
   -signaling         <int>        E...A.... SBR/PS signaling style (from -1 to 2) (default default)
      default                      E...A.... Choose signaling implicitly (explicit hierarchical by default, implicit if global header is disabled)
      implicit                     E...A.... Implicit backwards compatible signaling
@@ -2592,6 +2593,60 @@ h264_nvenc AVOptions:
      middle                       E..V..... Only (number of B frames)/2 will be used for reference
   -a53cc             <boolean>    E..V..... Use A53 Closed Captions (if available) (default true)
 
+h264_qsv encoder AVOptions:
+  -async_depth       <int>        E..V..... Maximum processing parallelism (from 1 to INT_MAX) (default 4)
+  -avbr_accuracy     <int>        E..V..... Accuracy of the AVBR ratecontrol (from 0 to INT_MAX) (default 0)
+  -avbr_convergence  <int>        E..V..... Convergence of the AVBR ratecontrol (from 0 to INT_MAX) (default 0)
+  -preset            <int>        E..V..... (from 1 to 7) (default medium)
+     veryfast                     E..V.....
+     faster                       E..V.....
+     fast                         E..V.....
+     medium                       E..V.....
+     slow                         E..V.....
+     slower                       E..V.....
+     veryslow                     E..V.....
+  -rdo               <int>        E..V..... Enable rate distortion optimization (from -1 to 1) (default -1)
+  -max_frame_size    <int>        E..V..... Maximum encoded frame size in bytes (from -1 to 65535) (default -1)
+  -max_slice_size    <int>        E..V..... Maximum encoded slice size in bytes (from -1 to 65535) (default -1)
+  -bitrate_limit     <int>        E..V..... Toggle bitrate limitations (from -1 to 1) (default -1)
+  -mbbrc             <int>        E..V..... MB level bitrate control (from -1 to 1) (default -1)
+  -extbrc            <int>        E..V..... Extended bitrate control (from -1 to 1) (default -1)
+  -adaptive_i        <int>        E..V..... Adaptive I-frame placement (from -1 to 1) (default -1)
+  -adaptive_b        <int>        E..V..... Adaptive B-frame placement (from -1 to 1) (default -1)
+  -b_strategy        <int>        E..V..... Strategy to choose between I/P/B-frames (from -1 to 1) (default -1)
+  -cavlc             <int>        E..V..... Enable CAVLC (from 0 to 1) (default 0)
+  -vcm               <int>        E..V..... Use the video conferencing mode ratecontrol (from 0 to 1) (default 0)
+  -idr_interval      <int>        E..V..... Distance (in I-frames) between IDR frames (from 0 to INT_MAX) (default 0)
+  -pic_timing_sei    <int>        E..V..... Insert picture timing SEI with pic_struct_syntax element (from 0 to 1) (default 1)
+  -single_sei_nal_unit <int>        E..V..... Put all the SEI messages into one NALU (from -1 to 1) (default -1)
+  -max_dec_frame_buffering <int>        E..V..... Maximum number of frames buffered in the DPB (from 0 to 65535) (default 0)
+  -look_ahead        <int>        E..V..... Use VBR algorithm with look ahead (from 0 to 1) (default 0)
+  -look_ahead_depth  <int>        E..V..... Depth of look ahead in number frames (from 0 to 100) (default 0)
+  -look_ahead_downsampling <int>        E..V..... Downscaling factor for the frames saved for the lookahead analysis (from 0 to 3) (default unknown)
+     unknown                      E..V.....
+     auto                         E..V.....
+     off                          E..V.....
+     2x                           E..V.....
+     4x                           E..V.....
+  -int_ref_type      <int>        E..V..... Intra refresh type (from -1 to 65535) (default -1)
+     none                         E..V.....
+     vertical                     E..V.....
+  -int_ref_cycle_size <int>        E..V..... Number of frames in the intra refresh cycle (from -1 to 65535) (default -1)
+  -int_ref_qp_delta  <int>        E..V..... QP difference for the refresh MBs (from -32768 to 32767) (default -32768)
+  -recovery_point_sei <int>        E..V..... Insert recovery point SEI messages (from -1 to 1) (default -1)
+  -trellis           <flags>      E..V..... Trellis quantization (default 0)
+     off                          E..V.....
+     I                            E..V.....
+     P                            E..V.....
+     B                            E..V.....
+  -profile           <int>        E..V..... (from 0 to INT_MAX) (default unknown)
+     unknown                      E..V.....
+     baseline                     E..V.....
+     main                         E..V.....
+     high                         E..V.....
+  -a53cc             <int>        E..V..... Use A53 Closed Captions (if available) (from 0 to 1) (default 1)
+  -aud               <int>        E..V..... Insert the Access Unit Delimiter NAL (from 0 to 1) (default 0)
+
 nvenc AVOptions:
   -preset            <int>        E..V..... Set the encoding preset (from 0 to 11) (default medium)
      default                      E..V..... 
@@ -2989,6 +3044,69 @@ hevc_nvenc AVOptions:
   -qp                <int>        E..V..... Constant quantization parameter rate control method (from -1 to 51) (default -1)
   -weighted_pred     <int>        E..V..... Set 1 to enable weighted prediction (from 0 to 1) (default 0)
 
+hevc_qsv encoder AVOptions:
+  -async_depth       <int>        E..V..... Maximum processing parallelism (from 1 to INT_MAX) (default 4)
+  -avbr_accuracy     <int>        E..V..... Accuracy of the AVBR ratecontrol (from 0 to INT_MAX) (default 0)
+  -avbr_convergence  <int>        E..V..... Convergence of the AVBR ratecontrol (from 0 to INT_MAX) (default 0)
+  -preset            <int>        E..V..... (from 1 to 7) (default medium)
+     veryfast                     E..V.....
+     faster                       E..V.....
+     fast                         E..V.....
+     medium                       E..V.....
+     slow                         E..V.....
+     slower                       E..V.....
+     veryslow                     E..V.....
+  -rdo               <int>        E..V..... Enable rate distortion optimization (from -1 to 1) (default -1)
+  -max_frame_size    <int>        E..V..... Maximum encoded frame size in bytes (from -1 to 65535) (default -1)
+  -max_slice_size    <int>        E..V..... Maximum encoded slice size in bytes (from -1 to 65535) (default -1)
+  -bitrate_limit     <int>        E..V..... Toggle bitrate limitations (from -1 to 1) (default -1)
+  -mbbrc             <int>        E..V..... MB level bitrate control (from -1 to 1) (default -1)
+  -extbrc            <int>        E..V..... Extended bitrate control (from -1 to 1) (default -1)
+  -adaptive_i        <int>        E..V..... Adaptive I-frame placement (from -1 to 1) (default -1)
+  -adaptive_b        <int>        E..V..... Adaptive B-frame placement (from -1 to 1) (default -1)
+  -b_strategy        <int>        E..V..... Strategy to choose between I/P/B-frames (from -1 to 1) (default -1)
+  -idr_interval      <int>        E..V..... Distance (in I-frames) between IDR frames (from -1 to INT_MAX) (default 0)
+     begin_only                   E..V..... Output an IDR-frame only at the beginning of the stream
+  -load_plugin       <int>        E..V..... A user plugin to load in an internal session (from 0 to 2) (default hevc_sw)
+     none                         E..V.....
+     hevc_sw                      E..V.....
+     hevc_hw                      E..V.....
+  -load_plugins      <string>     E..V..... A :-separate list of hexadecimal plugin UIDs to load in an internal session (default "")
+  -profile           <int>        E..V..... (from 0 to INT_MAX) (default unknown)
+     unknown                      E..V.....
+     main                         E..V.....
+     main10                       E..V.....
+     mainsp                       E..V.....
+
+mjpeg_qsv encoder AVOptions:
+
+mpeg2_qsv encoder AVOptions:
+  -async_depth       <int>        E..V..... Maximum processing parallelism (from 1 to INT_MAX) (default 4)
+  -avbr_accuracy     <int>        E..V..... Accuracy of the AVBR ratecontrol (from 0 to INT_MAX) (default 0)
+  -avbr_convergence  <int>        E..V..... Convergence of the AVBR ratecontrol (from 0 to INT_MAX) (default 0)
+  -preset            <int>        E..V..... (from 1 to 7) (default medium)
+     veryfast                     E..V.....
+     faster                       E..V.....
+     fast                         E..V.....
+     medium                       E..V.....
+     slow                         E..V.....
+     slower                       E..V.....
+     veryslow                     E..V.....
+  -rdo               <int>        E..V..... Enable rate distortion optimization (from -1 to 1) (default -1)
+  -max_frame_size    <int>        E..V..... Maximum encoded frame size in bytes (from -1 to 65535) (default -1)
+  -max_slice_size    <int>        E..V..... Maximum encoded slice size in bytes (from -1 to 65535) (default -1)
+  -bitrate_limit     <int>        E..V..... Toggle bitrate limitations (from -1 to 1) (default -1)
+  -mbbrc             <int>        E..V..... MB level bitrate control (from -1 to 1) (default -1)
+  -extbrc            <int>        E..V..... Extended bitrate control (from -1 to 1) (default -1)
+  -adaptive_i        <int>        E..V..... Adaptive I-frame placement (from -1 to 1) (default -1)
+  -adaptive_b        <int>        E..V..... Adaptive B-frame placement (from -1 to 1) (default -1)
+  -b_strategy        <int>        E..V..... Strategy to choose between I/P/B-frames (from -1 to 1) (default -1)
+  -profile           <int>        E..V..... (from 0 to INT_MAX) (default unknown)
+     unknown                      E..V.....
+     simple                       E..V.....
+     main                         E..V.....
+     high                         E..V.....
+
 EXR AVOptions:
   -layer             <string>     .D.V..... Set the decoding layer (default "")
   -gamma             <float>      .D.V..... Set the float gamma value when decoding (from 0.001 to FLT_MAX) (default 1)
@@ -3010,7 +3128,7 @@ EXR AVOptions:
      smpte2084                    .D.V..... SMPTE ST 2084
      smpte428_1                   .D.V..... SMPTE ST 428-1
 
-FIC encoder AVOptions:
+FIC decoder AVOptions:
   -skip_cursor       <boolean>    .D.V..... skip the cursor (default false)
 
 FITS decoder AVOptions:
@@ -3026,9 +3144,20 @@ H264 Decoder AVOptions:
   -enable_er         <boolean>    .D.V..... Enable error resilience on damaged frames (unsafe) (default auto)
   -x264_build        <int>        .D.V..... Assume this x264 version if no x264 version found in any SEI (from -1 to INT_MAX) (default -1)
 
+h264_qsv AVOptions:
+  -async_depth       <int>        .D.V..... Internal parallelization depth, the higher the value the higher the latency. (from 1 to INT_MAX) (default 4)
+
 HEVC decoder AVOptions:
   -apply_defdispwin  <boolean>    .D.V..... Apply default display window from VUI (default false)
   -strict-displaywin <boolean>    .D.V..... stricly apply default display window size (default false)
+
+hevc_qsv AVOptions:
+  -async_depth       <int>        .D.V..... Internal parallelization depth, the higher the value the higher the latency. (from 1 to INT_MAX) (default 4)
+  -load_plugin       <int>        .D.V..... A user plugin to load in an internal session (from 0 to 2) (default hevc_sw)
+     none                         .D.V.....
+     hevc_sw                      .D.V.....
+     hevc_hw                      .D.V.....
+  -load_plugins      <string>     .D.V..... A :-separate list of hexadecimal plugin UIDs to load in an internal session (default "")
 
 jpeg2000 AVOptions:
   -lowres            <int>        .D.V..... Lower the decoding resolution by a power of two (from 0 to 33) (default 0)
@@ -3037,6 +3166,12 @@ MJPEG decoder AVOptions:
   -extern_huff       <boolean>    .D.V..... Use external huffman table. (default false)
 
 MPEG4 Video Decoder AVOptions:
+
+mpeg2_qsv AVOptions:
+  -async_depth       <int>        .D.V..... Internal parallelization depth, the higher the value the higher the latency. (from 1 to INT_MAX) (default 4)
+
+rasc decoder AVOptions:
+  -skip_cursor       <boolean>    .D.V..... skip the cursor (default false)
 
 rawdec AVOptions:
   -top               <boolean>    .D.V..... top field first (default auto)
@@ -3050,6 +3185,9 @@ SMPTE 302M Decoder AVOptions:
 
 V210 Decoder AVOptions:
   -custom_stride     <int>        .D.V..... Custom V210 stride (from INT_MIN to INT_MAX) (default 0)
+
+vc1_qsv AVOptions:
+  -async_depth       <int>        .D.V..... Internal parallelization depth, the higher the value the higher the latency. (from 1 to INT_MAX) (default 4)
 
 AAC decoder AVOptions:
   -dual_mono_mode    <int>        .D..A.... Select the channel to decode for dual mono (from -1 to 2) (default auto)
@@ -3144,6 +3282,7 @@ libfdk-aac decoder AVOptions:
   -drc_level         <int>        .D..A.... Dynamic Range Control: reference level, quantized to 0.25dB steps where [0] is 0dB and [127] is -31.75dB (from -1 to 127) (default -1)
   -drc_heavy         <int>        .D..A.... Dynamic Range Control: heavy compression, where [1] is on (RF mode) and [0] is off (from -1 to 1) (default -1)
   -level_limit       <int>        .D..A.... Signal level limiting (from -1 to 1) (default 0)
+  -drc_effect        <int>        .D..A.... Dynamic Range Control: effect type, where e.g. [0] is none and [6] is general (from -1 to 8) (default -1)
 
 libilbc AVOptions:
   -enhance           <int>        .D..A.... Enhance the decoded audio (adds delay) (from 0 to 1) (default 0)
@@ -3254,6 +3393,9 @@ vp8_cuvid AVOptions:
   -drop_second_field <boolean>    .D.V..... Drop second field when deinterlacing (default false)
   -crop              <string>     .D.V..... Crop (top)x(bottom)x(left)x(right)
   -resize            <string>     .D.V..... Resize (width)x(height)
+
+vp8_qsv AVOptions:
+  -async_depth       <int>        .D.V..... Internal parallelization depth, the higher the value the higher the latency. (from 1 to INT_MAX) (default 4)
 
 vp9_cuvid AVOptions:
   -deint             <int>        .D.V..... Set deinterlacing mode (from 0 to 2) (default weave)
@@ -3400,9 +3542,9 @@ http AVOptions:
   -http_proxy        <string>     ED....... set HTTP proxy to tunnel through
   -headers           <string>     ED....... set custom HTTP headers, can override built in default headers
   -content_type      <string>     ED....... set a specific content type for the POST messages
-  -user_agent        <string>     .D....... override User-Agent header (default "Lavf/58.17.104")
+  -user_agent        <string>     .D....... override User-Agent header (default "Lavf/58.18.103")
   -referer           <string>     .D....... override referer header
-  -user-agent        <string>     .D....... use the "user_agent" option instead (default "Lavf/58.17.104")
+  -user-agent        <string>     .D....... use the "user_agent" option instead (default "Lavf/58.18.103")
   -multiple_requests <boolean>    ED....... use persistent connections (default false)
   -post_data         <binary>     ED....... set custom HTTP post data
   -cookies           <string>     .D....... set cookies to be sent in applicable future requests, use newline delimited Set-Cookie HTTP field value syntax
@@ -3429,9 +3571,9 @@ https AVOptions:
   -http_proxy        <string>     ED....... set HTTP proxy to tunnel through
   -headers           <string>     ED....... set custom HTTP headers, can override built in default headers
   -content_type      <string>     ED....... set a specific content type for the POST messages
-  -user_agent        <string>     .D....... override User-Agent header (default "Lavf/58.17.104")
+  -user_agent        <string>     .D....... override User-Agent header (default "Lavf/58.18.103")
   -referer           <string>     .D....... override referer header
-  -user-agent        <string>     .D....... use the "user_agent" option instead (default "Lavf/58.17.104")
+  -user-agent        <string>     .D....... use the "user_agent" option instead (default "Lavf/58.18.103")
   -multiple_requests <boolean>    ED....... use persistent connections (default false)
   -post_data         <binary>     ED....... set custom HTTP post data
   -cookies           <string>     .D....... set cookies to be sent in applicable future requests, use newline delimited Set-Cookie HTTP field value syntax
@@ -3714,6 +3856,9 @@ asf demuxer AVOptions:
 
 avi AVOptions:
   -use_odml          <boolean>    .D....... use odml index (default true)
+
+avs2 demuxer AVOptions:
+  -framerate         <video_rate> .D.......  (default "25")
 
 Binary text demuxer AVOptions:
   -linespeed         <int>        .D....... set simulated line speed (bytes per second) (from 1 to INT_MAX) (default 6000)
@@ -4065,8 +4210,8 @@ RTSP demuxer AVOptions:
   -stimeout          <int>        .D....... set timeout (in microseconds) of socket TCP I/O operations (from INT_MIN to INT_MAX) (default 0)
   -reorder_queue_size <int>        .D....... set number of packets to buffer for handling of reordered packets (from -1 to INT_MAX) (default -1)
   -buffer_size       <int>        ED....... Underlying protocol send/receive buffer size (from -1 to INT_MAX) (default -1)
-  -user_agent        <string>     .D....... override User-Agent header (default "Lavf58.17.104")
-  -user-agent        <string>     .D....... override User-Agent header (deprecated, use user_agent) (default "Lavf58.17.104")
+  -user_agent        <string>     .D....... override User-Agent header (default "Lavf58.18.103")
+  -user-agent        <string>     .D....... override User-Agent header (deprecated, use user_agent) (default "Lavf58.18.103")
 
 sbg_demuxer AVOptions:
   -sample_rate       <int>        .D.......  (from 0 to INT_MAX) (default 0)
@@ -4878,8 +5023,10 @@ hls muxer AVOptions:
      second_level_segment_size              E........ include segment size in segment filenames when use_localtime
      periodic_rekey               E........ reload keyinfo file periodically for re-keying
      independent_segments              E........ add EXT-X-INDEPENDENT-SEGMENTS, whenever applicable
-  -use_localtime     <boolean>    E........ set filename expansion with strftime at segment creation (default false)
-  -use_localtime_mkdir <boolean>    E........ create last directory component in strftime-generated filename (default false)
+  -use_localtime     <boolean>    E........ set filename expansion with strftime at segment creation(will be deprecated ) (default false)
+  -strftime          <boolean>    E........ set filename expansion with strftime at segment creation (default false)
+  -use_localtime_mkdir <boolean>    E........ create last directory component in strftime-generated filename(will be deprecated) (default false)
+  -strftime_mkdir    <boolean>    E........ create last directory component in strftime-generated filename (default false)
   -hls_playlist_type <int>        E........ set the HLS playlist type (from 0 to 2) (default 0)
      event                        E........ EVENT playlist
      vod                          E........ VOD playlist
@@ -5356,8 +5503,8 @@ RTSP muxer AVOptions:
   -stimeout          <int>        .D....... set timeout (in microseconds) of socket TCP I/O operations (from INT_MIN to INT_MAX) (default 0)
   -reorder_queue_size <int>        .D....... set number of packets to buffer for handling of reordered packets (from -1 to INT_MAX) (default -1)
   -buffer_size       <int>        ED....... Underlying protocol send/receive buffer size (from -1 to INT_MAX) (default -1)
-  -user_agent        <string>     .D....... override User-Agent header (default "Lavf58.17.104")
-  -user-agent        <string>     .D....... override User-Agent header (deprecated, use user_agent) (default "Lavf58.17.104")
+  -user_agent        <string>     .D....... override User-Agent header (default "Lavf58.18.103")
+  -user-agent        <string>     .D....... override User-Agent header (deprecated, use user_agent) (default "Lavf58.18.103")
 
 segment muxer AVOptions:
   -reference_stream  <string>     E........ set reference stream (default "auto")
@@ -5622,6 +5769,10 @@ Blackmagic DeckLink muxer AVOptions:
   -list_devices      <int>        E........ list available devices (from 0 to 1) (default 0)
   -list_formats      <int>        E........ list supported formats (from 0 to 1) (default 0)
   -preroll           <double>     E........ video preroll in seconds (from 0 to 5) (default 0.5)
+  -duplex_mode       <int>        E........ duplex mode (from 0 to 2) (default unset)
+     unset                        E........
+     half                         E........
+     full                         E........
 
 sdl2 outdev AVOptions:
   -window_title      <string>     E........ set SDL window title
@@ -5780,6 +5931,11 @@ acompressor AVOptions:
 acontrast AVOptions:
   contrast          <float>      ..F.A.... set contrast (from 0 to 100) (default 33)
 
+acue AVOptions:
+  cue               <int64>      ..FVA.... cue unix timestamp in microseconds (from 0 to I64_MAX) (default 0)
+  preroll           <duration>   ..FVA.... preroll duration in seconds (default 0)
+  buffer            <duration>   ..FVA.... buffer duration in seconds (default 0)
+
 acrossfade AVOptions:
   nb_samples        <int>        ..F.A.... set number of samples for cross fade duration (from 1 to 2.14748e+08) (default 44100)
   ns                <int>        ..F.A.... set number of samples for cross fade duration (from 1 to 2.14748e+08) (default 44100)
@@ -5855,6 +6011,13 @@ acrossfade AVOptions:
      ihsin                        ..F.A.... inverted half of sine wave
      dese                         ..F.A.... double-exponential seat
      desi                         ..F.A.... double-exponential sigmoid
+
+acrossover AVOptions:
+  split             <string>     ..F.A.... set split frequencies (default "500")
+  order             <int>        ..F.A.... set order (from 0 to 2) (default 4th)
+     2nd                          ..F.A.... 2nd order
+     4th                          ..F.A.... 4th order
+     8th                          ..F.A.... 8th order
 
 acrusher AVOptions:
   level_in          <double>     ..F.A.... set level in (from 0.015625 to 64) (default 1)
@@ -5971,6 +6134,23 @@ afade AVOptions:
      ihsin                        ..F.A.... inverted half of sine wave
      dese                         ..F.A.... double-exponential seat
      desi                         ..F.A.... double-exponential sigmoid
+
+afftdn AVOptions:
+  nr                <float>      ..F.A.... set the noise reduction (from 0.01 to 97) (default 12)
+  nf                <float>      ..F.A.... set the noise floor (from -80 to -20) (default -50)
+  nt                <int>        ..F.A.... set the noise type (from 0 to 3) (default w)
+     w                            ..F.A.... white noise
+     v                            ..F.A.... vinyl noise
+     s                            ..F.A.... shellac noise
+     c                            ..F.A.... custom noise
+  bn                <string>     ..F.A.... set the custom bands noise
+  rf                <float>      ..F.A.... set the residual floor (from -80 to -20) (default -38)
+  tn                <boolean>    ..F.A.... track noise (default false)
+  tr                <boolean>    ..F.A.... track residual (default false)
+  om                <int>        ..F.A.... set output mode (from 0 to 2) (default o)
+     i                            ..F.A.... input
+     o                            ..F.A.... output
+     n                            ..F.A.... noise
 
 afftfilt AVOptions:
   real              <string>     ..F.A.... set channels real expressions (default "1")
@@ -6855,6 +7035,7 @@ silencedetect AVOptions:
   d                 <double>     ..F.A.... set minimum duration in seconds (from 0 to 86400) (default 2)
   duration          <double>     ..F.A.... set minimum duration in seconds (from 0 to 86400) (default 2)
   mono              <boolean>    ..F.A.... check each channel separately (default false)
+  m                 <boolean>    ..F.A.... check each channel separately (default false)
 
 silenceremove AVOptions:
   start_periods     <int>        ..F.A.... (from 0 to 9000) (default 0)
@@ -7380,6 +7561,21 @@ framesync AVOptions:
   shortest          <boolean>    ..FV..... force termination when the shortest input terminates (default false)
   repeatlast        <boolean>    ..FV..... extend last frame of secondary streams beyond EOF (default true)
 
+bm3d AVOptions:
+  sigma             <float>      ..FV..... set denoising strength (from 0 to 99999.9) (default 1)
+  block             <int>        ..FV..... set log2(size) of local patch (from 4 to 6) (default 4)
+  bstep             <int>        ..FV..... set sliding step for processing blocks (from 1 to 64) (default 4)
+  group             <int>        ..FV..... set maximal number of similar blocks (from 1 to 256) (default 1)
+  range             <int>        ..FV..... set block matching range (from 1 to INT_MAX) (default 9)
+  mstep             <int>        ..FV..... set step for block matching (from 1 to 64) (default 1)
+  thmse             <float>      ..FV..... set threshold of mean square error for block matching (from 0 to INT_MAX) (default 0)
+  hdthr             <float>      ..FV..... set hard threshold for 3D transfer domain (from 0 to INT_MAX) (default 2.7)
+  estim             <int>        ..FV..... set filtering estimation mode (from 0 to 1) (default basic)
+     basic                        ..FV..... basic estimate
+     final                        ..FV..... final estimate
+  ref               <int>        ..FV..... have reference stream (from 0 to 1) (default 0)
+  planes            <int>        ..FV..... set planes to filter (from 0 to 15) (default 7)
+
 boxblur AVOptions:
   luma_radius       <string>     ..FV..... Radius of the luma blurring box (default "2")
   lr                <string>     ..FV..... Radius of the luma blurring box (default "2")
@@ -7735,6 +7931,11 @@ cropdetect AVOptions:
   reset_count       <int>        ..FV..... Recalculate the crop area after this many frames (from 0 to INT_MAX) (default 0)
   max_outliers      <int>        ..FV..... Threshold count of outliers (from 0 to INT_MAX) (default 0)
 
+cue AVOptions:
+  cue               <int64>      ..FVA.... cue unix timestamp in microseconds (from 0 to I64_MAX) (default 0)
+  preroll           <duration>   ..FVA.... preroll duration in seconds (default 0)
+  buffer            <duration>   ..FVA.... buffer duration in seconds (default 0)
+
 curves AVOptions:
   preset            <int>        ..FV..... select a color curves preset (from 0 to 10) (default none)
      none                         ..FV.....
@@ -7855,6 +8056,11 @@ deflicker AVOptions:
      pm                           ..FV..... power mean
      median                       ..FV..... median
   bypass            <boolean>    ..FV..... leave frames unchanged (default false)
+
+deinterlace_qsv AVOptions:
+  mode              <int>        ..FV..... set deinterlace mode (from 1 to 2) (default advanced)
+     bob                          ..FV..... bob algorithm
+     advanced                     ..FV..... Motion adaptive algorithm
 
 dejudder AVOptions:
   cycle             <int>        ..FV..... set the length of the cycle to use for dejuddering (from 2 to 240) (default 4)
@@ -8434,7 +8640,7 @@ inflate AVOptions:
   threshold3        <int>        ..FV..... set threshold for 4th plane (from 0 to 65535) (default 65535)
 
 interlace AVOptions:
-  scan              <int>        ..FV..... scanning mode (from 0 to 7) (default tff)
+  scan              <int>        ..FV..... scanning mode (from 0 to 1) (default tff)
      tff                          ..FV..... top field first
      bff                          ..FV..... bottom field first
 
@@ -8454,6 +8660,36 @@ lenscorrection AVOptions:
   cy                <double>     ..FV..... set relative center y (from 0 to 1) (default 0.5)
   k1                <double>     ..FV..... set quadratic distortion factor (from -1 to 1) (default 0)
   k2                <double>     ..FV..... set double quadratic distortion factor (from -1 to 1) (default 0)
+
+lensfun AVOptions:
+  make              <string>     ..FV..... set camera maker
+  model             <string>     ..FV..... set camera model
+  lens_model        <string>     ..FV..... set lens model
+  mode              <int>        ..FV..... set mode (from 0 to 7) (default geometry)
+     vignetting                   ..FV..... fix lens vignetting
+     geometry                     ..FV..... correct geometry distortion
+     subpixel                     ..FV..... fix chromatic aberrations
+     vig_geo                      ..FV..... fix lens vignetting and correct geometry distortion
+     vig_subpixel                 ..FV..... fix lens vignetting and chromatic aberrations
+     distortion                   ..FV..... correct geometry distortion and chromatic aberrations
+     all                          ..FV.....
+  focal_length      <float>      ..FV..... focal length of video (zoom; constant for the duration of the use of this filter) (from 0 to DBL_MAX) (default 18)
+  aperture          <float>      ..FV..... aperture (constant for the duration of the use of this filter) (from 0 to DBL_MAX) (default 3.5)
+  focus_distance    <float>      ..FV..... focus distance (constant for the duration of the use of this filter) (from 0 to DBL_MAX) (default 1000)
+  target_geometry   <int>        ..FV..... target geometry of the lens correction (only when geometry correction is enabled) (from 0 to INT_MAX) (default rectilinear)
+     rectilinear                  ..FV..... rectilinear lens (default)
+     fisheye                      ..FV..... fisheye lens
+     panoramic                    ..FV..... panoramic (cylindrical)
+     equirectangular              ..FV..... equirectangular
+     fisheye_orthographic              ..FV..... orthographic fisheye
+     fisheye_stereographic              ..FV..... stereographic fisheye
+     fisheye_equisolid              ..FV..... equisolid fisheye
+     fisheye_thoby                ..FV..... fisheye as measured by thoby
+  reverse           <boolean>    ..FV..... Does reverse correction (regular image to lens distorted) (default false)
+  interpolation     <int>        ..FV..... Type of interpolation (from 0 to 2) (default linear)
+     nearest                      ..FV.....
+     linear                       ..FV.....
+     lanczos                      ..FV.....
 
 limiter AVOptions:
   min               <int>        ..FV..... set min value (from 0 to 65535) (default 0)
@@ -8482,6 +8718,13 @@ lut AVOptions:
   g                 <string>     ..FV..... set G expression (default "clipval")
   b                 <string>     ..FV..... set B expression (default "clipval")
   a                 <string>     ..FV..... set A expression (default "clipval")
+
+lut1d AVOptions:
+  file              <string>     ..FV..... set 1D LUT file name
+  interp            <int>        ..FV..... select interpolation mode (from 0 to 2) (default linear)
+     nearest                      ..FV..... use values from the nearest defined points
+     linear                       ..FV..... use values from the linear interpolation
+     cubic                        ..FV..... use values from the cubic interpolation
 
 lut2 AVOptions:
   c0                <string>     ..FV..... set component #0 expression (default "x")
@@ -8812,6 +9055,27 @@ framesync AVOptions:
   shortest          <boolean>    ..FV..... force termination when the shortest input terminates (default false)
   repeatlast        <boolean>    ..FV..... extend last frame of secondary streams beyond EOF (default true)
 
+overlay_qsv AVOptions:
+  x                 <string>     ..FV..... Overlay x position (default "0")
+  y                 <string>     ..FV..... Overlay y position (default "0")
+  w                 <string>     ..FV..... Overlay width (default "overlay_iw")
+  h                 <string>     ..FV..... Overlay height (default "overlay_ih*w/overlay_iw")
+  alpha             <int>        ..FV..... Overlay global alpha (from 0 to 255) (default 255)
+  eof_action        <int>        ..FV..... Action to take when encountering EOF from secondary input  (from 0 to 2) (default repeat)
+     repeat                       ..FV..... Repeat the previous frame.
+     endall                       ..FV..... End both streams.
+     pass                         ..FV..... Pass through the main input.
+  shortest          <boolean>    ..FV..... force termination when the shortest input terminates (default false)
+  repeatlast        <boolean>    ..FV..... repeat overlay of the last overlay frame (default true)
+
+framesync AVOptions:
+  eof_action        <int>        ..FV..... Action to take when encountering EOF from secondary input  (from 0 to 2) (default repeat)
+     repeat                       ..FV..... Repeat the previous frame.
+     endall                       ..FV..... End both streams.
+     pass                         ..FV..... Pass through the main input.
+  shortest          <boolean>    ..FV..... force termination when the shortest input terminates (default false)
+  repeatlast        <boolean>    ..FV..... extend last frame of secondary streams beyond EOF (default true)
+
 owdenoise AVOptions:
   depth             <int>        ..FV..... set depth (from 8 to 16) (default 8)
   luma_strength     <double>     ..FV..... set luma strength (from 0 to 1000) (default 1)
@@ -9117,6 +9381,11 @@ SWScaler AVOptions:
      uniform_color                E..V..... blend onto a uniform color
      checkerboard                 E..V..... blend onto a checkerboard
 
+qsvscale AVOptions:
+  w                 <string>     ..FV..... Output video width (default "iw")
+  h                 <string>     ..FV..... Output video height (default "ih")
+  format            <string>     ..FV..... Output pixel format (default "same")
+
 scale2ref AVOptions:
   w                 <string>     ..FV..... Output video width
   width             <string>     ..FV..... Output video width
@@ -9383,13 +9652,10 @@ AVDCT AVOptions:
      simpleauto                   ED.V..... experimental / for debugging
 
 sr AVOptions:
-  model             <flags>      ..FV..... specifies what DNN model to use (default 0)
-     srcnn                        ..FV..... Super-Resolution Convolutional Neural Network model (scale factor should be specified for custom SRCNN model)
-     espcn                        ..FV..... Efficient Sub-Pixel Convolutional Neural Network model
   dnn_backend       <flags>      ..FV..... DNN backend used for model execution (default 0)
      native                       ..FV..... native backend flag
   scale_factor      <int>        ..FV..... scale factor for SRCNN model (from 2 to 4) (default 2)
-  model_filename    <string>     ..FV..... path to model file specifying network architecture and its parameters
+  model             <string>     ..FV..... path to model file specifying network architecture and its parameters
 
 ssim AVOptions:
   stats_file        <string>     ..FV..... Set file where to store per-frame difference information
@@ -9900,6 +10166,27 @@ vignette AVOptions:
 
 vmafmotion AVOptions:
   stats_file        <string>     ..FV..... Set file where to store per-frame difference information
+
+vpp_qsv AVOptions:
+  deinterlace       <int>        ..FV..... deinterlace mode: 0=off, 1=bob, 2=advanced (from 0 to 2) (default 0)
+     bob                          ..FV..... Bob deinterlace mode.
+     advanced                     ..FV..... Advanced deinterlace mode. 
+  denoise           <int>        ..FV..... denoise level [0, 100] (from 0 to 100) (default 0)
+  detail            <int>        ..FV..... enhancement level [0, 100] (from 0 to 100) (default 0)
+  framerate         <rational>   ..FV..... output framerate (from 0 to DBL_MAX) (default 0/1)
+  procamp           <int>        ..FV..... Enable ProcAmp (from 0 to 1) (default 0)
+  hue               <float>      ..FV..... ProcAmp hue (from -180 to 180) (default 0)
+  saturation        <float>      ..FV..... ProcAmp saturation (from 0 to 10) (default 1)
+  contrast          <float>      ..FV..... ProcAmp contrast (from 0 to 10) (default 1)
+  brightness        <float>      ..FV..... ProcAmp brightness (from -100 to 100) (default 0)
+  cw                <string>     ..FV..... set the width crop area expression (default "iw")
+  ch                <string>     ..FV..... set the height crop area expression (default "ih")
+  cx                <string>     ..FV..... set the x crop area expression (default "(in_w-out_w)/2")
+  cy                <string>     ..FV..... set the y crop area expression (default "(in_h-out_h)/2")
+  w                 <string>     ..FV..... Output video width (default "cw")
+  width             <string>     ..FV..... Output video width (default "cw")
+  h                 <string>     ..FV..... Output video height (default "w*ch/cw")
+  height            <string>     ..FV..... Output video height (default "w*ch/cw")
 
 vstack AVOptions:
   inputs            <int>        ..FV..... set number of inputs (from 2 to INT_MAX) (default 2)
@@ -10814,7 +11101,7 @@ showspectrum AVOptions:
   mode              <int>        ..FV..... set channel display mode (from 0 to 1) (default combined)
      combined                     ..FV..... combined mode
      separate                     ..FV..... separate mode
-  color             <int>        ..FV..... set channel coloring (from 0 to 8) (default channel)
+  color             <int>        ..FV..... set channel coloring (from 0 to 9) (default channel)
      channel                      ..FV..... separate color for each channel
      intensity                    ..FV..... intensity based coloring
      rainbow                      ..FV..... rainbow based coloring
@@ -10824,6 +11111,7 @@ showspectrum AVOptions:
      fiery                        ..FV..... fiery based coloring
      fruit                        ..FV..... fruit based coloring
      cool                         ..FV..... cool based coloring
+     magma                        ..FV..... magma based coloring
   scale             <int>        ..FV..... set display scale (from 0 to 5) (default sqrt)
      lin                          ..FV..... linear
      sqrt                         ..FV..... square root
@@ -10869,7 +11157,7 @@ showspectrumpic AVOptions:
   mode              <int>        ..FV..... set channel display mode (from 0 to 1) (default combined)
      combined                     ..FV..... combined mode
      separate                     ..FV..... separate mode
-  color             <int>        ..FV..... set channel coloring (from 0 to 8) (default intensity)
+  color             <int>        ..FV..... set channel coloring (from 0 to 9) (default intensity)
      channel                      ..FV..... separate color for each channel
      intensity                    ..FV..... intensity based coloring
      rainbow                      ..FV..... rainbow based coloring
@@ -10879,6 +11167,7 @@ showspectrumpic AVOptions:
      fiery                        ..FV..... fiery based coloring
      fruit                        ..FV..... fruit based coloring
      cool                         ..FV..... cool based coloring
+     magma                        ..FV..... magma based coloring
   scale             <int>        ..FV..... set display scale (from 0 to 5) (default log)
      lin                          ..FV..... linear
      sqrt                         ..FV..... square root
@@ -11049,6 +11338,20 @@ abuffersink AVOptions:
 buffersink AVOptions:
   pix_fmts          <binary>     ..FV..... set the supported pixel formats
 
+av1_metadata_bsf AVOptions:
+  -color_primaries   <int>        ...V....B Set color primaries (section 6.4.2) (from -1 to 255) (default -1)
+  -transfer_characteristics <int>        ...V....B Set transfer characteristics (section 6.4.2) (from -1 to 255) (default -1)
+  -matrix_coefficients <int>        ...V....B Set matrix coefficients (section 6.4.2) (from -1 to 255) (default -1)
+  -color_range       <int>        ...V....B Set color range flag (section 6.4.2) (from -1 to 1) (default -1)
+     tv                           ...V....B TV (limited) range
+     pc                           ...V....B PC (full) range
+  -chroma_sample_position <int>        ...V....B Set chroma sample position (section 6.4.2) (from -1 to 3) (default -1)
+     unknown                      ...V....B Unknown chroma sample position
+     vertical                     ...V....B Left chroma sample position
+     colocated                    ...V....B Top-left chroma sample position
+  -tick_rate         <rational>   ...V....B Set display tick rate (num_units_in_display_tick / time_scale) (from 0 to UINT32_MAX) (default 0/1)
+  -num_ticks_per_picture <int>        ...V....B Set display ticks per picture for CFR streams (from -1 to INT_MAX) (default -1)
+
 dump_extradata bsf AVOptions:
   -freq              <int>        ...V....B When do dump extradata (from 0 to 1) (default k)
      k                            ...V....B
@@ -11092,6 +11395,28 @@ h264_metadata_bsf AVOptions:
   -flip              <flags>      ...V....B Set flip in display orientation SEI (default 0)
      horizontal                   ...V....B Set hor_flip
      vertical                     ...V....B Set ver_flip
+  -level             <int>        ...V....B Set level (table A-1) (from -2 to 255) (default -2)
+     auto                         ...V....B Attempt to guess level from stream properties
+     1                            ...V....B
+     1b                           ...V....B
+     1.1                          ...V....B
+     1.2                          ...V....B
+     1.3                          ...V....B
+     2                            ...V....B
+     2.1                          ...V....B
+     2.2                          ...V....B
+     3                            ...V....B
+     3.1                          ...V....B
+     3.2                          ...V....B
+     4                            ...V....B
+     4.1                          ...V....B
+     4.2                          ...V....B
+     5                            ...V....B
+     5.1                          ...V....B
+     5.2                          ...V....B
+     6                            ...V....B
+     6.1                          ...V....B
+     6.2                          ...V....B
 
 hapqa_extract_bsf AVOptions:
   -texture           <int>        ...V....B texture to keep (from 0 to 1) (default color)
@@ -11193,6 +11518,7 @@ Encoders:
  V..... libopenh264          OpenH264 H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10 (codec h264)
  V..... h264_amf             AMD AMF H.264 Encoder (codec h264)
  V..... h264_nvenc           NVIDIA NVENC H.264 encoder (codec h264)
+ V..... h264_qsv             H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10 (Intel Quick Sync Video acceleration) (codec h264)
  V..... nvenc                NVIDIA NVENC H.264 encoder (codec h264)
  V..... nvenc_h264           NVIDIA NVENC H.264 encoder (codec h264)
  V..... hap                  Vidvox Hap
@@ -11200,6 +11526,7 @@ Encoders:
  V..... nvenc_hevc           NVIDIA NVENC hevc encoder (codec hevc)
  V..... hevc_amf             AMD AMF HEVC encoder (codec hevc)
  V..... hevc_nvenc           NVIDIA NVENC hevc encoder (codec hevc)
+ V..... hevc_qsv             HEVC (Intel Quick Sync Video acceleration) (codec hevc)
  VF.... huffyuv              Huffyuv / HuffYUV
  V..... jpeg2000             JPEG 2000
  VF.... libopenjpeg          OpenJPEG JPEG 2000 (codec jpeg2000)
@@ -11207,8 +11534,10 @@ Encoders:
  VF.... ljpeg                Lossless JPEG
  VF.... magicyuv             MagicYUV video
  VFS... mjpeg                MJPEG (Motion JPEG)
+ V..... mjpeg_qsv            MJPEG (Intel Quick Sync Video acceleration) (codec mjpeg)
  V.S... mpeg1video           MPEG-1 video
  V.S... mpeg2video           MPEG-2 video
+ V..... mpeg2_qsv            MPEG-2 video (Intel Quick Sync Video acceleration) (codec mpeg2video)
  V.S... mpeg4                MPEG-4 part 2
  V..... libxvid              libxvidcore MPEG-4 part 2 (codec mpeg4)
  V..... msmpeg4v2            MPEG-4 part 2 Microsoft variant version 2
@@ -11425,10 +11754,12 @@ Decoders:
  V...BD h263i                Intel H.263
  V...BD h263p                H.263 / H.263-1996, H.263+ / H.263-1998 / H.263 version 2
  VFS..D h264                 H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10
+ V....D h264_qsv             H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10 (Intel Quick Sync Video acceleration) (codec h264)
  V....D libopenh264          OpenH264 H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10 (codec h264)
  V..... h264_cuvid           Nvidia CUVID H264 decoder (codec h264)
  VFS..D hap                  Vidvox Hap
  VFS..D hevc                 HEVC (High Efficiency Video Coding)
+ V....D hevc_qsv             HEVC (Intel Quick Sync Video acceleration) (codec hevc)
  V..... hevc_cuvid           Nvidia CUVID HEVC decoder (codec hevc)
  V....D hnm4video            HNM 4 video
  V....D hq_hqa               Canopus HQ/HQA
@@ -11465,6 +11796,7 @@ Decoders:
  V..... mpeg1_cuvid          Nvidia CUVID MPEG1VIDEO decoder (codec mpeg1video)
  V.S.BD mpeg2video           MPEG-2 video
  V.S.BD mpegvideo            MPEG-1 video (codec mpeg2video)
+ V....D mpeg2_qsv            MPEG-2 video (Intel Quick Sync Video acceleration) (codec mpeg2video)
  V..... mpeg2_cuvid          Nvidia CUVID MPEG2VIDEO decoder (codec mpeg2video)
  VF..BD mpeg4                MPEG-4 part 2
  V..... mpeg4_cuvid          Nvidia CUVID MPEG4 decoder (codec mpeg4)
@@ -11503,6 +11835,7 @@ Decoders:
  V....D qtrle                QuickTime Animation (RLE) video
  V....D r10k                 AJA Kona 10-bit RGB Codec
  V....D r210                 Uncompressed RGB 10-bit
+ V....D rasc                 RemotelyAnywhere Screen Capture
  V..... rawvideo             raw video
  V....D rl2                  RL2 video
  V....D roqvideo             id RoQ video (codec roq)
@@ -11555,6 +11888,7 @@ Decoders:
  V....D vb                   Beam Software VB
  VF...D vble                 VBLE Lossless Codec
  V....D vc1                  SMPTE VC-1
+ V....D vc1_qsv              VC-1 video (Intel Quick Sync Video acceleration) (codec vc1)
  V..... vc1_cuvid            Nvidia CUVID VC1 decoder (codec vc1)
  V....D vc1image             Windows Media Video 9 Image v2
  V....D vcr1                 ATI VCR1
@@ -11570,6 +11904,7 @@ Decoders:
  VFS..D vp8                  On2 VP8
  V....D libvpx               libvpx VP8 (codec vp8)
  V..... vp8_cuvid            Nvidia CUVID VP8 decoder (codec vp8)
+ V....D vp8_qsv              VP8 video (Intel Quick Sync Video acceleration) (codec vp8)
  VFS..D vp9                  Google VP9
  V....D libvpx-vp9           libvpx VP9 (codec vp9)
  V..... vp9_cuvid            Nvidia CUVID VP9 decoder (codec vp9)
@@ -11686,6 +12021,7 @@ Decoders:
  A....D gsm_ms               GSM Microsoft variant
  A....D libgsm_ms            libgsm GSM Microsoft variant (codec gsm_ms)
  A....D iac                  IAC (Indeo Audio Coder)
+ A....D ilbc                 iLBC (Internet Low Bitrate Codec)
  A....D libilbc              iLBC (Internet Low Bitrate Codec) (codec ilbc)
  A....D imc                  IMC (Intel Music Coder)
  A....D interplay_dpcm       DPCM Interplay
@@ -11889,9 +12225,9 @@ Codecs:
  DEV.L. h263                 H.263 / H.263-1996, H.263+ / H.263-1998 / H.263 version 2
  D.V.L. h263i                Intel H.263
  DEV.L. h263p                H.263+ / H.263-1998 / H.263 version 2
- DEV.LS h264                 H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10 (decoders: h264 libopenh264 h264_cuvid ) (encoders: libx264 libx264rgb libopenh264 h264_amf h264_nvenc nvenc nvenc_h264 )
+ DEV.LS h264                 H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10 (decoders: h264 h264_qsv libopenh264 h264_cuvid ) (encoders: libx264 libx264rgb libopenh264 h264_amf h264_nvenc h264_qsv nvenc nvenc_h264 )
  DEVIL. hap                  Vidvox Hap
- DEV.L. hevc                 H.265 / HEVC (High Efficiency Video Coding) (decoders: hevc hevc_cuvid ) (encoders: libx265 nvenc_hevc hevc_amf hevc_nvenc )
+ DEV.L. hevc                 H.265 / HEVC (High Efficiency Video Coding) (decoders: hevc hevc_qsv hevc_cuvid ) (encoders: libx265 nvenc_hevc hevc_amf hevc_nvenc hevc_qsv )
  D.V.L. hnm4video            HNM 4 video
  D.VIL. hq_hqa               Canopus HQ/HQA
  D.VIL. hqx                  Canopus HQX
@@ -11918,12 +12254,12 @@ Codecs:
  DEVI.S magicyuv             MagicYUV video
  D.VIL. mdec                 Sony PlayStation MDEC (Motion DECoder)
  D.V.L. mimic                Mimic
- DEVIL. mjpeg                Motion JPEG (decoders: mjpeg mjpeg_cuvid )
+ DEVIL. mjpeg                Motion JPEG (decoders: mjpeg mjpeg_cuvid ) (encoders: mjpeg mjpeg_qsv )
  D.VIL. mjpegb               Apple MJPEG-B
  D.V.L. mmvideo              American Laser Games MM Video
  D.V.L. motionpixels         Motion Pixels video
  DEV.L. mpeg1video           MPEG-1 video (decoders: mpeg1video mpeg1_cuvid )
- DEV.L. mpeg2video           MPEG-2 video (decoders: mpeg2video mpegvideo mpeg2_cuvid )
+ DEV.L. mpeg2video           MPEG-2 video (decoders: mpeg2video mpegvideo mpeg2_qsv mpeg2_cuvid ) (encoders: mpeg2video mpeg2_qsv )
  DEV.L. mpeg4                MPEG-4 part 2 (decoders: mpeg4 mpeg4_cuvid ) (encoders: mpeg4 libxvid )
  D.V.L. msa1                 MS ATC Screen
  D.VI.S mscc                 Mandsoft Screen Capture Codec
@@ -11960,6 +12296,7 @@ Codecs:
  DEV..S qtrle                QuickTime Animation (RLE) video
  DEVI.S r10k                 AJA Kona 10-bit RGB Codec
  DEVI.S r210                 Uncompressed RGB 10-bit
+ D.V.L. rasc                 RemotelyAnywhere Screen Capture
  DEVI.S rawvideo             raw video
  D.VIL. rl2                  RL2 video
  DEV.L. roq                  id RoQ video (decoders: roqvideo ) (encoders: roqvideo )
@@ -12012,7 +12349,7 @@ Codecs:
  DEVI.S v410                 Uncompressed 4:4:4 10-bit
  D.V.L. vb                   Beam Software VB
  D.VI.S vble                 VBLE Lossless Codec
- D.V.L. vc1                  SMPTE VC-1 (decoders: vc1 vc1_cuvid )
+ D.V.L. vc1                  SMPTE VC-1 (decoders: vc1 vc1_qsv vc1_cuvid )
  D.V.L. vc1image             Windows Media Video 9 Image v2
  D.VIL. vcr1                 ATI VCR1
  D.VIL. vixl                 Miro VideoXL (decoders: xl )
@@ -12024,7 +12361,7 @@ Codecs:
  D.V.L. vp6a                 On2 VP6 (Flash version, with alpha channel)
  D.V.L. vp6f                 On2 VP6 (Flash version)
  D.V.L. vp7                  On2 VP7
- DEV.L. vp8                  On2 VP8 (decoders: vp8 libvpx vp8_cuvid ) (encoders: libvpx )
+ DEV.L. vp8                  On2 VP8 (decoders: vp8 libvpx vp8_cuvid vp8_qsv ) (encoders: libvpx )
  DEV.L. vp9                  Google VP9 (decoders: vp9 libvpx-vp9 vp9_cuvid ) (encoders: libvpx-vp9 )
  D.V..S wcmv                 WinCAM Motion Video
  DEVILS webp                 WebP (encoders: libwebp )
@@ -12135,7 +12472,7 @@ Codecs:
  DEA.L. gsm                  GSM (decoders: gsm libgsm ) (encoders: libgsm )
  DEA.L. gsm_ms               GSM Microsoft variant (decoders: gsm_ms libgsm_ms ) (encoders: libgsm_ms )
  D.A.L. iac                  IAC (Indeo Audio Coder)
- DEA.L. ilbc                 iLBC (Internet Low Bitrate Codec) (decoders: libilbc ) (encoders: libilbc )
+ DEA.L. ilbc                 iLBC (Internet Low Bitrate Codec) (decoders: ilbc libilbc ) (encoders: libilbc )
  D.A.L. imc                  IMC (Intel Music Coder)
  D.A.L. interplay_dpcm       DPCM Interplay
  D.A.L. interplayacm         Interplay ACM
@@ -12497,6 +12834,7 @@ File formats:
   E avm2            SWF (ShockWave Flash) (AVM2)
  D  avr             AVR (Audio Visual Research)
  D  avs             Argonaut Games Creature Shock
+ DE avs2            raw AVS2-P2/IEEE1857.4 video
  D  bethsoftvid     Bethesda Softworks VID
  D  bfi             Brute Force & Ignorance
  D  bfstm           BFSTM (Binary Cafe Stream)
@@ -12824,6 +13162,7 @@ File formats:
   E au              Sun AU
   E avi             AVI (Audio Video Interleaved)
   E avm2            SWF (ShockWave Flash) (AVM2)
+  E avs2            raw AVS2-P2/IEEE1857.4 video
   E bit             G.729 BIT file format
   E caca            caca (color ASCII art) output device
   E caf             Apple CAF (Core Audio Format)
@@ -13007,6 +13346,7 @@ File formats:
  D  avisynth        AviSynth script
  D  avr             AVR (Audio Visual Research)
  D  avs             Argonaut Games Creature Shock
+ D  avs2            raw AVS2-P2/IEEE1857.4
  D  bethsoftvid     Bethesda Softworks VID
  D  bfi             Brute Force & Ignorance
  D  bfstm           BFSTM (Binary Cafe Stream)
@@ -13268,7 +13608,9 @@ File formats:
 Hardware acceleration methods:
 cuda
 dxva2
+qsv
 d3d11va
+qsv
 cuvid
 
 Filters:
@@ -13283,7 +13625,9 @@ Filters:
  ... acompressor       A->A       Audio compressor.
  ... acontrast         A->A       Simple audio dynamic range compression/expansion filter.
  ... acopy             A->A       Copy the input audio unchanged to the output.
+ ... acue              A->A       Delay filtering to match a cue.
  ... acrossfade        AA->A      Cross fade two input audio streams.
+ ... acrossover        A->N       Split audio into per-bands streams.
  ... acrusher          A->A       Reduce audio bit resolution.
  .S. adeclick          A->A       Remove impulsive noise from input audio.
  .S. adeclip           A->A       Remove clipping from input audio.
@@ -13293,6 +13637,7 @@ Filters:
  ... aemphasis         A->A       Audio emphasis.
  ... aeval             A->A       Filter audio signal according to a specified expression.
  T.. afade             A->A       Fade in/out input audio.
+ TSC afftdn            A->A       Denoise audio samples using FFT.
  ... afftfilt          A->A       Apply arbitrary expressions to samples in frequency domain.
  .S. afir              AA->N      Apply Finite Impulse Response filter with supplied coefficients in 2nd stream.
  ... aformat           A->A       Convert the input audio to one of the specified formats.
@@ -13306,6 +13651,7 @@ Filters:
  ... amerge            N->A       Merge two or more audio streams into a single multi-channel stream.
  T.. ametadata         A->A       Manipulate audio frame metadata.
  ... amix              N->A       Audio mixing.
+ ... amultiply         AA->A      Multiply two audio streams.
  ..C anequalizer       A->N       Apply high-order audio parametric multi band equalizer.
  ... anull             A->A       Pass the source unchanged to the output.
  T.. apad              A->A       Pad audio with silence.
@@ -13396,6 +13742,7 @@ Filters:
  ... blackdetect       V->V       Detect video intervals that are (almost) black.
  ... blackframe        V->V       Detect frames that are (almost) black.
  TS. blend             VV->V      Blend two video frames into each other.
+ TS. bm3d              N->V       Block-Matching 3D denoiser.
  T.. boxblur           V->V       Blur the input.
  TS. bwdif             V->V       Deinterlace the input image.
  TS. chromakey         V->V       Turns a certain color into transparency. Operates on YUV colors.
@@ -13413,6 +13760,7 @@ Filters:
  ... cover_rect        V->V       Find and cover a user specified object.
  ..C crop              V->V       Crop the input video.
  T.. cropdetect        V->V       Auto-detect crop size.
+ ... cue               V->V       Delay filtering to match a cue.
  TS. curves            V->V       Adjust components curves.
  .S. datascope         V->V       Video data analysis.
  TS. dctdnoiz          V->V       Denoise frames using 2D DCT.
@@ -13422,6 +13770,7 @@ Filters:
  TS. deconvolve        VV->V      Deconvolve first video stream with second video stream.
  TS. deflate           V->V       Apply deflate effect.
  ... deflicker         V->V       Remove temporal frame luminance variations.
+ ... deinterlace_qsv   V->V       QuickSync video deinterlacing
  ... dejudder          V->V       Remove judder produced by pullup.
  T.. delogo            V->V       Remove logo from input video.
  ... deshake           V->V       Stabilize shaky video.
@@ -13481,10 +13830,12 @@ Filters:
  ... interleave        N->V       Temporally interleave video inputs.
  ... kerndeint         V->V       Apply kernel deinterlacing to the input.
  .S. lenscorrection    V->V       Rectify the image by correcting for lens distortion.
- T.. limiter           V->V       Limit pixels components to the specified range.
+ TS. lensfun           V->V       Apply correction to an image based on info derived from the lensfun database.
+ TS. limiter           V->V       Limit pixels components to the specified range.
  ... loop              V->V       Loop video frames.
  TS. lumakey           V->V       Turns a certain luma into transparency.
  T.. lut               V->V       Compute and apply a lookup table to the RGB/YUV input video.
+ TS. lut1d             V->V       Adjust colors using a 1D LUT.
  T.. lut2              VV->V      Compute and apply a lookup table from two video inputs.
  TS. lut3d             V->V       Adjust colors using a 3D LUT.
  T.. lutrgb            V->V       Compute and apply a lookup table to the RGB input video.
@@ -13509,6 +13860,7 @@ Filters:
  ... ocr               V->V       Optical Character Recognition.
  T.. oscilloscope      V->V       2D Video Oscilloscope.
  TSC overlay           VV->V      Overlay a video source on top of the input.
+ ... overlay_qsv       VV->V      Quick Sync Video overlay.
  T.. owdenoise         V->V       Denoise using wavelets.
  ... pad               V->V       Pad the input video.
  ... palettegen        V->V       Find the optimal palette for a given stream.
@@ -13530,7 +13882,7 @@ Filters:
  T.. readeia608        V->V       Read EIA-608 Closed Caption codes from input video and write them to frame metadata.
  ... readvitc          V->V       Read vertical interval timecode and write it to frame metadata.
  ... realtime          V->V       Slow down filtering to match realtime.
- T.. remap             VVV->V     Remap pixels.
+ TS. remap             VVV->V     Remap pixels.
  TS. removegrain       V->V       Remove grain.
  T.. removelogo        V->V       Remove a TV logo based on a mask image.
  ... repeatfields      V->V       Hard repeat fields based on MPEG repeat field flag.
@@ -13539,6 +13891,7 @@ Filters:
  TSC rotate            V->V       Rotate the input image.
  T.. sab               V->V       Apply shape adaptive blur.
  ..C scale             V->V       Scale the input video size and/or convert the image format.
+ ... scale_qsv         V->V       QuickSync video scaling and format conversion
  ..C scale2ref         VV->VV     Scale the input video size and/or convert the image format to the given reference.
  ... select            V->N       Select video frames to pass in output.
  TS. selectivecolor    V->V       Apply CMYK adjustments to specific color ranges.
@@ -13571,7 +13924,7 @@ Filters:
  T.. swapuv            V->V       Swap U and V components.
  TS. tblend            V->V       Blend successive frames.
  ... telecine          V->V       Apply a telecine pattern.
- T.. threshold         VVVV->V    Threshold first video stream using other video streams.
+ TS. threshold         VVVV->V    Threshold first video stream using other video streams.
  ... thumbnail         V->V       Select the most representative frame in a given sequence of consecutive frames.
  ... tile              V->V       Tile several successive frames together.
  ... tinterlace        V->V       Perform temporal field interlacing.
@@ -13591,6 +13944,7 @@ Filters:
  ... vidstabtransform  V->V       Transform the frames, pass 2 of 2 for stabilization (see vidstabdetect for pass 1).
  T.. vignette          V->V       Make or reverse a vignette effect.
  ... vmafmotion        V->V       Calculate the VMAF Motion score.
+ ... vpp_qsv           V->V       Quick Sync Video VPP.
  ... vstack            N->V       Stack video inputs vertically.
  TS. w3fdif            V->V       Apply Martin Weston three field deinterlace.
  .S. waveform          V->V       Video waveform monitor.
