@@ -32,18 +32,28 @@ elif not os.path.isdir(filepath):
         filepath = os.path.dirname(sys.argv[0])
 filepath = os.path.abspath(os.path.join(filepath, 'lock')).replace("\\", "\\\\")
 
-x = open(filepath, 'r+')
-print("checking Lock")
-while True:
-    try:
-        portalocker.lock(x, portalocker.LOCK_EX)
-        break
-    except pywintypes.error as e:
+settings = ReadSettings(os.path.dirname(sys.argv[0]), "autoProcess.ini")
+
+try:
+    concurr = settings.uTorrentBlockconcurrent
+    log.info("concurr is %s." % concurr)
+except:
+    log.info("concurr is %s." % concurr)
+    concurr = False
+
+if concurr:
+    x = open(filepath, 'r+')
+    print("checking Lock")
+    while True:
+        try:
+            portalocker.lock(x, portalocker.LOCK_EX)
+            break
+        except pywintypes.error as e:
         # raise on unrelated error
-        if e.errno != errno.EAGAIN:
-            raise
-        else:
-            time.sleep(30)
+            if e.errno != errno.EAGAIN:
+                raise
+            else:
+                time.sleep(30)
 
 log.info("uTorrent post processing started.")
 
