@@ -97,6 +97,7 @@ host = http://localhost:8080/
 username =
 password =
 output_directory =
+block-concurrent = True
 
 [Deluge]
 host = localhost
