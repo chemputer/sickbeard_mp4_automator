@@ -645,7 +645,8 @@ class ReadSettings:
         self.uTorrentHost = config.get(section, "host").lower()
         self.uTorrentUsername = config.get(section, "username")
         self.uTorrentPassword = config.get(section, "password")
-
+        self.uTorrentBlockconcurrent = config.getboolean(section, "block-concurrent")
+        
         # Read relevant Deluge section information
         section = "Deluge"
         self.deluge = {}
