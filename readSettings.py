@@ -173,7 +173,8 @@ class ReadSettings:
                              'host': 'http://localhost:8080/',
                              'username': '',
                              'password': '',
-                             'output_directory': ''}
+                             'output_directory': '',
+                             'block-concurrent': 'false'}
         # Default SAB settings
         sab_defaults = {'convert': 'True',
                         'Sickbeard-category': 'sickbeard',
