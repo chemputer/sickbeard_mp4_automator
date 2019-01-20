@@ -2162,6 +2162,7 @@ libvpx-vp8 encoder AVOptions:
   -arnr_strength     <int>        E..V..... altref noise reduction filter strength (from 0 to 6) (default 3)
   -arnr_type         <int>        E..V..... altref noise reduction filter type (from 1 to 3) (default 3)
   -rc_lookahead      <int>        E..V..... Number of frames to look ahead for alternate reference frame selection (from 0 to 25) (default 25)
+  -sharpness         <int>        E..V..... Increase sharpness at the expense of lower PSNR (from -1 to 7) (default -1)
 
 libvpx-vp9 encoder AVOptions:
   -lag-in-frames     <int>        E..V..... Number of frames to look ahead for alternate reference frame selection (from -1 to INT_MAX) (default -1)
@@ -2220,6 +2221,7 @@ libvpx-vp9 encoder AVOptions:
   -arnr_strength     <int>        E..V..... altref noise reduction filter strength (from 0 to 6) (default 3)
   -arnr_type         <int>        E..V..... altref noise reduction filter type (from 1 to 3) (default 3)
   -rc_lookahead      <int>        E..V..... Number of frames to look ahead for alternate reference frame selection (from 0 to 25) (default 25)
+  -sharpness         <int>        E..V..... Increase sharpness at the expense of lower PSNR (from -1 to 7) (default -1)
 
 libwebp AVOptions:
   -lossless          <int>        E..V..... Use lossless mode (from 0 to 1) (default 0)
@@ -2661,6 +2663,7 @@ h264_qsv encoder AVOptions:
      high                         E..V.....
   -a53cc             <int>        E..V..... Use A53 Closed Captions (if available) (from 0 to 1) (default 1)
   -aud               <int>        E..V..... Insert the Access Unit Delimiter NAL (from 0 to 1) (default 0)
+  -low_power         <boolean>    E..V..... enable low power mode(experimental: many limitations by mfx version, BRC modes, etc.) (default false)
   -repeat_pps        <boolean>    E..V..... repeat pps for every frame (default false)
 
 nvenc AVOptions:
@@ -3565,9 +3568,9 @@ http AVOptions:
   -http_proxy        <string>     ED....... set HTTP proxy to tunnel through
   -headers           <string>     ED....... set custom HTTP headers, can override built in default headers
   -content_type      <string>     ED....... set a specific content type for the POST messages
-  -user_agent        <string>     .D....... override User-Agent header (default "Lavf/58.25.100")
+  -user_agent        <string>     .D....... override User-Agent header (default "Lavf/58.26.100")
   -referer           <string>     .D....... override referer header
-  -user-agent        <string>     .D....... use the "user_agent" option instead (default "Lavf/58.25.100")
+  -user-agent        <string>     .D....... use the "user_agent" option instead (default "Lavf/58.26.100")
   -multiple_requests <boolean>    ED....... use persistent connections (default false)
   -post_data         <binary>     ED....... set custom HTTP post data
   -cookies           <string>     .D....... set cookies to be sent in applicable future requests, use newline delimited Set-Cookie HTTP field value syntax
@@ -3594,9 +3597,9 @@ https AVOptions:
   -http_proxy        <string>     ED....... set HTTP proxy to tunnel through
   -headers           <string>     ED....... set custom HTTP headers, can override built in default headers
   -content_type      <string>     ED....... set a specific content type for the POST messages
-  -user_agent        <string>     .D....... override User-Agent header (default "Lavf/58.25.100")
+  -user_agent        <string>     .D....... override User-Agent header (default "Lavf/58.26.100")
   -referer           <string>     .D....... override referer header
-  -user-agent        <string>     .D....... use the "user_agent" option instead (default "Lavf/58.25.100")
+  -user-agent        <string>     .D....... use the "user_agent" option instead (default "Lavf/58.26.100")
   -multiple_requests <boolean>    ED....... use persistent connections (default false)
   -post_data         <binary>     ED....... set custom HTTP post data
   -cookies           <string>     .D....... set cookies to be sent in applicable future requests, use newline delimited Set-Cookie HTTP field value syntax
@@ -4240,8 +4243,8 @@ RTSP demuxer AVOptions:
   -stimeout          <int>        .D....... set timeout (in microseconds) of socket TCP I/O operations (from INT_MIN to INT_MAX) (default 0)
   -reorder_queue_size <int>        .D....... set number of packets to buffer for handling of reordered packets (from -1 to INT_MAX) (default -1)
   -buffer_size       <int>        ED....... Underlying protocol send/receive buffer size (from -1 to INT_MAX) (default -1)
-  -user_agent        <string>     .D....... override User-Agent header (default "Lavf58.25.100")
-  -user-agent        <string>     .D....... override User-Agent header (deprecated, use user_agent) (default "Lavf58.25.100")
+  -user_agent        <string>     .D....... override User-Agent header (default "Lavf58.26.100")
+  -user-agent        <string>     .D....... override User-Agent header (deprecated, use user_agent) (default "Lavf58.26.100")
 
 sbg_demuxer AVOptions:
   -sample_rate       <int>        .D.......  (from 0 to INT_MAX) (default 0)
@@ -5565,8 +5568,8 @@ RTSP muxer AVOptions:
   -stimeout          <int>        .D....... set timeout (in microseconds) of socket TCP I/O operations (from INT_MIN to INT_MAX) (default 0)
   -reorder_queue_size <int>        .D....... set number of packets to buffer for handling of reordered packets (from -1 to INT_MAX) (default -1)
   -buffer_size       <int>        ED....... Underlying protocol send/receive buffer size (from -1 to INT_MAX) (default -1)
-  -user_agent        <string>     .D....... override User-Agent header (default "Lavf58.25.100")
-  -user-agent        <string>     .D....... override User-Agent header (deprecated, use user_agent) (default "Lavf58.25.100")
+  -user_agent        <string>     .D....... override User-Agent header (default "Lavf58.26.100")
+  -user-agent        <string>     .D....... override User-Agent header (deprecated, use user_agent) (default "Lavf58.26.100")
 
 segment muxer AVOptions:
   -reference_stream  <string>     E........ set reference stream (default "auto")
@@ -6286,8 +6289,8 @@ afir AVOptions:
   channel           <int>        ..FV..... set IR channel to display frequency response (from 0 to 1024) (default 0)
   size              <image_size> ..FV..... set video size (default "hd720")
   rate              <video_rate> ..FV..... set video rate (default "25")
-  minp              <int>        ..F.A.... set min partition size (from 16 to 65536) (default 16)
-  maxp              <int>        ..F.A.... set max partition size (from 16 to 65536) (default 65536)
+  minp              <int>        ..F.A.... set min partition size (from 8 to 32768) (default 8192)
+  maxp              <int>        ..F.A.... set max partition size (from 8 to 32768) (default 8192)
 
 aformat AVOptions:
   sample_fmts       <string>     ..F.A.... A '|'-separated list of sample formats.
@@ -6414,6 +6417,11 @@ anequalizer AVOptions:
      lin                          ..FV..... linear
      log                          ..FV..... logarithmic
   colors            <string>     ..FV..... set channels curves colors (default "red|green|blue|yellow|orange|lime|pink|magenta|brown")
+
+anlmdn AVOptions:
+  s                 <float>      ..F.A.... set denoising strength (from 1e-05 to 10) (default 1e-05)
+  p                 <duration>   ..F.A.... set patch duration (default 0.002)
+  r                 <duration>   ..F.A.... set research duration (default 0.006)
 
 apad AVOptions:
   packet_size       <int>        ..F.A.... set silence packet size (from 0 to INT_MAX) (default 4096)
@@ -7181,8 +7189,13 @@ sofalizer AVOptions:
      time                         ..F.A.... time domain
      freq                         ..F.A.... frequency domain
   speakers          <string>     ..F.A.... set speaker custom positions
-  lfegain           <float>      ..F.A.... set lfe gain (from -9 to 9) (default 0)
+  lfegain           <float>      ..F.A.... set lfe gain (from -20 to 40) (default 0)
   framesize         <int>        ..F.A.... set frame size (from 1024 to 96000) (default 1024)
+  normalize         <boolean>    ..F.A.... normalize IRs (default true)
+  interpolate       <boolean>    ..F.A.... interpolate IRs from neighbors (default false)
+  minphase          <boolean>    ..F.A.... minphase IRs (default false)
+  anglestep         <float>      ..F.A.... set neighbor search angle step (from 0.01 to 10) (default 0.5)
+  radstep           <float>      ..F.A.... set neighbor search radius step (from 0.01 to 1) (default 0.01)
 
 stereotools AVOptions:
   level_in          <double>     ..F.A.... set level in (from 0.015625 to 64) (default 1)
@@ -8984,6 +8997,13 @@ maskedclamp AVOptions:
 
 maskedmerge AVOptions:
   planes            <int>        ..FV..... set planes (from 0 to 15) (default 15)
+
+maskfun AVOptions:
+  low               <int>        ..FV..... set low threshold (from 0 to 65535) (default 10)
+  high              <int>        ..FV..... set high threshold (from 0 to 65535) (default 10)
+  planes            <int>        ..FV..... set planes (from 0 to 15) (default 15)
+  fill              <int>        ..FV..... set fill value (from 0 to 65535) (default 0)
+  sum               <int>        ..FV..... set sum value (from 0 to 65535) (default 10)
 
 mcdeint AVOptions:
   mode              <int>        ..FV..... set mode (from 0 to 3) (default fast)
@@ -12159,6 +12179,7 @@ Decoders:
  V....D hq_hqa               Canopus HQ/HQA
  VFS..D hqx                  Canopus HQX
  VF..BD huffyuv              Huffyuv / HuffYUV
+ VF..BD hymt                 HuffYUV MT
  V....D idcinvideo           id Quake II CIN video (codec idcin)
  V....D idf                  iCEDraw text
  V....D iff                  IFF ACBM/ANIM/DEEP/ILBM/PBM/RGB8/RGBN (codec iff_ilbm)
@@ -12414,6 +12435,7 @@ Decoders:
  A....D libgsm               libgsm GSM (codec gsm)
  A....D gsm_ms               GSM Microsoft variant
  A....D libgsm_ms            libgsm GSM Microsoft variant (codec gsm_ms)
+ A....D hcom                 HCOM Audio
  A....D iac                  IAC (Indeo Audio Coder)
  A....D ilbc                 iLBC (Internet Low Bitrate Codec)
  A....D libilbc              iLBC (Internet Low Bitrate Codec) (codec ilbc)
@@ -12627,6 +12649,7 @@ Codecs:
  D.VIL. hq_hqa               Canopus HQ/HQA
  D.VIL. hqx                  Canopus HQX
  DEVI.S huffyuv              HuffYUV
+ D.VI.S hymt                 HuffYUV MT
  D.V.L. idcin                id Quake II CIN video (decoders: idcinvideo )
  D.VI.. idf                  iCEDraw text
  D.V.L. iff_ilbm             IFF ACBM/ANIM/DEEP/ILBM/PBM/RGB8/RGBN (decoders: iff )
@@ -12866,6 +12889,7 @@ Codecs:
  D.A.L. gremlin_dpcm         DPCM Gremlin
  DEA.L. gsm                  GSM (decoders: gsm libgsm ) (encoders: libgsm )
  DEA.L. gsm_ms               GSM Microsoft variant (decoders: gsm_ms libgsm_ms ) (encoders: libgsm_ms )
+ D.A.L. hcom                 HCOM Audio
  D.A.L. iac                  IAC (Indeo Audio Coder)
  DEA.L. ilbc                 iLBC (Internet Low Bitrate Codec) (decoders: ilbc libilbc ) (encoders: libilbc )
  D.A.L. imc                  IMC (Intel Music Coder)
@@ -13319,6 +13343,7 @@ File formats:
  DE h263            raw H.263
  DE h264            raw H.264 video
   E hash            Hash testing
+ D  hcom            Macintosh HCOM
   E hds             HDS Muxer
  DE hevc            raw HEVC video
   E hls             Apple HTTP Live Streaming
@@ -13826,6 +13851,7 @@ File formats:
  D  h261            raw H.261
  D  h263            raw H.263
  D  h264            raw H.264 video
+ D  hcom            Macintosh HCOM
  D  hevc            raw HEVC video
  D  hls,applehttp   Apple HTTP Live Streaming
  D  hnm             Cryo HNM v4
@@ -14064,6 +14090,7 @@ Filters:
  ... amix              N->A       Audio mixing.
  ... amultiply         AA->A      Multiply two audio streams.
  ..C anequalizer       A->N       Apply high-order audio parametric multi band equalizer.
+ TS. anlmdn            A->A       Reduce broadband noise from stream using Non-Local Means.
  ... anull             A->A       Pass the source unchanged to the output.
  T.. apad              A->A       Pad audio with silence.
  ... aperms            A->A       Set permissions for the output audio frame.
@@ -14259,6 +14286,7 @@ Filters:
  T.. lutyuv            V->V       Compute and apply a lookup table to the YUV input video.
  TS. maskedclamp       VVV->V     Clamp first stream with second stream and third stream.
  TS. maskedmerge       VVV->V     Merge first stream with second stream using third stream as mask.
+ TS. maskfun           V->V       Create Mask.
  ... mcdeint           V->V       Apply motion compensating deinterlacing.
  ... mergeplanes       N->V       Merge planes.
  ... mestimate         V->V       Generate motion vectors.
