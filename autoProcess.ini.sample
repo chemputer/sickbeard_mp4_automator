@@ -93,6 +93,7 @@ forceconvert = False
 vsync = -1
 sample_rate = 
 burn_in_forced_subs = False
+enable_hdr_sdr_tonemapping = False
 
 [CouchPotato]
 host = localhost

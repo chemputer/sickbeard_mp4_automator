@@ -117,6 +117,7 @@ class ReadSettings:
                         'use-qsv-decoder-with-encoder': 'True',
                         'use-hevc-qsv-decoder': 'False',
                         'enable_dxva2_gpu_decode': 'False',
+                        'enable_hdr_sdr_tonemapping': 'False',
                         'subtitle-codec': 'mov_text',
                         'subtitle-language': '',
                         'subtitle-default-language': '',
@@ -461,6 +462,7 @@ class ReadSettings:
         self.qsv_decoder = config.getboolean(section, "use-qsv-decoder-with-encoder")  # Use Intel QuickSync Decoder when using QuickSync Encoder
         self.hevc_qsv_decoder = config.getboolean( section, "use-hevc-qsv-decoder") #only supported on 6th gen intel and up.
         self.dxva2_decoder = config.getboolean( section, "enable_dxva2_gpu_decode" )
+        self.hdr_sdr_convert = config.getboolean( section, "enable_hdr_sdr_tonemapping" )
         self.nvenc_hwaccel_enabled = False
         self.nvenc_profile = config.get(section, "nvenc_profile")
         self.nvenc_preset = config.get(section, "nvenc_preset")

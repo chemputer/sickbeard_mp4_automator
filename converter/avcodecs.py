@@ -260,7 +260,8 @@ class VideoCodec(BaseCodec):
         'maxrate': int,
         'minrate': int,
         'bufsize': int,
-        'filter_complex': str
+        'filter_complex': str,
+        'color_space_convert': str
     }
 
     def _aspect_corrections(self, sw, sh, w, h, mode):
@@ -387,6 +388,8 @@ class VideoCodec(BaseCodec):
 
         optlist = ['-vcodec', self.ffmpeg_codec_name]
 
+        if 'color_space_convert' in safe and safe['color_space_convert'] is not None:
+            optlist.extend(['-vf', str(safe['color_space_convert'])])
         if 'qmin' in safe:
             optlist.extend(['-qmin', str(safe['qmin'])])
         if 'qmax' in safe:

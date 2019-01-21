@@ -128,6 +128,7 @@ class MediaStreamInfo(object):
         self.video_level = None
         self.pix_fmt = None
         self.profile = None
+        self.color_space = None
         self.audio_channels = None
         self.audio_samplerate = None
         self.attached_pic = None
@@ -179,6 +180,8 @@ class MediaStreamInfo(object):
             self.attached_pic = self.parse_int(val)
         elif key == 'profile':
             self.profile = val
+        elif key == 'color_space':
+            self.color_space = val
 
         if key.startswith('TAG:'):
             key = key.split('TAG:')[1].lower()

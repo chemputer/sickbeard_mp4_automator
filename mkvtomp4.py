@@ -44,6 +44,7 @@ class MkvtoMp4:
                  qsv_decoder=True,
                  hevc_qsv_decoder=False,
                  dxva2_decoder=False,
+                 hdr_sdr_convert=False,
                  nvenc_cuvid=False,
                  nvenc_cuvid_hevc=False,
                  nvenc_decoder_gpu=None,
@@ -133,6 +134,7 @@ class MkvtoMp4:
         self.qsv_decoder = qsv_decoder
         self.hevc_qsv_decoder = hevc_qsv_decoder
         self.dxva2_decoder = dxva2_decoder
+        self.hdr_sdr_convert = hdr_sdr_convert
         self.nvenc_cuvid = nvenc_cuvid
         self.nvenc_cuvid_hevc = nvenc_cuvid_hevc
         self.nvenc_decoder_gpu = nvenc_decoder_gpu
@@ -215,6 +217,7 @@ class MkvtoMp4:
         self.qsv_decoder = settings.qsv_decoder
         self.hevc_qsv_decoder = settings.hevc_qsv_decoder
         self.dxva2_decoder = settings.dxva2_decoder
+        self.hdr_sdr_convert = settings.hdr_sdr_convert
         self.nvenc_cuvid = settings.nvenc_cuvid
         self.nvenc_cuvid_hevc = settings.nvenc_cuvid_hevc
         self.nvenc_decoder_gpu = settings.nvenc_decoder_gpu
@@ -654,6 +657,7 @@ class MkvtoMp4:
         guessed_subtitle_number  = -1
         overlay_stream = ""
         subtitle_will_be_burned_in = False
+        subtitle_burn = ""
         subtitle_number = -1 # Subtitle_used is the index of the subtitle stream compared to only other subtitles. -vf to overlay uses this.
         subtitle_used = subtitle_number
         shortest_duration_subtitle_stream = 86400 # There probably aren't too many movies that are 24 hours long.
@@ -738,6 +742,7 @@ class MkvtoMp4:
                         temp_directory = temp_directory.replace("\\", "//" )
                         subtitle_settings[l]['subtitle_burn'] = temp_directory + "//" + filename + "." + input_extension + ":si=" + str( subtitle_used ) + "'"
                     self.log.info("Creating subtitle stream %s from source stream %s." % (l, s.index))
+                    subtitle_burn = subtitle_settings[l]['subtitle_burn']
                     l = l + 1
             
             if s.codec.lower() in bad_subtitle_codecs and self.embedsubs == True and forced_sub > 0 and self.burn_in_forced_subs == True: # This overlays forced picture subtitles on top of the video stream. Slows down conversion significantly.
@@ -902,7 +907,8 @@ class MkvtoMp4:
                 'vsync': self.vsync,
                 'level': self.h264_level,
                 'profile': vprofile,
-                'pix_fmt': pix_fmt
+                'pix_fmt': pix_fmt,
+                'color_space_convert': None,
             },
             'audio': audio_settings,
             'subtitle': subtitle_settings,
@@ -935,8 +941,15 @@ class MkvtoMp4:
             options['postopts'].extend(self.postopts)
 
         options['preopts'].extend(['-vsync', self.vsync ])
+        if self.hdr_sdr_convert and info.video.color_space == 'bt2020nc': # Thanks to https://stevens.li/guides/video/converting-hdr-to-sdr-with-ffmpeg/ 
+            #Currently this will not work with picture subtitles
+            if len(overlay_stream) < 1:
+                options['video']['color_space_convert'] = 'zscale=t=linear:npl=100,format=gbrpf32le,zscale=p=bt709,tonemap=tonemap=hable:desat=0,zscale=t=bt709:m=bt709:r=tv,format=yuv420p'
+                if subtitle_will_be_burned_in:
+                    options['video']['color_space_convert'] = 'zscale=t=linear:npl=100,format=gbrpf32le,zscale=p=bt709,tonemap=tonemap=hable:desat=0,zscale=t=bt709:m=bt709:r=tv,format=yuv420p,' + subtitle_burn
+                    del subtitle_settings[0]['subtitle_burn']
 
-        nvenc_cuvid_codecs = { "h264", "mjpeg", "mpeg1video", "mpeg2video", "mpeg4", "vc1", "vp8", "hevc", "vp9" } # mpeg1video/mpeg4 decoding were horribly broken before an ffmpeg commit on 11/20/2017
+        nvenc_cuvid_codecs = { "h264", "mjpeg", "mpeg1video", "mpeg2video", "mpeg4", "vc1", "vp8", "hevc", "vp9" }
 
         if self.dxva2_decoder: # DXVA2 will fallback to CPU decoding when it hits a file that it cannot handle, so we don't need to check if the file is supported.
             options['preopts'].extend(['-hwaccel', 'dxva2' ])
