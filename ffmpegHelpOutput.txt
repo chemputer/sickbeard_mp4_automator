@@ -2033,6 +2033,18 @@ libaom-av1 encoder AVOptions:
   -tile-rows         <int>        E..V..... Log2 of number of tile rows to use (from -1 to 6) (default -1)
   -row-mt            <boolean>    E..V..... Enable row based multi-threading (default false)
 
+libcodec2 encoder AVOptions:
+  -mode              <int>        E...A.... codec2 mode (from 0 to 8) (default 1300)
+     3200                         E...A.... 3200
+     2400                         E...A.... 2400
+     1600                         E...A.... 1600
+     1400                         E...A.... 1400
+     1300                         E...A.... 1300
+     1200                         E...A.... 1200
+     700                          E...A.... 700
+     700B                         E...A.... 700B
+     700C                         E...A.... 700C
+
 libfdk_aac AVOptions:
   -afterburner       <int>        E...A.... Afterburner (improved quality) (from 0 to 1) (default 1)
   -eld_sbr           <int>        E...A.... Enable SBR for ELD (for SBR in other configurations, use the -profile parameter) (from 0 to 1) (default 0)
@@ -2222,6 +2234,20 @@ libvpx-vp9 encoder AVOptions:
   -arnr_type         <int>        E..V..... altref noise reduction filter type (from 1 to 3) (default 3)
   -rc_lookahead      <int>        E..V..... Number of frames to look ahead for alternate reference frame selection (from 0 to 25) (default 25)
   -sharpness         <int>        E..V..... Increase sharpness at the expense of lower PSNR (from -1 to 7) (default -1)
+
+libwebp_anim AVOptions:
+  -lossless          <int>        E..V..... Use lossless mode (from 0 to 1) (default 0)
+  -preset            <int>        E..V..... Configuration preset (from -1 to 5) (default none)
+     none                         E..V..... do not use a preset
+     default                      E..V..... default preset
+     picture                      E..V..... digital picture, like portrait, inner shot
+     photo                        E..V..... outdoor photograph, with natural lighting
+     drawing                      E..V..... hand or line drawing, with high-contrast details
+     icon                         E..V..... small-sized colorful images
+     text                         E..V..... text-like
+  -cr_threshold      <int>        E..V..... Conditional replenishment threshold (from 0 to INT_MAX) (default 0)
+  -cr_size           <int>        E..V..... Conditional replenishment block size (from 0 to 256) (default 16)
+  -quality           <float>      E..V..... Quality (from 0 to 100) (default 75)
 
 libwebp AVOptions:
   -lossless          <int>        E..V..... Use lossless mode (from 0 to 1) (default 0)
@@ -3098,6 +3124,9 @@ hevc_qsv encoder AVOptions:
      main10                       E..V.....
      mainsp                       E..V.....
 
+libkvazaar AVOptions:
+  -kvazaar-params    <string>     E..V..... Set kvazaar parameters as a comma-separated list of key=value pairs.
+
 mjpeg_qsv encoder AVOptions:
   -async_depth       <int>        E..V..... Maximum processing parallelism (from 1 to INT_MAX) (default 4)
 
@@ -3296,6 +3325,10 @@ text decoder AVOptions:
 
 vplayer decoder AVOptions:
   -keep_ass_markup   <boolean>    .D...S... Set if ASS tags must be escaped (default false)
+
+libdav1d decoder AVOptions:
+  -tilethreads       <int>        .D.V..... Tile threads (from 1 to 64) (default 1)
+  -filmgrain         <boolean>    .D.V..... Apply Film Grain (default true)
 
 libfdk-aac decoder AVOptions:
   -conceal           <int>        .D..A.... Error concealment method (from 0 to 2) (default noise)
@@ -3546,12 +3579,6 @@ crypto AVOptions:
   -encryption_key    <binary>     E........ AES encryption key
   -encryption_iv     <binary>     E........ AES encryption initialization vector
 
-ffrtmpcrypt AVOptions:
-  -ffrtmpcrypt_tunneling <int>        .D....... Use a HTTP tunneling connection (RTMPTE). (from 0 to 1) (default 0)
-
-ffrtmphttp AVOptions:
-  -ffrtmphttp_tls    <boolean>    .D....... Use a HTTPS tunneling connection (RTMPTS). (default false)
-
 file AVOptions:
   -truncate          <boolean>    E........ truncate existing files on write (default true)
   -blocksize         <int>        E........ set I/O operation maximum block size (from 1 to INT_MAX) (default INT_MAX)
@@ -3639,138 +3666,6 @@ prompeg AVOptions:
   -l                 <int>        E........ FEC L (from 4 to 20) (default 5)
   -d                 <int>        E........ FEC D (from 4 to 20) (default 5)
 
-rtmp AVOptions:
-  -rtmp_app          <string>     ED....... Name of application to connect to on the RTMP server
-  -rtmp_buffer       <int>        ED....... Set buffer time in milliseconds. The default is 3000. (from 0 to INT_MAX) (default 3000)
-  -rtmp_conn         <string>     ED....... Append arbitrary AMF data to the Connect message
-  -rtmp_flashver     <string>     ED....... Version of the Flash plugin used to run the SWF player.
-  -rtmp_flush_interval <int>        E........ Number of packets flushed in the same request (RTMPT only). (from 0 to INT_MAX) (default 10)
-  -rtmp_live         <int>        .D....... Specify that the media is a live stream. (from INT_MIN to INT_MAX) (default any)
-     any                          .D....... both
-     live                         .D....... live stream
-     recorded                     .D....... recorded stream
-  -rtmp_pageurl      <string>     .D....... URL of the web page in which the media was embedded. By default no value will be sent.
-  -rtmp_playpath     <string>     ED....... Stream identifier to play or to publish
-  -rtmp_subscribe    <string>     .D....... Name of live stream to subscribe to. Defaults to rtmp_playpath.
-  -rtmp_swfhash      <binary>     .D....... SHA256 hash of the decompressed SWF file (32 bytes).
-  -rtmp_swfsize      <int>        .D....... Size of the decompressed SWF file, required for SWFVerification. (from 0 to INT_MAX) (default 0)
-  -rtmp_swfurl       <string>     ED....... URL of the SWF player. By default no value will be sent
-  -rtmp_swfverify    <string>     .D....... URL to player swf file, compute hash/size automatically.
-  -rtmp_tcurl        <string>     ED....... URL of the target stream. Defaults to proto://host[:port]/app.
-  -rtmp_listen       <int>        .D....... Listen for incoming rtmp connections (from INT_MIN to INT_MAX) (default 0)
-  -listen            <int>        .D....... Listen for incoming rtmp connections (from INT_MIN to INT_MAX) (default 0)
-  -timeout           <int>        .D....... Maximum timeout (in seconds) to wait for incoming connections. -1 is infinite. Implies -rtmp_listen 1 (from INT_MIN to INT_MAX) (default -1)
-
-rtmpe AVOptions:
-  -rtmp_app          <string>     ED....... Name of application to connect to on the RTMP server
-  -rtmp_buffer       <int>        ED....... Set buffer time in milliseconds. The default is 3000. (from 0 to INT_MAX) (default 3000)
-  -rtmp_conn         <string>     ED....... Append arbitrary AMF data to the Connect message
-  -rtmp_flashver     <string>     ED....... Version of the Flash plugin used to run the SWF player.
-  -rtmp_flush_interval <int>        E........ Number of packets flushed in the same request (RTMPT only). (from 0 to INT_MAX) (default 10)
-  -rtmp_live         <int>        .D....... Specify that the media is a live stream. (from INT_MIN to INT_MAX) (default any)
-     any                          .D....... both
-     live                         .D....... live stream
-     recorded                     .D....... recorded stream
-  -rtmp_pageurl      <string>     .D....... URL of the web page in which the media was embedded. By default no value will be sent.
-  -rtmp_playpath     <string>     ED....... Stream identifier to play or to publish
-  -rtmp_subscribe    <string>     .D....... Name of live stream to subscribe to. Defaults to rtmp_playpath.
-  -rtmp_swfhash      <binary>     .D....... SHA256 hash of the decompressed SWF file (32 bytes).
-  -rtmp_swfsize      <int>        .D....... Size of the decompressed SWF file, required for SWFVerification. (from 0 to INT_MAX) (default 0)
-  -rtmp_swfurl       <string>     ED....... URL of the SWF player. By default no value will be sent
-  -rtmp_swfverify    <string>     .D....... URL to player swf file, compute hash/size automatically.
-  -rtmp_tcurl        <string>     ED....... URL of the target stream. Defaults to proto://host[:port]/app.
-  -rtmp_listen       <int>        .D....... Listen for incoming rtmp connections (from INT_MIN to INT_MAX) (default 0)
-  -listen            <int>        .D....... Listen for incoming rtmp connections (from INT_MIN to INT_MAX) (default 0)
-  -timeout           <int>        .D....... Maximum timeout (in seconds) to wait for incoming connections. -1 is infinite. Implies -rtmp_listen 1 (from INT_MIN to INT_MAX) (default -1)
-
-rtmps AVOptions:
-  -rtmp_app          <string>     ED....... Name of application to connect to on the RTMP server
-  -rtmp_buffer       <int>        ED....... Set buffer time in milliseconds. The default is 3000. (from 0 to INT_MAX) (default 3000)
-  -rtmp_conn         <string>     ED....... Append arbitrary AMF data to the Connect message
-  -rtmp_flashver     <string>     ED....... Version of the Flash plugin used to run the SWF player.
-  -rtmp_flush_interval <int>        E........ Number of packets flushed in the same request (RTMPT only). (from 0 to INT_MAX) (default 10)
-  -rtmp_live         <int>        .D....... Specify that the media is a live stream. (from INT_MIN to INT_MAX) (default any)
-     any                          .D....... both
-     live                         .D....... live stream
-     recorded                     .D....... recorded stream
-  -rtmp_pageurl      <string>     .D....... URL of the web page in which the media was embedded. By default no value will be sent.
-  -rtmp_playpath     <string>     ED....... Stream identifier to play or to publish
-  -rtmp_subscribe    <string>     .D....... Name of live stream to subscribe to. Defaults to rtmp_playpath.
-  -rtmp_swfhash      <binary>     .D....... SHA256 hash of the decompressed SWF file (32 bytes).
-  -rtmp_swfsize      <int>        .D....... Size of the decompressed SWF file, required for SWFVerification. (from 0 to INT_MAX) (default 0)
-  -rtmp_swfurl       <string>     ED....... URL of the SWF player. By default no value will be sent
-  -rtmp_swfverify    <string>     .D....... URL to player swf file, compute hash/size automatically.
-  -rtmp_tcurl        <string>     ED....... URL of the target stream. Defaults to proto://host[:port]/app.
-  -rtmp_listen       <int>        .D....... Listen for incoming rtmp connections (from INT_MIN to INT_MAX) (default 0)
-  -listen            <int>        .D....... Listen for incoming rtmp connections (from INT_MIN to INT_MAX) (default 0)
-  -timeout           <int>        .D....... Maximum timeout (in seconds) to wait for incoming connections. -1 is infinite. Implies -rtmp_listen 1 (from INT_MIN to INT_MAX) (default -1)
-
-rtmpt AVOptions:
-  -rtmp_app          <string>     ED....... Name of application to connect to on the RTMP server
-  -rtmp_buffer       <int>        ED....... Set buffer time in milliseconds. The default is 3000. (from 0 to INT_MAX) (default 3000)
-  -rtmp_conn         <string>     ED....... Append arbitrary AMF data to the Connect message
-  -rtmp_flashver     <string>     ED....... Version of the Flash plugin used to run the SWF player.
-  -rtmp_flush_interval <int>        E........ Number of packets flushed in the same request (RTMPT only). (from 0 to INT_MAX) (default 10)
-  -rtmp_live         <int>        .D....... Specify that the media is a live stream. (from INT_MIN to INT_MAX) (default any)
-     any                          .D....... both
-     live                         .D....... live stream
-     recorded                     .D....... recorded stream
-  -rtmp_pageurl      <string>     .D....... URL of the web page in which the media was embedded. By default no value will be sent.
-  -rtmp_playpath     <string>     ED....... Stream identifier to play or to publish
-  -rtmp_subscribe    <string>     .D....... Name of live stream to subscribe to. Defaults to rtmp_playpath.
-  -rtmp_swfhash      <binary>     .D....... SHA256 hash of the decompressed SWF file (32 bytes).
-  -rtmp_swfsize      <int>        .D....... Size of the decompressed SWF file, required for SWFVerification. (from 0 to INT_MAX) (default 0)
-  -rtmp_swfurl       <string>     ED....... URL of the SWF player. By default no value will be sent
-  -rtmp_swfverify    <string>     .D....... URL to player swf file, compute hash/size automatically.
-  -rtmp_tcurl        <string>     ED....... URL of the target stream. Defaults to proto://host[:port]/app.
-  -rtmp_listen       <int>        .D....... Listen for incoming rtmp connections (from INT_MIN to INT_MAX) (default 0)
-  -listen            <int>        .D....... Listen for incoming rtmp connections (from INT_MIN to INT_MAX) (default 0)
-  -timeout           <int>        .D....... Maximum timeout (in seconds) to wait for incoming connections. -1 is infinite. Implies -rtmp_listen 1 (from INT_MIN to INT_MAX) (default -1)
-
-rtmpte AVOptions:
-  -rtmp_app          <string>     ED....... Name of application to connect to on the RTMP server
-  -rtmp_buffer       <int>        ED....... Set buffer time in milliseconds. The default is 3000. (from 0 to INT_MAX) (default 3000)
-  -rtmp_conn         <string>     ED....... Append arbitrary AMF data to the Connect message
-  -rtmp_flashver     <string>     ED....... Version of the Flash plugin used to run the SWF player.
-  -rtmp_flush_interval <int>        E........ Number of packets flushed in the same request (RTMPT only). (from 0 to INT_MAX) (default 10)
-  -rtmp_live         <int>        .D....... Specify that the media is a live stream. (from INT_MIN to INT_MAX) (default any)
-     any                          .D....... both
-     live                         .D....... live stream
-     recorded                     .D....... recorded stream
-  -rtmp_pageurl      <string>     .D....... URL of the web page in which the media was embedded. By default no value will be sent.
-  -rtmp_playpath     <string>     ED....... Stream identifier to play or to publish
-  -rtmp_subscribe    <string>     .D....... Name of live stream to subscribe to. Defaults to rtmp_playpath.
-  -rtmp_swfhash      <binary>     .D....... SHA256 hash of the decompressed SWF file (32 bytes).
-  -rtmp_swfsize      <int>        .D....... Size of the decompressed SWF file, required for SWFVerification. (from 0 to INT_MAX) (default 0)
-  -rtmp_swfurl       <string>     ED....... URL of the SWF player. By default no value will be sent
-  -rtmp_swfverify    <string>     .D....... URL to player swf file, compute hash/size automatically.
-  -rtmp_tcurl        <string>     ED....... URL of the target stream. Defaults to proto://host[:port]/app.
-  -rtmp_listen       <int>        .D....... Listen for incoming rtmp connections (from INT_MIN to INT_MAX) (default 0)
-  -listen            <int>        .D....... Listen for incoming rtmp connections (from INT_MIN to INT_MAX) (default 0)
-  -timeout           <int>        .D....... Maximum timeout (in seconds) to wait for incoming connections. -1 is infinite. Implies -rtmp_listen 1 (from INT_MIN to INT_MAX) (default -1)
-
-rtmpts AVOptions:
-  -rtmp_app          <string>     ED....... Name of application to connect to on the RTMP server
-  -rtmp_buffer       <int>        ED....... Set buffer time in milliseconds. The default is 3000. (from 0 to INT_MAX) (default 3000)
-  -rtmp_conn         <string>     ED....... Append arbitrary AMF data to the Connect message
-  -rtmp_flashver     <string>     ED....... Version of the Flash plugin used to run the SWF player.
-  -rtmp_flush_interval <int>        E........ Number of packets flushed in the same request (RTMPT only). (from 0 to INT_MAX) (default 10)
-  -rtmp_live         <int>        .D....... Specify that the media is a live stream. (from INT_MIN to INT_MAX) (default any)
-     any                          .D....... both
-     live                         .D....... live stream
-     recorded                     .D....... recorded stream
-  -rtmp_pageurl      <string>     .D....... URL of the web page in which the media was embedded. By default no value will be sent.
-  -rtmp_playpath     <string>     ED....... Stream identifier to play or to publish
-  -rtmp_subscribe    <string>     .D....... Name of live stream to subscribe to. Defaults to rtmp_playpath.
-  -rtmp_swfhash      <binary>     .D....... SHA256 hash of the decompressed SWF file (32 bytes).
-  -rtmp_swfsize      <int>        .D....... Size of the decompressed SWF file, required for SWFVerification. (from 0 to INT_MAX) (default 0)
-  -rtmp_swfurl       <string>     ED....... URL of the SWF player. By default no value will be sent
-  -rtmp_swfverify    <string>     .D....... URL to player swf file, compute hash/size automatically.
-  -rtmp_tcurl        <string>     ED....... URL of the target stream. Defaults to proto://host[:port]/app.
-  -rtmp_listen       <int>        .D....... Listen for incoming rtmp connections (from INT_MIN to INT_MAX) (default 0)
-  -listen            <int>        .D....... Listen for incoming rtmp connections (from INT_MIN to INT_MAX) (default 0)
-  -timeout           <int>        .D....... Maximum timeout (in seconds) to wait for incoming connections. -1 is infinite. Implies -rtmp_listen 1 (from INT_MIN to INT_MAX) (default -1)
-
 rtp AVOptions:
   -ttl               <int>        ED....... Time to live (in milliseconds, multicast only) (from -1 to INT_MAX) (default -1)
   -buffer_size       <int>        ED....... Send/Receive buffer size (in bytes) (from -1 to INT_MAX) (default -1)
@@ -3854,6 +3749,138 @@ udplite AVOptions:
   -sources           <string>     ED....... Source list
   -block             <string>     ED....... Block list
 
+librtmp protocol AVOptions:
+  -rtmp_app          <string>     ED....... Name of application to connect to on the RTMP server
+  -rtmp_buffer       <string>     ED....... Set buffer time in milliseconds. The default is 3000. (default "3000")
+  -rtmp_conn         <string>     ED....... Append arbitrary AMF data to the Connect message
+  -rtmp_flashver     <string>     ED....... Version of the Flash plugin used to run the SWF player.
+  -rtmp_live         <int>        .D....... Specify that the media is a live stream. (from INT_MIN to INT_MAX) (default recorded)
+     any                          .D....... both
+     live                         .D....... live stream
+     recorded                     .D....... recorded stream
+  -rtmp_pageurl      <string>     .D....... URL of the web page in which the media was embedded. By default no value will be sent.
+  -rtmp_playpath     <string>     ED....... Stream identifier to play or to publish
+  -rtmp_subscribe    <string>     .D....... Name of live stream to subscribe to. Defaults to rtmp_playpath.
+  -rtmp_swfurl       <string>     ED....... URL of the SWF player. By default no value will be sent
+  -rtmp_swfverify    <string>     .D....... URL to player swf file, compute hash/size automatically. (unimplemented)
+  -rtmp_tcurl        <string>     ED....... URL of the target stream. Defaults to proto://host[:port]/app.
+  -rtmp_buffer_size  <int>        ED....... set buffer size in bytes (from -1 to INT_MAX) (default -1)
+
+librtmpe protocol AVOptions:
+  -rtmp_app          <string>     ED....... Name of application to connect to on the RTMP server
+  -rtmp_buffer       <string>     ED....... Set buffer time in milliseconds. The default is 3000. (default "3000")
+  -rtmp_conn         <string>     ED....... Append arbitrary AMF data to the Connect message
+  -rtmp_flashver     <string>     ED....... Version of the Flash plugin used to run the SWF player.
+  -rtmp_live         <int>        .D....... Specify that the media is a live stream. (from INT_MIN to INT_MAX) (default recorded)
+     any                          .D....... both
+     live                         .D....... live stream
+     recorded                     .D....... recorded stream
+  -rtmp_pageurl      <string>     .D....... URL of the web page in which the media was embedded. By default no value will be sent.
+  -rtmp_playpath     <string>     ED....... Stream identifier to play or to publish
+  -rtmp_subscribe    <string>     .D....... Name of live stream to subscribe to. Defaults to rtmp_playpath.
+  -rtmp_swfurl       <string>     ED....... URL of the SWF player. By default no value will be sent
+  -rtmp_swfverify    <string>     .D....... URL to player swf file, compute hash/size automatically. (unimplemented)
+  -rtmp_tcurl        <string>     ED....... URL of the target stream. Defaults to proto://host[:port]/app.
+  -rtmp_buffer_size  <int>        ED....... set buffer size in bytes (from -1 to INT_MAX) (default -1)
+
+librtmps protocol AVOptions:
+  -rtmp_app          <string>     ED....... Name of application to connect to on the RTMP server
+  -rtmp_buffer       <string>     ED....... Set buffer time in milliseconds. The default is 3000. (default "3000")
+  -rtmp_conn         <string>     ED....... Append arbitrary AMF data to the Connect message
+  -rtmp_flashver     <string>     ED....... Version of the Flash plugin used to run the SWF player.
+  -rtmp_live         <int>        .D....... Specify that the media is a live stream. (from INT_MIN to INT_MAX) (default recorded)
+     any                          .D....... both
+     live                         .D....... live stream
+     recorded                     .D....... recorded stream
+  -rtmp_pageurl      <string>     .D....... URL of the web page in which the media was embedded. By default no value will be sent.
+  -rtmp_playpath     <string>     ED....... Stream identifier to play or to publish
+  -rtmp_subscribe    <string>     .D....... Name of live stream to subscribe to. Defaults to rtmp_playpath.
+  -rtmp_swfurl       <string>     ED....... URL of the SWF player. By default no value will be sent
+  -rtmp_swfverify    <string>     .D....... URL to player swf file, compute hash/size automatically. (unimplemented)
+  -rtmp_tcurl        <string>     ED....... URL of the target stream. Defaults to proto://host[:port]/app.
+  -rtmp_buffer_size  <int>        ED....... set buffer size in bytes (from -1 to INT_MAX) (default -1)
+
+librtmpt protocol AVOptions:
+  -rtmp_app          <string>     ED....... Name of application to connect to on the RTMP server
+  -rtmp_buffer       <string>     ED....... Set buffer time in milliseconds. The default is 3000. (default "3000")
+  -rtmp_conn         <string>     ED....... Append arbitrary AMF data to the Connect message
+  -rtmp_flashver     <string>     ED....... Version of the Flash plugin used to run the SWF player.
+  -rtmp_live         <int>        .D....... Specify that the media is a live stream. (from INT_MIN to INT_MAX) (default recorded)
+     any                          .D....... both
+     live                         .D....... live stream
+     recorded                     .D....... recorded stream
+  -rtmp_pageurl      <string>     .D....... URL of the web page in which the media was embedded. By default no value will be sent.
+  -rtmp_playpath     <string>     ED....... Stream identifier to play or to publish
+  -rtmp_subscribe    <string>     .D....... Name of live stream to subscribe to. Defaults to rtmp_playpath.
+  -rtmp_swfurl       <string>     ED....... URL of the SWF player. By default no value will be sent
+  -rtmp_swfverify    <string>     .D....... URL to player swf file, compute hash/size automatically. (unimplemented)
+  -rtmp_tcurl        <string>     ED....... URL of the target stream. Defaults to proto://host[:port]/app.
+  -rtmp_buffer_size  <int>        ED....... set buffer size in bytes (from -1 to INT_MAX) (default -1)
+
+librtmpte protocol AVOptions:
+  -rtmp_app          <string>     ED....... Name of application to connect to on the RTMP server
+  -rtmp_buffer       <string>     ED....... Set buffer time in milliseconds. The default is 3000. (default "3000")
+  -rtmp_conn         <string>     ED....... Append arbitrary AMF data to the Connect message
+  -rtmp_flashver     <string>     ED....... Version of the Flash plugin used to run the SWF player.
+  -rtmp_live         <int>        .D....... Specify that the media is a live stream. (from INT_MIN to INT_MAX) (default recorded)
+     any                          .D....... both
+     live                         .D....... live stream
+     recorded                     .D....... recorded stream
+  -rtmp_pageurl      <string>     .D....... URL of the web page in which the media was embedded. By default no value will be sent.
+  -rtmp_playpath     <string>     ED....... Stream identifier to play or to publish
+  -rtmp_subscribe    <string>     .D....... Name of live stream to subscribe to. Defaults to rtmp_playpath.
+  -rtmp_swfurl       <string>     ED....... URL of the SWF player. By default no value will be sent
+  -rtmp_swfverify    <string>     .D....... URL to player swf file, compute hash/size automatically. (unimplemented)
+  -rtmp_tcurl        <string>     ED....... URL of the target stream. Defaults to proto://host[:port]/app.
+  -rtmp_buffer_size  <int>        ED....... set buffer size in bytes (from -1 to INT_MAX) (default -1)
+
+libsrt AVOptions:
+  -rw_timeout        <int64>      ED....... Timeout of socket I/O operations (from -1 to I64_MAX) (default -1)
+  -listen_timeout    <int64>      ED....... Connection awaiting timeout (from -1 to I64_MAX) (default -1)
+  -send_buffer_size  <int>        ED....... Socket send buffer size (in bytes) (from -1 to INT_MAX) (default -1)
+  -recv_buffer_size  <int>        ED....... Socket receive buffer size (in bytes) (from -1 to INT_MAX) (default -1)
+  -pkt_size          <int>        ED....... Maximum SRT packet size (from -1 to 1456) (default -1)
+     ts_size                      ED.......
+     max_size                     ED.......
+  -payload_size      <int>        ED....... Maximum SRT packet size (from -1 to 1456) (default -1)
+     ts_size                      ED.......
+     max_size                     ED.......
+  -maxbw             <int64>      ED....... Maximum bandwidth (bytes per second) that the connection can use (from -1 to I64_MAX) (default -1)
+  -pbkeylen          <int>        ED....... Crypto key len in bytes {16,24,32} Default: 16 (128-bit) (from -1 to 32) (default -1)
+  -passphrase        <string>     ED....... Crypto PBKDF2 Passphrase size[0,10..64] 0:disable crypto
+  -mss               <int>        ED....... The Maximum Segment Size (from -1 to 1500) (default -1)
+  -ffs               <int>        ED....... Flight flag size (window size) (in bytes) (from -1 to INT_MAX) (default -1)
+  -ipttl             <int>        ED....... IP Time To Live (from -1 to 255) (default -1)
+  -iptos             <int>        ED....... IP Type of Service (from -1 to 255) (default -1)
+  -inputbw           <int64>      ED....... Estimated input stream rate (from -1 to I64_MAX) (default -1)
+  -oheadbw           <int>        ED....... MaxBW ceiling based on % over input stream rate (from -1 to 100) (default -1)
+  -latency           <int64>      ED....... receiver delay to absorb bursts of missed packet retransmissions (from -1 to I64_MAX) (default -1)
+  -tsbpddelay        <int64>      ED....... deprecated, same effect as latency option (from -1 to I64_MAX) (default -1)
+  -rcvlatency        <int64>      ED....... receive latency (from -1 to I64_MAX) (default -1)
+  -peerlatency       <int64>      ED....... peer latency (from -1 to I64_MAX) (default -1)
+  -tlpktdrop         <int>        ED....... Enable receiver pkt drop (from -1 to 1) (default -1)
+  -nakreport         <int>        ED....... Enable receiver to send periodic NAK reports (from -1 to 1) (default -1)
+  -connect_timeout   <int64>      ED....... Connect timeout. Caller default: 3000, rendezvous (x 10) (from -1 to I64_MAX) (default -1)
+  -mode              <int>        ED....... Connection mode (caller, listener, rendezvous) (from 0 to 2) (default caller)
+     caller                       ED.......
+     listener                     ED.......
+     rendezvous                   ED.......
+  -sndbuf            <int>        ED....... Send buffer size (in bytes) (from -1 to INT_MAX) (default -1)
+  -rcvbuf            <int>        ED....... Receive buffer size (in bytes) (from -1 to INT_MAX) (default -1)
+  -lossmaxttl        <int>        ED....... Maximum possible packet reorder tolerance (from -1 to INT_MAX) (default -1)
+  -minversion        <int>        ED....... The minimum SRT version that is required from the peer (from -1 to INT_MAX) (default -1)
+  -streamid          <string>     ED....... A string of up to 512 characters that an Initiator can pass to a Responder
+  -smoother          <string>     ED....... The type of Smoother used for the transmission for that socket
+  -messageapi        <int>        ED....... Enable message API (from -1 to 1) (default -1)
+  -transtype         <int>        ED....... The transmission type for the socket (from 0 to 2) (default 2)
+     live                         ED.......
+     file                         ED.......
+
+libssh AVOptions:
+  -timeout           <int>        ED....... set timeout of socket I/O operations (from -1 to INT_MAX) (default -1)
+  -truncate          <int>        E........ Truncate existing files on write (from 0 to 1) (default 1)
+  -private_key       <string>     ED....... set path to private key
+
 aa AVOptions:
   -aa_fixed_key      <binary>     .D....... Fixed key used for handling Audible AA files
 
@@ -3918,6 +3945,9 @@ concat demuxer AVOptions:
   -safe              <boolean>    .D....... enable safe mode (default true)
   -auto_convert      <boolean>    .D....... automatically convert bitstream format (default true)
   -segment_time_metadata <boolean>    .D....... output file segment start time and duration as packet metadata (default false)
+
+dash AVOptions:
+  -allowed_extensions <string>     .D....... List of file extensions that dash is allowed to access (default "aac,m4a,m4s,m4v,mov,mp4,webm")
 
 dirac demuxer AVOptions:
   -framerate         <video_rate> .D.......  (default "25")
@@ -4777,6 +4807,13 @@ ModPlug demuxer AVOptions:
   -video_stream_h    <int>        .D....... Video stream height in char (one char = 8x8px) (from 20 to 512) (default 30)
   -video_stream_ptxt <int>        .D....... Print speed, tempo, order, ... in video stream (from 0 to 1) (default 1)
 
+libopenmpt AVOptions:
+  -sample_rate       <int>        .D..A.... set sample rate (from 1000 to INT_MAX) (default 48000)
+  -layout            <channel_layout> .D..A.... set channel layout (default 0x3)
+  -subsong           <int>        .D..A.... set subsong (from -2 to INT_MAX) (default auto)
+     all                          .D..A.... all
+     auto                         .D..A.... auto
+
 Blackmagic DeckLink demuxer AVOptions:
   -list_devices      <int>        .D....... list available devices (from 0 to 1) (default 0)
   -list_formats      <int>        .D....... list supported formats (from 0 to 1) (default 0)
@@ -4882,6 +4919,15 @@ lavfi indev AVOptions:
 VFW indev AVOptions:
   -video_size        <string>     .D....... A string describing frame size, such as 640x480 or hd720.
   -framerate         <string>     .D.......  (default "ntsc")
+
+libcdio indev AVOptions:
+  -speed             <int>        .D....... set drive reading speed (from 0 to INT_MAX) (default 0)
+  -paranoia_mode     <flags>      .D....... set error recovery mode (default 0)
+     disable                      .D....... apply no fixups
+     verify                       .D....... verify data integrity in overlap area
+     overlap                      .D....... perform overlapped reads
+     neverskip                    .D....... do not skip failed reads
+     full                         .D....... apply all recovery modes
 
 ADTS muxer AVOptions:
   -write_id3v2       <boolean>    E........ Enable ID3v2 tag writing (default false)
@@ -5817,6 +5863,11 @@ WebM Chunk Muxer AVOptions:
 WebP muxer AVOptions:
   -loop              <int>        E........ Number of times to loop the output: 0 - infinite loop (from 0 to 65535) (default 1)
 
+chromaprint muxer AVOptions:
+  -silence_threshold <int>        E........ threshold for detecting silence (from -1 to 32767) (default -1)
+  -algorithm         <int>        E........ version of the fingerprint algorithm (from 0 to INT_MAX) (default 1)
+  -fp_format         <int>        E........ fingerprint format to write (from 0 to 2) (default 2)
+
 caca_outdev AVOptions:
   -window_size       <image_size> E........ set window forced size
   -window_title      <string>     E........ set window title
@@ -5842,6 +5893,12 @@ Blackmagic DeckLink muxer AVOptions:
      full                         E........
   -timing_offset     <int>        E........ genlock timing pixel offset (from INT_MIN to INT_MAX) (default unset)
      unset                        E........
+
+opengl outdev AVOptions:
+  -background        <color>      E........ set background color (default "black")
+  -no_window         <int>        E........ disable default window (from INT_MIN to INT_MAX) (default 0)
+  -window_title      <string>     E........ set window title
+  -window_size       <image_size> E........ set window size
 
 sdl2 outdev AVOptions:
   -window_title      <string>     E........ set SDL window title
@@ -6626,6 +6683,10 @@ atrim AVOptions:
   start_sample      <int64>      ..F.A.... Number of the first audio sample that should be passed to the output (from -1 to I64_MAX) (default -1)
   end_sample        <int64>      ..F.A.... Number of the first audio sample that should be dropped again (from 0 to I64_MAX) (default I64_MAX)
 
+azmq AVOptions:
+  bind_address      <string>     ..FVA.... set bind address (default "tcp://*:5555")
+  b                 <string>     ..FVA.... set bind address (default "tcp://*:5555")
+
 bandpass AVOptions:
   frequency         <double>     ..F.A.... set central frequency (from 0 to 999999) (default 3000)
   f                 <double>     ..F.A.... set central frequency (from 0 to 999999) (default 3000)
@@ -6965,6 +7026,20 @@ join AVOptions:
   channel_layout    <string>     ..F.A.... Channel layout of the output stream. (default "stereo")
   map               <string>     ..F.A.... A comma-separated list of channels maps in the format 'input_stream.input_channel-output_channel.
 
+ladspa AVOptions:
+  file              <string>     ..F.A.... set library name or full path
+  f                 <string>     ..F.A.... set library name or full path
+  plugin            <string>     ..F.A.... set plugin name
+  p                 <string>     ..F.A.... set plugin name
+  controls          <string>     ..F.A.... set plugin options
+  c                 <string>     ..F.A.... set plugin options
+  sample_rate       <int>        ..F.A.... set sample rate (from 1 to INT_MAX) (default 44100)
+  s                 <int>        ..F.A.... set sample rate (from 1 to INT_MAX) (default 44100)
+  nb_samples        <int>        ..F.A.... set the number of samples per requested frame (from 1 to INT_MAX) (default 1024)
+  n                 <int>        ..F.A.... set the number of samples per requested frame (from 1 to INT_MAX) (default 1024)
+  duration          <duration>   ..F.A.... set audio duration (default -0.000001)
+  d                 <duration>   ..F.A.... set audio duration (default -0.000001)
+
 loudnorm AVOptions:
   I                 <double>     ..F.A.... set integrated loudness target (from -70 to -5) (default -24)
   i                 <double>     ..F.A.... set integrated loudness target (from -70 to -5) (default -24)
@@ -7036,54 +7111,6 @@ mcompand AVOptions:
 
 pan AVOptions:
   args              <string>     ..F.A....
-
-AVAudioResampleContext AVOptions:
-  -in_channel_layout <int64>      ....A.... Input Channel Layout (from I64_MIN to I64_MAX) (default 0)
-  -in_sample_fmt     <int>        ....A.... Input Sample Format (from 0 to 11) (default 1)
-  -in_sample_rate    <int>        ....A.... Input Sample Rate (from 1 to INT_MAX) (default 48000)
-  -out_channel_layout <int64>      ....A.... Output Channel Layout (from I64_MIN to I64_MAX) (default 0)
-  -out_sample_fmt    <int>        ....A.... Output Sample Format (from 0 to 11) (default 1)
-  -out_sample_rate   <int>        ....A.... Output Sample Rate (from 1 to INT_MAX) (default 48000)
-  -internal_sample_fmt <int>        ....A.... Internal Sample Format (from -1 to 11) (default -1)
-     u8                           ....A.... 8-bit unsigned integer
-     s16                          ....A.... 16-bit signed integer
-     s32                          ....A.... 32-bit signed integer
-     flt                          ....A.... 32-bit float
-     dbl                          ....A.... 64-bit double
-     u8p                          ....A.... 8-bit unsigned integer planar
-     s16p                         ....A.... 16-bit signed integer planar
-     s32p                         ....A.... 32-bit signed integer planar
-     fltp                         ....A.... 32-bit float planar
-     dblp                         ....A.... 64-bit double planar
-  -mix_coeff_type    <int>        ....A.... Mixing Coefficient Type (from 0 to 2) (default flt)
-     q8                           ....A.... 16-bit 8.8 Fixed-Point
-     q15                          ....A.... 32-bit 17.15 Fixed-Point
-     flt                          ....A.... Floating-Point
-  -center_mix_level  <double>     ....A.... Center Mix Level (from -32 to 32) (default 0.707107)
-  -surround_mix_level <double>     ....A.... Surround Mix Level (from -32 to 32) (default 0.707107)
-  -lfe_mix_level     <double>     ....A.... LFE Mix Level (from -32 to 32) (default 0)
-  -normalize_mix_level <int>        ....A.... Normalize Mix Level (from 0 to 1) (default 1)
-  -force_resampling  <int>        ....A.... Force Resampling (from 0 to 1) (default 0)
-  -filter_size       <int>        ....A.... Resampling Filter Size (from 0 to 32) (default 16)
-  -phase_shift       <int>        ....A.... Resampling Phase Shift (from 0 to 30) (default 10)
-  -linear_interp     <int>        ....A.... Use Linear Interpolation (from 0 to 1) (default 0)
-  -cutoff            <double>     ....A.... Cutoff Frequency Ratio (from 0 to 1) (default 0.8)
-  -resample_cutoff   <double>     ....A.... Cutoff Frequency Ratio (from 0 to 1) (default 0.8)
-  -matrix_encoding   <int>        ....A.... Matrixed Stereo Encoding (from 0 to 6) (default none)
-     none                         ....A.... None
-     dolby                        ....A.... Dolby
-     dplii                        ....A.... Dolby Pro Logic II
-  -filter_type       <int>        ....A.... Filter Type (from 0 to 2) (default kaiser)
-     cubic                        ....A.... Cubic
-     blackman_nuttall              ....A.... Blackman Nuttall Windowed Sinc
-     kaiser                       ....A.... Kaiser Windowed Sinc
-  -kaiser_beta       <int>        ....A.... Kaiser Window Beta (from 2 to 16) (default 9)
-  -dither_method     <int>        ....A.... Dither Method (from 0 to 4) (default none)
-     none                         ....A.... No Dithering
-     rectangular                  ....A.... Rectangular Dither
-     triangular                   ....A.... Triangular Dither
-     triangular_hp                ....A.... Triangular Dither With High Pass
-     triangular_ns                ....A.... Triangular Dither With Noise Shaping
 
 rubberband AVOptions:
   tempo             <double>     ..F.A.... set tempo scale factor (from 0.01 to 100) (default 1)
@@ -7487,6 +7514,11 @@ avgblur AVOptions:
   planes            <int>        ..FV..... set planes to filter (from 0 to 15) (default 15)
   sizeY             <int>        ..FV..... set vertical size (from 0 to 1024) (default 0)
 
+avgblur_opencl AVOptions:
+  sizeX             <int>        ..FV..... set horizontal size (from 1 to 1024) (default 1)
+  planes            <int>        ..FV..... set planes to filter (from 0 to 15) (default 15)
+  sizeY             <int>        ..FV..... set vertical size (from 0 to 1024) (default 0)
+
 bbox AVOptions:
   min_val           <int>        ..FV..... set minimum luminance value for bounding box (from 0 to 254) (default 16)
 
@@ -7728,6 +7760,20 @@ bm3d AVOptions:
   planes            <int>        ..FV..... set planes to filter (from 0 to 15) (default 7)
 
 boxblur AVOptions:
+  luma_radius       <string>     ..FV..... Radius of the luma blurring box (default "2")
+  lr                <string>     ..FV..... Radius of the luma blurring box (default "2")
+  luma_power        <int>        ..FV..... How many times should the boxblur be applied to luma (from 0 to INT_MAX) (default 2)
+  lp                <int>        ..FV..... How many times should the boxblur be applied to luma (from 0 to INT_MAX) (default 2)
+  chroma_radius     <string>     ..FV..... Radius of the chroma blurring box
+  cr                <string>     ..FV..... Radius of the chroma blurring box
+  chroma_power      <int>        ..FV..... How many times should the boxblur be applied to chroma (from -1 to INT_MAX) (default -1)
+  cp                <int>        ..FV..... How many times should the boxblur be applied to chroma (from -1 to INT_MAX) (default -1)
+  alpha_radius      <string>     ..FV..... Radius of the alpha blurring box
+  ar                <string>     ..FV..... Radius of the alpha blurring box
+  alpha_power       <int>        ..FV..... How many times should the boxblur be applied to alpha (from -1 to INT_MAX) (default -1)
+  ap                <int>        ..FV..... How many times should the boxblur be applied to alpha (from -1 to INT_MAX) (default -1)
+
+boxblur_opencl AVOptions:
   luma_radius       <string>     ..FV..... Radius of the luma blurring box (default "2")
   lr                <string>     ..FV..... Radius of the luma blurring box (default "2")
   luma_power        <int>        ..FV..... How many times should the boxblur be applied to luma (from 0 to INT_MAX) (default 2)
@@ -8058,6 +8104,20 @@ convolution AVOptions:
      row                          ..FV..... single row matrix
      column                       ..FV..... single column matrix
 
+convolution_opencl AVOptions:
+  0m                <string>     ..FV..... set matrix for 2nd plane (default "0 0 0 0 1 0 0 0 0")
+  1m                <string>     ..FV..... set matrix for 2nd plane (default "0 0 0 0 1 0 0 0 0")
+  2m                <string>     ..FV..... set matrix for 3rd plane (default "0 0 0 0 1 0 0 0 0")
+  3m                <string>     ..FV..... set matrix for 4th plane (default "0 0 0 0 1 0 0 0 0")
+  0rdiv             <float>      ..FV..... set rdiv for 1nd plane (from 0 to INT_MAX) (default 1)
+  1rdiv             <float>      ..FV..... set rdiv for 2nd plane (from 0 to INT_MAX) (default 1)
+  2rdiv             <float>      ..FV..... set rdiv for 3rd plane (from 0 to INT_MAX) (default 1)
+  3rdiv             <float>      ..FV..... set rdiv for 4th plane (from 0 to INT_MAX) (default 1)
+  0bias             <float>      ..FV..... set bias for 1st plane (from 0 to INT_MAX) (default 0)
+  1bias             <float>      ..FV..... set bias for 2nd plane (from 0 to INT_MAX) (default 0)
+  2bias             <float>      ..FV..... set bias for 3rd plane (from 0 to INT_MAX) (default 0)
+  3bias             <float>      ..FV..... set bias for 4th plane (from 0 to INT_MAX) (default 0)
+
 convolve AVOptions:
   planes            <int>        ..FV..... set planes to convolve (from 0 to 15) (default 7)
   impulse           <int>        ..FV..... when to process impulses (from 0 to 1) (default all)
@@ -8294,6 +8354,13 @@ dilation AVOptions:
   threshold3        <int>        ..FV..... set threshold for 4th plane (from 0 to 65535) (default 65535)
   coordinates       <int>        ..FV..... set coordinates (from 0 to 255) (default 255)
 
+dilation_opencl AVOptions:
+  threshold0        <float>      ..FV..... set threshold for 1st plane (from 0 to 65535) (default 65535)
+  threshold1        <float>      ..FV..... set threshold for 2nd plane (from 0 to 65535) (default 65535)
+  threshold2        <float>      ..FV..... set threshold for 3rd plane (from 0 to 65535) (default 65535)
+  threshold3        <float>      ..FV..... set threshold for 4th plane (from 0 to 65535) (default 65535)
+  coordinates       <int>        ..FV..... set coordinates (from 0 to 255) (default 255)
+
 displace AVOptions:
   edge              <int>        ..FV..... set edge mode (from 0 to 3) (default smear)
      blank                        ..FV..... 
@@ -8458,6 +8525,13 @@ erosion AVOptions:
   threshold1        <int>        ..FV..... set threshold for 2nd plane (from 0 to 65535) (default 65535)
   threshold2        <int>        ..FV..... set threshold for 3rd plane (from 0 to 65535) (default 65535)
   threshold3        <int>        ..FV..... set threshold for 4th plane (from 0 to 65535) (default 65535)
+  coordinates       <int>        ..FV..... set coordinates (from 0 to 255) (default 255)
+
+erosion_opencl AVOptions:
+  threshold0        <float>      ..FV..... set threshold for 1st plane (from 0 to 65535) (default 65535)
+  threshold1        <float>      ..FV..... set threshold for 2nd plane (from 0 to 65535) (default 65535)
+  threshold2        <float>      ..FV..... set threshold for 3rd plane (from 0 to 65535) (default 65535)
+  threshold3        <float>      ..FV..... set threshold for 4th plane (from 0 to 65535) (default 65535)
   coordinates       <int>        ..FV..... set coordinates (from 0 to 255) (default 255)
 
 extractplanes AVOptions:
@@ -8875,35 +8949,27 @@ lenscorrection AVOptions:
   k1                <double>     ..FV..... set quadratic distortion factor (from -1 to 1) (default 0)
   k2                <double>     ..FV..... set double quadratic distortion factor (from -1 to 1) (default 0)
 
-lensfun AVOptions:
-  make              <string>     ..FV..... set camera maker
-  model             <string>     ..FV..... set camera model
-  lens_model        <string>     ..FV..... set lens model
-  mode              <int>        ..FV..... set mode (from 0 to 7) (default geometry)
-     vignetting                   ..FV..... fix lens vignetting
-     geometry                     ..FV..... correct geometry distortion
-     subpixel                     ..FV..... fix chromatic aberrations
-     vig_geo                      ..FV..... fix lens vignetting and correct geometry distortion
-     vig_subpixel                 ..FV..... fix lens vignetting and chromatic aberrations
-     distortion                   ..FV..... correct geometry distortion and chromatic aberrations
-     all                          ..FV.....
-  focal_length      <float>      ..FV..... focal length of video (zoom; constant for the duration of the use of this filter) (from 0 to DBL_MAX) (default 18)
-  aperture          <float>      ..FV..... aperture (constant for the duration of the use of this filter) (from 0 to DBL_MAX) (default 3.5)
-  focus_distance    <float>      ..FV..... focus distance (constant for the duration of the use of this filter) (from 0 to DBL_MAX) (default 1000)
-  target_geometry   <int>        ..FV..... target geometry of the lens correction (only when geometry correction is enabled) (from 0 to INT_MAX) (default rectilinear)
-     rectilinear                  ..FV..... rectilinear lens (default)
-     fisheye                      ..FV..... fisheye lens
-     panoramic                    ..FV..... panoramic (cylindrical)
-     equirectangular              ..FV..... equirectangular
-     fisheye_orthographic              ..FV..... orthographic fisheye
-     fisheye_stereographic              ..FV..... stereographic fisheye
-     fisheye_equisolid              ..FV..... equisolid fisheye
-     fisheye_thoby                ..FV..... fisheye as measured by thoby
-  reverse           <boolean>    ..FV..... Does reverse correction (regular image to lens distorted) (default false)
-  interpolation     <int>        ..FV..... Type of interpolation (from 0 to 2) (default linear)
-     nearest                      ..FV.....
-     linear                       ..FV.....
-     lanczos                      ..FV.....
+libvmaf AVOptions:
+  model_path        <string>     ..FV..... Set the model to be used for computing vmaf. (default "/usr/local/share/model/vmaf_v0.6.1.pkl")
+  log_path          <string>     ..FV..... Set the file path to be used to store logs.
+  log_fmt           <string>     ..FV..... Set the format of the log (xml or json).
+  enable_transform  <boolean>    ..FV..... Enables transform for computing vmaf. (default false)
+  phone_model       <boolean>    ..FV..... Invokes the phone model that will generate higher VMAF scores. (default false)
+  psnr              <boolean>    ..FV..... Enables computing psnr along with vmaf. (default false)
+  ssim              <boolean>    ..FV..... Enables computing ssim along with vmaf. (default false)
+  ms_ssim           <boolean>    ..FV..... Enables computing ms-ssim along with vmaf. (default false)
+  pool              <string>     ..FV..... Set the pool method to be used for computing vmaf.
+  n_threads         <int>        ..FV..... Set number of threads to be used when computing vmaf. (from 0 to UINT32_MAX) (default 0)
+  n_subsample       <int>        ..FV..... Set interval for frame subsampling used when computing vmaf. (from 1 to UINT32_MAX) (default 1)
+  enable_conf_interval <boolean>    ..FV..... Enables confidence interval. (default false)
+
+framesync AVOptions:
+  eof_action        <int>        ..FV..... Action to take when encountering EOF from secondary input  (from 0 to 2) (default repeat)
+     repeat                       ..FV..... Repeat the previous frame.
+     endall                       ..FV..... End both streams.
+     pass                         ..FV..... Pass through the main input.
+  shortest          <boolean>    ..FV..... force termination when the shortest input terminates (default false)
+  repeatlast        <boolean>    ..FV..... extend last frame of secondary streams beyond EOF (default true)
 
 limiter AVOptions:
   min               <int>        ..FV..... set min value (from 0 to 65535) (default 0)
@@ -9279,6 +9345,10 @@ framesync AVOptions:
   shortest          <boolean>    ..FV..... force termination when the shortest input terminates (default false)
   repeatlast        <boolean>    ..FV..... extend last frame of secondary streams beyond EOF (default true)
 
+overlay_opencl AVOptions:
+  x                 <int>        ..FV..... Overlay x position (from 0 to INT_MAX) (default 0)
+  y                 <int>        ..FV..... Overlay y position (from 0 to INT_MAX) (default 0)
+
 overlay_qsv AVOptions:
   x                 <string>     ..FV..... Overlay x position (default "0")
   y                 <string>     ..FV..... Overlay y position (default "0")
@@ -9417,6 +9487,26 @@ prewitt AVOptions:
   scale             <float>      ..FV..... set scale (from 0 to 65535) (default 1)
   delta             <float>      ..FV..... set delta (from -65535 to 65535) (default 0)
 
+prewitt_opencl AVOptions:
+  planes            <int>        ..FV..... set planes to filter (from 0 to 15) (default 15)
+  scale             <float>      ..FV..... set scale (from 0 to 65535) (default 1)
+  delta             <float>      ..FV..... set delta (from -65535 to 65535) (default 0)
+
+program_opencl AVOptions:
+  source            <string>     ..FV..... OpenCL program source file
+  kernel            <string>     ..FV..... Kernel name in program
+  inputs            <int>        ..FV..... Number of inputs (from 1 to INT_MAX) (default 1)
+  size              <image_size> ..FV..... Video size
+  s                 <image_size> ..FV..... Video size
+
+framesync AVOptions:
+  eof_action        <int>        ..FV..... Action to take when encountering EOF from secondary input  (from 0 to 2) (default repeat)
+     repeat                       ..FV..... Repeat the previous frame.
+     endall                       ..FV..... End both streams.
+     pass                         ..FV..... Pass through the main input.
+  shortest          <boolean>    ..FV..... force termination when the shortest input terminates (default false)
+  repeatlast        <boolean>    ..FV..... extend last frame of secondary streams beyond EOF (default true)
+
 pseudocolor AVOptions:
   c0                <string>     ..FV..... set component #0 expression (default "val")
   c1                <string>     ..FV..... set component #1 expression (default "val")
@@ -9503,6 +9593,11 @@ rgbashift AVOptions:
      wrap                         ..FV.....
 
 roberts AVOptions:
+  planes            <int>        ..FV..... set planes to filter (from 0 to 15) (default 15)
+  scale             <float>      ..FV..... set scale (from 0 to 65535) (default 1)
+  delta             <float>      ..FV..... set delta (from -65535 to 65535) (default 0)
+
+roberts_opencl AVOptions:
   planes            <int>        ..FV..... set planes to filter (from 0 to 15) (default 15)
   scale             <float>      ..FV..... set scale (from 0 to 65535) (default 1)
   delta             <float>      ..FV..... set delta (from -65535 to 65535) (default 0)
@@ -9618,6 +9713,24 @@ SWScaler AVOptions:
      none                         E..V..... ignore alpha
      uniform_color                E..V..... blend onto a uniform color
      checkerboard                 E..V..... blend onto a checkerboard
+
+cudascale AVOptions:
+  w                 <string>     ..FV..... Output video width (default "iw")
+  h                 <string>     ..FV..... Output video height (default "ih")
+
+nppscale AVOptions:
+  w                 <string>     ..FV..... Output video width (default "iw")
+  h                 <string>     ..FV..... Output video height (default "ih")
+  format            <string>     ..FV..... Output pixel format (default "same")
+  interp_algo       <int>        ..FV..... Interpolation algorithm used for resizing (from 0 to INT_MAX) (default cubic)
+     nn                           ..FV..... nearest neighbour
+     linear                       ..FV..... linear
+     cubic                        ..FV..... cubic
+     cubic2p_bspline              ..FV..... 2-parameter cubic (B=1, C=0)
+     cubic2p_catmullrom              ..FV..... 2-parameter cubic (B=0, C=1/2)
+     cubic2p_b05c03               ..FV..... 2-parameter cubic (B=1/2, C=3/10)
+     super                        ..FV..... supersampling
+     lanczos                      ..FV..... Lanczos
 
 qsvscale AVOptions:
   w                 <string>     ..FV..... Output video width (default "iw")
@@ -9919,6 +10032,11 @@ smartblur AVOptions:
   ct                <int>        ..FV..... set chroma threshold (from -31 to 30) (default -31)
 
 sobel AVOptions:
+  planes            <int>        ..FV..... set planes to filter (from 0 to 15) (default 15)
+  scale             <float>      ..FV..... set scale (from 0 to 65535) (default 1)
+  delta             <float>      ..FV..... set delta (from -65535 to 65535) (default 0)
+
+sobel_opencl AVOptions:
   planes            <int>        ..FV..... set planes to filter (from 0 to 15) (default 15)
   scale             <float>      ..FV..... set scale (from 0 to 65535) (default 1)
   delta             <float>      ..FV..... set delta (from -65535 to 65535) (default 0)
@@ -10258,6 +10376,9 @@ threshold AVOptions:
 thumbnail AVOptions:
   n                 <int>        ..FV..... set the frames batch size (from 2 to INT_MAX) (default 100)
 
+thumbnail_cuda AVOptions:
+  n                 <int>        ..FV..... set the frames batch size (from 2 to INT_MAX) (default 100)
+
 tile AVOptions:
   layout            <image_size> ..FV..... set grid size (default "6x5")
   nb_frames         <int>        ..FV..... set maximum number of frame to render (from 0 to INT_MAX) (default 0)
@@ -10302,6 +10423,49 @@ tonemap AVOptions:
   desat             <double>     ..FV..... desaturation strength (from 0 to DBL_MAX) (default 2)
   peak              <double>     ..FV..... signal peak override (from 0 to DBL_MAX) (default 0)
 
+tonemap_opencl AVOptions:
+  tonemap           <int>        ..FV..... tonemap algorithm selection (from 0 to 6) (default none)
+     none                         ..FV.....
+     linear                       ..FV.....
+     gamma                        ..FV.....
+     clip                         ..FV.....
+     reinhard                     ..FV.....
+     hable                        ..FV.....
+     mobius                       ..FV.....
+  transfer          <int>        ..FV..... set transfer characteristic (from -1 to INT_MAX) (default bt709)
+     bt709                        ..FV.....
+     bt2020                       ..FV.....
+  t                 <int>        ..FV..... set transfer characteristic (from -1 to INT_MAX) (default bt709)
+     bt709                        ..FV.....
+     bt2020                       ..FV.....
+  matrix            <int>        ..FV..... set colorspace matrix (from -1 to INT_MAX) (default -1)
+     bt709                        ..FV.....
+     bt2020                       ..FV.....
+  m                 <int>        ..FV..... set colorspace matrix (from -1 to INT_MAX) (default -1)
+     bt709                        ..FV.....
+     bt2020                       ..FV.....
+  primaries         <int>        ..FV..... set color primaries (from -1 to INT_MAX) (default -1)
+     bt709                        ..FV.....
+     bt2020                       ..FV.....
+  p                 <int>        ..FV..... set color primaries (from -1 to INT_MAX) (default -1)
+     bt709                        ..FV.....
+     bt2020                       ..FV.....
+  range             <int>        ..FV..... set color range (from -1 to INT_MAX) (default -1)
+     tv                           ..FV.....
+     pc                           ..FV.....
+     limited                      ..FV.....
+     full                         ..FV.....
+  r                 <int>        ..FV..... set color range (from -1 to INT_MAX) (default -1)
+     tv                           ..FV.....
+     pc                           ..FV.....
+     limited                      ..FV.....
+     full                         ..FV.....
+  format            <pix_fmt>    ..FV..... output pixel format (default none)
+  peak              <double>     ..FV..... signal peak override (from 0 to DBL_MAX) (default 0)
+  param             <double>     ..FV..... tonemap parameter (from DBL_MIN to DBL_MAX) (default nan)
+  desat             <double>     ..FV..... desaturation parameter (from 0 to DBL_MAX) (default 0.5)
+  threshold         <double>     ..FV..... scene detection threshold (from 0 to DBL_MAX) (default 0.2)
+
 tpad AVOptions:
   start             <int>        ..FV..... set the number of frames to delay input (from 0 to INT_MAX) (default 0)
   stop              <int>        ..FV..... set the number of frames to add after input finished (from -1 to INT_MAX) (default 0)
@@ -10317,6 +10481,28 @@ tpad AVOptions:
 
 transpose AVOptions:
   dir               <int>        ..FV..... set transpose direction (from 0 to 7) (default cclock_flip)
+     cclock_flip                  ..FV..... rotate counter-clockwise with vertical flip
+     clock                        ..FV..... rotate clockwise
+     cclock                       ..FV..... rotate counter-clockwise
+     clock_flip                   ..FV..... rotate clockwise with vertical flip
+  passthrough       <int>        ..FV..... do not apply transposition if the input matches the specified geometry (from 0 to INT_MAX) (default none)
+     none                         ..FV..... always apply transposition
+     portrait                     ..FV..... preserve portrait geometry
+     landscape                    ..FV..... preserve landscape geometry
+
+npptranspose AVOptions:
+  dir               <int>        ..FV..... set transpose direction (from 0 to 3) (default cclock_flip)
+     cclock_flip                  ..FV..... rotate counter-clockwise with vertical flip
+     clock                        ..FV..... rotate clockwise
+     cclock                       ..FV..... rotate counter-clockwise
+     clock_flip                   ..FV..... rotate clockwise with vertical flip
+  passthrough       <int>        ..FV..... do not apply transposition if the input matches the specified geometry (from 0 to 2) (default none)
+     none                         ..FV..... always apply transposition
+     landscape                    ..FV..... preserve landscape geometry
+     portrait                     ..FV..... preserve portrait geometry
+
+transpose_opencl AVOptions:
+  dir               <int>        ..FV..... set transpose direction (from 0 to 3) (default cclock_flip)
      cclock_flip                  ..FV..... rotate counter-clockwise with vertical flip
      clock                        ..FV..... rotate clockwise
      cclock                       ..FV..... rotate counter-clockwise
@@ -10356,6 +10542,20 @@ unsharp AVOptions:
   chroma_amount     <float>      ..FV..... set chroma effect strength (from -2 to 5) (default 0)
   ca                <float>      ..FV..... set chroma effect strength (from -2 to 5) (default 0)
   opencl            <boolean>    ..FV..... ignored (default false)
+
+unsharp_opencl AVOptions:
+  luma_msize_x      <float>      ..FV..... Set luma mask horizontal diameter (pixels) (from 1 to 23) (default 5)
+  lx                <float>      ..FV..... Set luma mask horizontal diameter (pixels) (from 1 to 23) (default 5)
+  luma_msize_y      <float>      ..FV..... Set luma mask vertical diameter (pixels) (from 1 to 23) (default 5)
+  ly                <float>      ..FV..... Set luma mask vertical diameter (pixels) (from 1 to 23) (default 5)
+  luma_amount       <float>      ..FV..... Set luma amount (multiplier) (from -10 to 10) (default 1)
+  la                <float>      ..FV..... Set luma amount (multiplier) (from -10 to 10) (default 1)
+  chroma_msize_x    <float>      ..FV..... Set chroma mask horizontal diameter (pixels after subsampling) (from 1 to 23) (default 5)
+  cx                <float>      ..FV..... Set chroma mask horizontal diameter (pixels after subsampling) (from 1 to 23) (default 5)
+  chroma_msize_y    <float>      ..FV..... Set chroma mask vertical diameter (pixels after subsampling) (from 1 to 23) (default 5)
+  cy                <float>      ..FV..... Set chroma mask vertical diameter (pixels after subsampling) (from 1 to 23) (default 5)
+  chroma_amount     <float>      ..FV..... Set chroma amount (multiplier) (from -10 to 10) (default 0)
+  ca                <float>      ..FV..... Set chroma amount (multiplier) (from -10 to 10) (default 0)
 
 uspp AVOptions:
   quality           <int>        ..FV..... set quality (from 0 to 8) (default 3)
@@ -10631,6 +10831,24 @@ yadif AVOptions:
   deint             <int>        ..FV..... specify which frames to deinterlace (from 0 to 1) (default all)
      all                          ..FV..... deinterlace all frames
      interlaced                   ..FV..... only deinterlace frames marked as interlaced
+
+yadif_cuda AVOptions:
+  mode              <int>        ..FV..... specify the interlacing mode (from 0 to 3) (default send_frame)
+     send_frame                   ..FV..... send one frame for each frame
+     send_field                   ..FV..... send one frame for each field
+     send_frame_nospatial              ..FV..... send one frame for each frame, but skip spatial interlacing check
+     send_field_nospatial              ..FV..... send one frame for each field, but skip spatial interlacing check
+  parity            <int>        ..FV..... specify the assumed picture field parity (from -1 to 1) (default auto)
+     tff                          ..FV..... assume top field first
+     bff                          ..FV..... assume bottom field first
+     auto                         ..FV..... auto detect parity
+  deint             <int>        ..FV..... specify which frames to deinterlace (from 0 to 1) (default all)
+     all                          ..FV..... deinterlace all frames
+     interlaced                   ..FV..... only deinterlace frames marked as interlaced
+
+zmq AVOptions:
+  bind_address      <string>     ..FVA.... set bind address (default "tcp://*:5555")
+  b                 <string>     ..FVA.... set bind address (default "tcp://*:5555")
 
 zoompan AVOptions:
   zoom              <string>     ..FV..... set the zoom expression (default "1")
@@ -11137,6 +11355,15 @@ nullsrc AVOptions:
   duration          <duration>   ..FV..... set video duration (default -0.000001)
   d                 <duration>   ..FV..... set video duration (default -0.000001)
   sar               <rational>   ..FV..... set video sample aspect ratio (from 0 to INT_MAX) (default 1/1)
+
+openclsrc AVOptions:
+  source            <string>     ..FV..... OpenCL program source file
+  kernel            <string>     ..FV..... Kernel name in program
+  size              <image_size> ..FV..... Video size
+  s                 <image_size> ..FV..... Video size
+  format            <pix_fmt>    ..FV..... Video format (default none)
+  rate              <video_rate> ..FV..... Video frame rate (default "25")
+  r                 <video_rate> ..FV..... Video frame rate (default "25")
 
 pal75bars AVOptions:
   size              <image_size> ..FV..... set video size (default "320x240")
@@ -11939,6 +12166,7 @@ Encoders:
  V..... hevc_amf             AMD AMF HEVC encoder (codec hevc)
  V..... hevc_nvenc           NVIDIA NVENC hevc encoder (codec hevc)
  V..... hevc_qsv             HEVC (Intel Quick Sync Video acceleration) (codec hevc)
+ V..... libkvazaar           libkvazaar H.265 / HEVC (codec hevc)
  VF.... huffyuv              Huffyuv / HuffYUV
  V..... jpeg2000             JPEG 2000
  VF.... libopenjpeg          OpenJPEG JPEG 2000 (codec jpeg2000)
@@ -11986,6 +12214,7 @@ Encoders:
  V..... v410                 Uncompressed 4:4:4 10-bit
  V..... libvpx               libvpx VP8 (codec vp8)
  V..... libvpx-vp9           libvpx VP9 (codec vp9)
+ V..... libwebp_anim         libwebp WebP image (codec webp)
  V..... libwebp              libwebp WebP image (codec webp)
  V..... wmv1                 Windows Media Video 7
  V..... wmv2                 Windows Media Video 8
@@ -12015,6 +12244,7 @@ Encoders:
  A..... libvo_amrwbenc       Android VisualOn AMR-WB (Adaptive Multi-Rate Wide-Band) (codec amr_wb)
  A..... aptx                 aptX (Audio Processing Technology for Bluetooth)
  A..... aptx_hd              aptX HD (Audio Processing Technology for Bluetooth)
+ A..... libcodec2            codec2 encoder using libcodec2 (codec codec2)
  A..... comfortnoise         RFC 3389 comfort noise generator
  A..X.. dca                  DCA (DTS Coherent Acoustics) (codec dts)
  A..... eac3                 ATSC A/52 E-AC-3
@@ -12028,6 +12258,7 @@ Encoders:
  A..... mp2fixed             MP2 fixed point (MPEG audio layer 2) (codec mp2)
  A..... libtwolame           libtwolame MP2 (MPEG audio layer 2) (codec mp2)
  A..... libmp3lame           libmp3lame MP3 (MPEG audio layer 3) (codec mp3)
+ A..... libshine             libshine MP3 (MPEG audio layer 3) (codec mp3)
  A..... nellymoser           Nellymoser Asao
  A..X.. opus                 Opus
  A..... libopus              libopus Opus (codec opus)
@@ -12073,6 +12304,7 @@ Encoders:
  A..X.. vorbis               Vorbis
  A..... libvorbis            libvorbis (codec vorbis)
  A..... wavpack              WavPack
+ A..... libwavpack            (codec wavpack)
  A..... wmav1                Windows Media Audio 1
  A..... wmav2                Windows Media Audio 2
  S..... ssa                  ASS (Advanced SubStation Alpha) subtitle (codec ass)
@@ -12110,6 +12342,7 @@ Decoders:
  V....D aura                 Auravision AURA
  V....D aura2                Auravision Aura 2
  V....D libaom-av1           libaom AV1 (codec av1)
+ V..... libdav1d             dav1d AV1 decoder by VideoLAN (codec av1)
  V..... avrn                 Avid AVI Codec
  V....D avrp                 Avid 1:1 10-bit RGB Packer
  V....D avs                  AVS (Audio Video Standard) video
@@ -12413,6 +12646,7 @@ Decoders:
  A....D binkaudio_dct        Bink Audio (DCT)
  A....D binkaudio_rdft       Bink Audio (RDFT)
  A....D bmv_audio            Discworld II BMV audio
+ A..... libcodec2            codec2 decoder using libcodec2 (codec codec2)
  A....D comfortnoise         RFC 3389 comfort noise generator
  A....D cook                 Cook / Cooker / Gecko (RealAudio G2)
  A....D dolby_e              Dolby E
@@ -12582,7 +12816,7 @@ Codecs:
  DEVIL. asv2                 ASUS V2
  D.VIL. aura                 Auravision AURA
  D.VIL. aura2                Auravision Aura 2
- DEV.L. av1                  Alliance for Open Media AV1 (decoders: libaom-av1 ) (encoders: libaom-av1 )
+ DEV.L. av1                  Alliance for Open Media AV1 (decoders: libaom-av1 libdav1d ) (encoders: libaom-av1 )
  D.V... avrn                 Avid AVI Codec
  DEVI.S avrp                 Avid 1:1 10-bit RGB Packer
  D.V.L. avs                  AVS (Audio Video Standard) video
@@ -12644,7 +12878,7 @@ Codecs:
  DEV.L. h263p                H.263+ / H.263-1998 / H.263 version 2
  DEV.LS h264                 H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10 (decoders: h264 h264_qsv libopenh264 h264_cuvid ) (encoders: libx264 libx264rgb libopenh264 h264_amf h264_nvenc h264_qsv nvenc nvenc_h264 )
  DEVIL. hap                  Vidvox Hap
- DEV.L. hevc                 H.265 / HEVC (High Efficiency Video Coding) (decoders: hevc hevc_qsv hevc_cuvid ) (encoders: libx265 nvenc_hevc hevc_amf hevc_nvenc hevc_qsv )
+ DEV.L. hevc                 H.265 / HEVC (High Efficiency Video Coding) (decoders: hevc hevc_qsv hevc_cuvid ) (encoders: libx265 nvenc_hevc hevc_amf hevc_nvenc hevc_qsv libkvazaar )
  D.V.L. hnm4video            HNM 4 video
  D.VIL. hq_hqa               Canopus HQ/HQA
  D.VIL. hqx                  Canopus HQX
@@ -12782,7 +13016,7 @@ Codecs:
  DEV.L. vp8                  On2 VP8 (decoders: vp8 libvpx vp8_cuvid vp8_qsv ) (encoders: libvpx )
  DEV.L. vp9                  Google VP9 (decoders: vp9 libvpx-vp9 vp9_cuvid ) (encoders: libvpx-vp9 )
  D.V..S wcmv                 WinCAM Motion Video
- DEVILS webp                 WebP (encoders: libwebp )
+ DEVILS webp                 WebP (encoders: libwebp_anim libwebp )
  DEV.L. wmv1                 Windows Media Video 7
  DEV.L. wmv2                 Windows Media Video 8
  D.V.L. wmv3                 Windows Media Video 9
@@ -12868,7 +13102,7 @@ Codecs:
  D.A.L. binkaudio_rdft       Bink Audio (RDFT)
  D.A.L. bmv_audio            Discworld II BMV audio
  ..A.L. celt                 Constrained Energy Lapped Transform (CELT)
- ..A.L. codec2               codec2 (very low bitrate speech codec)
+ DEA.L. codec2               codec2 (very low bitrate speech codec) (decoders: libcodec2 ) (encoders: libcodec2 )
  DEA.L. comfortnoise         RFC 3389 Comfort Noise
  D.A.L. cook                 Cook / Cooker / Gecko (RealAudio G2)
  D.A.L. dolby_e              Dolby E
@@ -12901,7 +13135,7 @@ Codecs:
  DEA..S mlp                  MLP (Meridian Lossless Packing)
  D.A.L. mp1                  MP1 (MPEG audio layer 1) (decoders: mp1 mp1float )
  DEA.L. mp2                  MP2 (MPEG audio layer 2) (decoders: mp2 mp2float ) (encoders: mp2 mp2fixed libtwolame )
- DEA.L. mp3                  MP3 (MPEG audio layer 3) (decoders: mp3float mp3 ) (encoders: libmp3lame )
+ DEA.L. mp3                  MP3 (MPEG audio layer 3) (decoders: mp3float mp3 ) (encoders: libmp3lame libshine )
  D.A.L. mp3adu               ADU (Application Data Unit) MP3 (MPEG audio layer 3) (decoders: mp3adufloat mp3adu )
  D.A.L. mp3on4               MP3onMP4 (decoders: mp3on4float mp3on4 )
  D.A..S mp4als               MPEG-4 Audio Lossless Coding (ALS) (decoders: als )
@@ -12971,7 +13205,7 @@ Codecs:
  D.A.L. vmdaudio             Sierra VMD audio
  DEA.L. vorbis               Vorbis (decoders: vorbis libvorbis ) (encoders: vorbis libvorbis )
  D.A... wavesynth            Wave synthesis pseudo-codec
- DEAILS wavpack              WavPack
+ DEAILS wavpack              WavPack (encoders: wavpack libwavpack )
  D.A.L. westwood_snd1        Westwood Audio (SND1) (decoders: ws_snd1 )
  D.A..S wmalossless          Windows Media Audio Lossless
  D.A.L. wmapro               Windows Media Audio 9 Professional
@@ -13276,12 +13510,13 @@ File formats:
  DE cavsvideo       raw Chinese AVS (Audio Video Standard) video
  D  cdg             CD Graphics
  D  cdxl            Commodore CDXL video
+  E chromaprint     Chromaprint
  D  cine            Phantom Cine
  DE codec2          codec2 .c2 muxer
  DE codec2raw       raw codec2 muxer
  D  concat          Virtual concatenation script
   E crc             CRC testing
-  E dash            DASH Muxer
+ DE dash            DASH Muxer
  DE data            raw data
  DE daud            D-Cinema audio
  D  dcstr           Sega DC STR
@@ -13372,8 +13607,10 @@ File formats:
  D  jv              Bitmap Brothers JV
   E latm            LOAS/LATM
  D  lavfi           Libavfilter virtual input device
+ D  libcdio          
  D  libgme          Game Music Emu demuxer
  D  libmodplug      ModPlug demuxer
+ D  libopenmpt      Tracker formats (libopenmpt)
  D  live_flv        live RTMP FLV (Flash Video)
  D  lmlm4           raw lmlm4
  D  loas            LOAS AudioSyncStream
@@ -13432,6 +13669,7 @@ File formats:
  DE ogg             Ogg
   E ogv             Ogg Video
  DE oma             Sony OpenMG audio
+  E opengl          OpenGL output
   E opus            Ogg Opus
  D  paf             Amazing Studio Packed Animation File
  D  pam_pipe        piped pam sequence
@@ -13597,6 +13835,7 @@ File formats:
   E caca            caca (color ASCII art) output device
   E caf             Apple CAF (Core Audio Format)
   E cavsvideo       raw Chinese AVS (Audio Video Standard) video
+  E chromaprint     Chromaprint
   E codec2          codec2 .c2 muxer
   E codec2raw       raw codec2 muxer
   E crc             CRC testing
@@ -13678,6 +13917,7 @@ File formats:
   E ogg             Ogg
   E ogv             Ogg Video
   E oma             Sony OpenMG audio
+  E opengl          OpenGL output
   E opus            Ogg Opus
   E psp             PSP MP4 (MPEG-4 Part 14)
   E rawvideo        raw video
@@ -13798,6 +14038,7 @@ File formats:
  D  codec2          codec2 .c2 demuxer
  D  codec2raw       raw codec2 demuxer
  D  concat          Virtual concatenation script
+ D  dash            Dynamic Adaptive Streaming over HTTP
  D  data            raw data
  D  daud            D-Cinema audio
  D  dcstr           Sega DC STR
@@ -13875,8 +14116,10 @@ File formats:
  D  jpegls_pipe     piped jpegls sequence
  D  jv              Bitmap Brothers JV
  D  lavfi           Libavfilter virtual input device
+ D  libcdio          
  D  libgme          Game Music Emu demuxer
  D  libmodplug      ModPlug demuxer
+ D  libopenmpt      Tracker formats (libopenmpt)
  D  live_flv        live RTMP FLV (Flash Video)
  D  lmlm4           raw lmlm4
  D  loas            LOAS AudioSyncStream
@@ -14047,6 +14290,7 @@ cuda
 dxva2
 qsv
 d3d11va
+opencl
 qsv
 cuvid
 
@@ -14112,6 +14356,7 @@ Filters:
  ..C astreamselect     N->N       Select audio streams
  ..C atempo            A->A       Adjust audio tempo.
  ... atrim             A->A       Pick one continuous section from the input, drop the rest.
+ ... azmq              A->A       Receive commands through ZMQ and broker them to filters.
  .SC bandpass          A->A       Apply a two-pole Butterworth band-pass filter.
  .SC bandreject        A->A       Apply a two-pole Butterworth band-reject filter.
  .SC bass              A->A       Boost or cut lower frequencies.
@@ -14139,13 +14384,13 @@ Filters:
  .SC highpass          A->A       Apply a high-pass filter with 3dB point frequency.
  .SC highshelf         A->A       Apply a high shelf filter.
  ... join              N->A       Join multiple audio streams into multi-channel output.
+ ..C ladspa            N->A       Apply LADSPA effect.
  ... loudnorm          A->A       EBU R128 loudness normalization
  .SC lowpass           A->A       Apply a low-pass filter with 3dB point frequency.
  .SC lowshelf          A->A       Apply a low shelf filter.
  ... mcompand          A->A       Multiband Compress or expand audio dynamic range.
  ... pan               A->A       Remix channels with coefficients (panning).
  ... replaygain        A->A       ReplayGain scanner.
- ... resample          A->A       Audio resampling and conversion.
  ..C rubberband        A->A       Apply time-stretching and pitch-shifting.
  ... sidechaincompress AA->A      Sidechain compressor.
  ... sidechaingate     AA->A      Audio sidechain gate.
@@ -14175,6 +14420,7 @@ Filters:
  ... ass               V->V       Render ASS subtitles onto input video using the libass library.
  TS. atadenoise        V->V       Apply an Adaptive Temporal Averaging Denoiser.
  TS. avgblur           V->V       Apply Average Blur filter.
+ ... avgblur_opencl    V->V       Apply average blur filter
  T.. bbox              V->V       Compute bounding box for each frame.
  ... bench             V->V       Benchmark part of a filtergraph.
  T.. bitplanenoise     V->V       Measure bit plane noise.
@@ -14183,6 +14429,7 @@ Filters:
  TS. blend             VV->V      Blend two video frames into each other.
  TS. bm3d              N->V       Block-Matching 3D denoiser.
  T.. boxblur           V->V       Blur the input.
+ ... boxblur_opencl    V->V       Apply boxblur filter to input video
  TS. bwdif             V->V       Deinterlace the input image.
  TS. chromahold        V->V       Turns a certain color range into gray.
  TS. chromakey         V->V       Turns a certain color into transparency. Operates on YUV colors.
@@ -14196,6 +14443,7 @@ Filters:
  TS. colormatrix       V->V       Convert color matrix.
  TS. colorspace        V->V       Convert between colorspaces.
  TS. convolution       V->V       Apply convolution filter.
+ ... convolution_opencl V->V       Apply convolution mask to input video
  TS. convolve          VV->V      Convolve first video stream with second video stream.
  ... copy              V->V       Copy the input video unchanged to the output.
  ... cover_rect        V->V       Find and cover a user specified object.
@@ -14219,6 +14467,7 @@ Filters:
  TS. despill           V->V       Despill video.
  ... detelecine        V->V       Apply an inverse telecine pattern.
  TS. dilation          V->V       Apply dilation effect.
+ ... dilation_opencl   V->V       Apply dilation effect
  T.. displace          VVV->V     Displace pixels.
  ... doubleweave       V->V       Weave input video fields into double number of frames.
  T.. drawbox           V->V       Draw a colored box on the input video.
@@ -14230,6 +14479,7 @@ Filters:
  T.. entropy           V->V       Measure video frames entropy.
  T.C eq                V->V       Adjust brightness, contrast, gamma, and saturation.
  TS. erosion           V->V       Apply erosion effect.
+ ... erosion_opencl    V->V       Apply erosion effect
  ... extractplanes     V->N       Extract planes as grayscale frames.
  .S. fade              V->V       Fade in/out input video.
  T.. fftdnoiz          V->V       Denoise frames using 3D FFT.
@@ -14274,7 +14524,7 @@ Filters:
  ... interleave        N->V       Temporally interleave video inputs.
  ... kerndeint         V->V       Apply kernel deinterlacing to the input.
  .S. lenscorrection    V->V       Rectify the image by correcting for lens distortion.
- TS. lensfun           V->V       Apply correction to an image based on info derived from the lensfun database.
+ ... libvmaf           VV->V      Calculate the VMAF between two video streams.
  TS. limiter           V->V       Limit pixels components to the specified range.
  ... loop              V->V       Loop video frames.
  TS. lumakey           V->V       Turns a certain luma into transparency.
@@ -14305,6 +14555,7 @@ Filters:
  ... ocr               V->V       Optical Character Recognition.
  T.. oscilloscope      V->V       2D Video Oscilloscope.
  TSC overlay           VV->V      Overlay a video source on top of the input.
+ ... overlay_opencl    VV->V      Overlay one video on top of another
  ... overlay_qsv       VV->V      Quick Sync Video overlay.
  T.. owdenoise         V->V       Denoise using wavelets.
  ... pad               V->V       Pad the input video.
@@ -14319,6 +14570,8 @@ Filters:
  T.. pp7               V->V       Apply Postprocessing 7 filter.
  TS. premultiply       N->V       PreMultiply first stream with first plane of second stream.
  TS. prewitt           V->V       Apply prewitt operator.
+ ... prewitt_opencl    V->V       Apply prewitt operator
+ ... program_opencl    |->V       Filter video using an OpenCL program
  T.. pseudocolor       V->V       Make pseudocolored video frames.
  ... psnr              VV->V      Calculate the PSNR between two video streams.
  ... pullup            V->V       Pullup from field sequence to frames.
@@ -14334,9 +14587,12 @@ Filters:
  ... reverse           V->V       Reverse a clip.
  TS. rgbashift         V->V       Shift RGBA.
  TS. roberts           V->V       Apply roberts cross operator.
+ ... roberts_opencl    V->V       Apply roberts operator
  TSC rotate            V->V       Rotate the input image.
  T.. sab               V->V       Apply shape adaptive blur.
  ..C scale             V->V       Scale the input video size and/or convert the image format.
+ ... scale_cuda        V->V       GPU accelerated video resizer
+ ... scale_npp         V->V       NVIDIA Performance Primitives video scaling and format conversion
  ... scale_qsv         V->V       QuickSync video scaling and format conversion
  ..C scale2ref         VV->VV     Scale the input video size and/or convert the image format to the given reference.
  ... select            V->N       Select video frames to pass in output.
@@ -14359,6 +14615,7 @@ Filters:
  ... signature         N->V       Calculate the MPEG-7 video signature
  T.. smartblur         V->V       Blur the input video without impacting the outlines.
  TS. sobel             V->V       Apply sobel operator.
+ ... sobel_opencl      V->V       Apply sobel operator
  ... split             V->N       Pass on the input to N video outputs.
  T.C spp               V->V       Apply a simple post processing filter.
  TS. sr                V->V       Apply DNN-based image super resolution to the input.
@@ -14373,16 +14630,21 @@ Filters:
  ... telecine          V->V       Apply a telecine pattern.
  TS. threshold         VVVV->V    Threshold first video stream using other video streams.
  ... thumbnail         V->V       Select the most representative frame in a given sequence of consecutive frames.
+ ... thumbnail_cuda    V->V       Select the most representative frame in a given sequence of consecutive frames.
  ... tile              V->V       Tile several successive frames together.
  ... tinterlace        V->V       Perform temporal field interlacing.
  T.. tlut2             V->V       Compute and apply a lookup table from two successive frames.
  .S. tmix              V->V       Mix successive video frames.
  ... tonemap           V->V       Conversion to/from different dynamic ranges.
+ ... tonemap_opencl    V->V       perform HDR to SDR conversion with tonemapping
  ... tpad              V->V       Temporarily pad video frames.
  .S. transpose         V->V       Transpose input video.
+ ... transpose_npp     V->V       NVIDIA Performance Primitives video transpose
+ ... transpose_opencl  V->V       Transpose input video
  ... trim              V->V       Pick one continuous section from the input, drop the rest.
  TS. unpremultiply     N->V       UnPreMultiply first stream with first plane of second stream.
  T.. unsharp           V->V       Sharpen or blur the input video.
+ ... unsharp_opencl    V->V       Apply unsharp mask to input video
  T.. uspp              V->V       Apply Ultra Simple / Slow Post-processing filter.
  T.. vaguedenoiser     V->V       Apply a Wavelet based Denoiser.
  ... vectorscope       V->V       Video vectorscope.
@@ -14401,6 +14663,8 @@ Filters:
  .S. xbr               V->V       Scale the input using xBR algorithm.
  ... xstack            N->V       Stack video inputs into custom layout.
  TS. yadif             V->V       Deinterlace the input image.
+ T.. yadif_cuda        V->V       Deinterlace CUDA frames
+ ... zmq               V->V       Receive commands through ZMQ and broker them to filters.
  ... zoompan           V->V       Apply Zoom & Pan effect.
  ..C zscale            V->V       Apply resizing, colorspace and bit depth conversion.
  ... allrgb            |->V       Generate all RGB colors.
@@ -14413,6 +14677,7 @@ Filters:
  ... mandelbrot        |->V       Render a Mandelbrot fractal.
  ... mptestsrc         |->V       Generate various test pattern.
  ... nullsrc           |->V       Null video source, return unprocessed video frames.
+ ... openclsrc         |->V       Generate video using an OpenCL program
  ... pal75bars         |->V       Generate PAL 75% color bars.
  ... pal100bars        |->V       Generate PAL 100% color bars.
  ... rgbtestsrc        |->V       Generate RGB test pattern.
@@ -14767,4 +15032,23 @@ vp9_cuvid AVOptions:
   -crop              <string>     .D.V..... Crop (top)x(bottom)x(left)x(right)
   -resize            <string>     .D.V..... Resize (width)x(height)
 
-Unknown filter 'scale_npp'.
+Filter scale_npp
+  NVIDIA Performance Primitives video scaling and format conversion
+    Inputs:
+       #0: default (video)
+    Outputs:
+       #0: default (video)
+nppscale AVOptions:
+  w                 <string>     ..FV..... Output video width (default "iw")
+  h                 <string>     ..FV..... Output video height (default "ih")
+  format            <string>     ..FV..... Output pixel format (default "same")
+  interp_algo       <int>        ..FV..... Interpolation algorithm used for resizing (from 0 to INT_MAX) (default cubic)
+     nn                           ..FV..... nearest neighbour
+     linear                       ..FV..... linear
+     cubic                        ..FV..... cubic
+     cubic2p_bspline              ..FV..... 2-parameter cubic (B=1, C=0)
+     cubic2p_catmullrom              ..FV..... 2-parameter cubic (B=0, C=1/2)
+     cubic2p_b05c03               ..FV..... 2-parameter cubic (B=1/2, C=3/10)
+     super                        ..FV..... supersampling
+     lanczos                      ..FV..... Lanczos
+
