@@ -118,6 +118,8 @@ class ReadSettings:
                         'use-hevc-qsv-decoder': 'False',
                         'enable_dxva2_gpu_decode': 'False',
                         'enable_hdr_sdr_tonemapping': 'False',
+                        'enable_opencl_hdr_sdr_tonemapping': 'False',
+                        'init_hw_device': 'opencl=gpu:0',
                         'subtitle-codec': 'mov_text',
                         'subtitle-language': '',
                         'subtitle-default-language': '',
@@ -463,6 +465,8 @@ class ReadSettings:
         self.hevc_qsv_decoder = config.getboolean( section, "use-hevc-qsv-decoder") #only supported on 6th gen intel and up.
         self.dxva2_decoder = config.getboolean( section, "enable_dxva2_gpu_decode" )
         self.hdr_sdr_convert = config.getboolean( section, "enable_hdr_sdr_tonemapping" )
+        self.enable_opencl_hdr_sdr_tonemapping = config.getboolean( section, "enable_opencl_hdr_sdr_tonemapping")
+        self.init_hw_device = config.get( section, "init_hw_device")
         self.nvenc_hwaccel_enabled = False
         self.nvenc_profile = config.get(section, "nvenc_profile")
         self.nvenc_preset = config.get(section, "nvenc_preset")

@@ -45,6 +45,8 @@ class MkvtoMp4:
                  hevc_qsv_decoder=False,
                  dxva2_decoder=False,
                  hdr_sdr_convert=False,
+                 enable_opencl_hdr_sdr_tonemapping=False,
+                 init_hw_device='opencl=gpu:0',
                  nvenc_cuvid=False,
                  nvenc_cuvid_hevc=False,
                  nvenc_decoder_gpu=None,
@@ -135,6 +137,8 @@ class MkvtoMp4:
         self.hevc_qsv_decoder = hevc_qsv_decoder
         self.dxva2_decoder = dxva2_decoder
         self.hdr_sdr_convert = hdr_sdr_convert
+        self.enable_opencl_hdr_sdr_tonemapping = enable_opencl_hdr_sdr_tonemapping
+        self.init_hw_device = init_hw_device
         self.nvenc_cuvid = nvenc_cuvid
         self.nvenc_cuvid_hevc = nvenc_cuvid_hevc
         self.nvenc_decoder_gpu = nvenc_decoder_gpu
@@ -218,6 +222,8 @@ class MkvtoMp4:
         self.hevc_qsv_decoder = settings.hevc_qsv_decoder
         self.dxva2_decoder = settings.dxva2_decoder
         self.hdr_sdr_convert = settings.hdr_sdr_convert
+        self.enable_opencl_hdr_sdr_tonemapping = settings.enable_opencl_hdr_sdr_tonemapping
+        self.init_hw_device = settings.init_hw_device
         self.nvenc_cuvid = settings.nvenc_cuvid
         self.nvenc_cuvid_hevc = settings.nvenc_cuvid_hevc
         self.nvenc_decoder_gpu = settings.nvenc_decoder_gpu
@@ -941,13 +947,22 @@ class MkvtoMp4:
             options['postopts'].extend(self.postopts)
 
         options['preopts'].extend(['-vsync', self.vsync ])
-        if self.hdr_sdr_convert and info.video.color_space == 'bt2020nc': # Thanks to https://stevens.li/guides/video/converting-hdr-to-sdr-with-ffmpeg/ 
+        if info.video.color_space == 'bt2020nc':  # Thanks to https://stevens.li/guides/video/converting-hdr-to-sdr-with-ffmpeg/ 
             #Currently this will not work with picture subtitles
-            if len(overlay_stream) < 1:
-                options['video']['color_space_convert'] = 'zscale=t=linear:npl=100,format=gbrpf32le,zscale=p=bt709,tonemap=tonemap=hable:desat=0,zscale=t=bt709:m=bt709:r=tv,format=yuv420p'
-                if subtitle_will_be_burned_in:
-                    options['video']['color_space_convert'] = 'zscale=t=linear:npl=100,format=gbrpf32le,zscale=p=bt709,tonemap=tonemap=hable:desat=0,zscale=t=bt709:m=bt709:r=tv,format=yuv420p,' + subtitle_burn
-                    del subtitle_settings[0]['subtitle_burn']
+            if self.enable_opencl_hdr_sdr_tonemapping:
+                if len(overlay_stream) < 1:
+                    options['preopts'].extend( ['-init_hw_device', self.init_hw_device ] )
+                    options['preopts'].extend( ['-filter_hw_device', 'gpu' ] )
+                    options['video']['color_space_convert'] = 'hwupload,tonemap_opencl=t=bt709:tonemap=hable:format=nv12,hwdownload,format=nv12'
+                    if subtitle_will_be_burned_in:
+                        options['video']['color_space_convert'] = 'hwupload,tonemap_opencl=t=bt709:tonemap=hable:format=nv12,hwdownload,format=nv12,' + subtitle_burn
+                        del subtitle_settings[0]['subtitle_burn']
+            elif self.hdr_sdr_convert:
+                if len(overlay_stream) < 1:
+                    options['video']['color_space_convert'] = 'zscale=t=linear:npl=100,format=gbrpf32le,zscale=p=bt709,tonemap=tonemap=hable:desat=0,zscale=t=bt709:m=bt709:r=tv,format=nv12'
+                    if subtitle_will_be_burned_in:
+                        options['video']['color_space_convert'] = 'zscale=t=linear:npl=100,format=gbrpf32le,zscale=p=bt709,tonemap=tonemap=hable:desat=0,zscale=t=bt709:m=bt709:r=tv,format=nv12,' + subtitle_burn
+                        del subtitle_settings[0]['subtitle_burn']
 
         nvenc_cuvid_codecs = { "h264", "mjpeg", "mpeg1video", "mpeg2video", "mpeg4", "vc1", "vp8", "hevc", "vp9" }
 

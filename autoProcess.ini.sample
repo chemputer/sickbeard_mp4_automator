@@ -94,6 +94,8 @@ vsync = -1
 sample_rate = 
 burn_in_forced_subs = False
 enable_hdr_sdr_tonemapping = False
+enable_opencl_hdr_sdr_tonemapping = False
+init_hw_device = opencl=gpu:0
 
 [CouchPotato]
 host = localhost

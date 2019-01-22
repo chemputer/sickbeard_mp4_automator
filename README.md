@@ -1,31 +1,31 @@
 Same as the original with better Nvidia support and some other things to make automation easier, my changes are as follows:
 
-**I have not tested this on a non-windows machine. It should still work, but let me know if it doesn't so I can fix it.**
-
-Nightly builds from https://ffmpeg.zeranoe.com/builds/ will work with all added options
+Nightly builds from https://ffmpeg.zeranoe.com/builds/ will work with all added options **EXCEPT enable_opencl_hdr_sdr_tonemapping -- You MUST compile your own ffmpeg to use this option.** If you are on windows I recommend using https://github.com/jb-alvarado/media-autobuild_suite "full build" for this purpose. The computer that does the compiling must have a OpenCL compliant video card in it.
 
 Cuvid/NVDEC only support pixel formats with 420 chroma, so it will not work with yuv444p, yuv422p, etc. When these formats are encountered, NVDEC will be disabled. 
 
 Brief explanation of added settings:
 
-- `enable_hdr_sdr_tonemapping` = This will do what is explained here - https://stevens.li/guides/video/converting-hdr-to-sdr-with-ffmpeg/ - This will disable itself when burn_in_forced_subs finds a picture-based subtitle to burn in, but I'll fix that in the future. Be warned that this is option will slow down conversion significantly due to being a single-threaded cpu operation, I was getting 4 fps on a i7 6900k.
+- `enable_hdr_sdr_tonemapping` = This will do what is explained here whenever a file with bt2020 colorspace is detected - https://stevens.li/guides/video/converting-hdr-to-sdr-with-ffmpeg/ - This will disable itself when burn_in_forced_subs finds a picture-based subtitle to burn in, but I'll fix that in the future. Be warned that this is option will slow down conversion significantly due to being a single-threaded cpu operation, I was getting 4 fps on a i7 6900k. This option is overriden by enable_opencl_hdr_sdr_tonemapping.
+- `enable_opencl_hdr_sdr_tonemapping` = This takes the tonemapping option above and shoves it thru the GPU using OpenCL. Initial results are an increase from 4 FPS to 28 FPS on a system with an i7 6900k and a Geforce 1080. This requires initializing hardware, which is done via the init_hw_device option -- The default setting should work for a majority of hardware setups, but if it doesn't you will need to modify the init_hw_device option. Please run a manual test on a HDR file before using this with automated setups -- mostly to make sure it works. Quality seems to be similar to CPU output, but admitedly I am not the best at making that determination. I'd highly recommend using this option instead of the CPU tonemapping as the speed difference is tremendous. 
+- `init_hw_device` = This overrides the init_hw_device open listed above. See https://ffmpeg.org/ffmpeg.html#Advanced-Video-options for options. Default is opencl=gpu:0
 - `burn_in_forced_subs` = This will attempt to find any forced subtitle and encode/"burn" it into the video. This is useful for media players that have trouble auto-selecting embedded forced subtitles from an .mp4. -- Looking at you, Plex. :p
   This looks for the 'forced' flag in the subtitle metadata first, but failing that will go digging through the title metadata where the text may say "forced", "english subs for non-english parts", "non-english parts", or something of that nature. 
   This part uses a whitelist method that only flags a subtitle stream as forced if it matches one of the items on the whitelist.
   Enabling this option will discard all subtitle streams as overlaying subtitles over burned in subtitles is kind of a bad idea.
-  You must select a language under `subtitle-language` for this to function properly. 
+  You must select a language under `subtitle-language` for this to function properly. It will "work" with non-english films for people who speak french/german/etc but want non-french/german/etc parts to have burned in subtitles but probably not very well. 
 - `sample_rate` = By default ffmpeg will upsample to 96 KHz with some audio filters (loudnorm being an example). Internet explorer/Firefox/edge will not play any video with 96 KHz audio, so this will allow you to set it to something lower like 48KHz.
 - `handle_m2ts_files` = This will allow the script to process m2ts files by going through the folder where they are located, searching for the largest .m2ts file and converting that one. Typically, the largest .m2ts file is the entire film without the extras. The script will delete all other m2ts files in the folder and convert the remaining m2ts file to mp4. Default is disabled. 
-- `resolution-bitrate-restriction` = Source bitrate restriction based on horizontal resolution. It MUST be done like this - horizontal resolution,bitrate, horizontal resolution,bitrate - With the lowest horizontal resolution first. 
-- Full Example: resolution-bitrate-restriction = 1280,6000,1920,10000,4096,40000 
-- That line will restrict 1280x720 to a bitrate of 6000, 1920x1080 to a bitrate of 10000 and 4k to a bitrate of 40000
-- This will override the bitrate set under video-bitrate
+- `resolution-bitrate-restriction` = Source bitrate restriction based on horizontal resolution. It MUST be done like this - horizontal resolution,bitrate, horizontal resolution,bitrate - With the lowest horizontal resolution first.
+- Full Example: resolution-bitrate-restriction = 1280,6000,1920,10000,4096,40000
+- That line will restrict 1280x720 to a bitrate of 6000, 1920x1080 to a bitrate of 10000 and 4k to a bitrate of 40000.
+- This will override the bitrate set under video-bitrate.
 - `qmin` = minimum video quantizer scale (VBR) (from -1 to 69) (default 2) - Must be set when nvenc_rate_control is vbr_2pass or vbr_minqp.
 - `qmax` = maximum video quantizer scale (VBR) (from -1 to 1024) (default 31)
-- `global_quality` = Must be set when nvenc_rate_control is constqp, interally this uses the -qp flag when nvenc is enabled
-- `maxrate` = maximum bitrate (in kb/s). Used for VBV together with bufsize. (from 0 to INT_MAX) (default 0), this can also be controlled the same as resolution-bitrate-restriction
-- `minrate` = minimum bitrate (in kb/s). Most useful in setting up a CBR encode. It is of little use otherwise. (from INT_MIN to INT_MAX) (default 0), this can also be controlled the same as resolution-bitrate-restriction
-- `bufsize` = set ratecontrol buffer size (in kb/s) (from INT_MIN to INT_MAX) (default 0) - I usually set this to 4*average bitrate, but mileage will vary, this can also be controlled the same as resolution-bitrate-restriction
+- `global_quality` = Must be set when nvenc_rate_control is constqp, internally this uses the -qp flag when nvenc is enabled.
+- `maxrate` = maximum bitrate (in kb/s). Used for VBV together with bufsize. (from 0 to INT_MAX) (default 0), this can also be controlled the same as resolution-bitrate-restriction.
+- `minrate` = minimum bitrate (in kb/s). Most useful in setting up a CBR encode. It is of little use otherwise. (from INT_MIN to INT_MAX) (default 0), this can also be controlled the same as resolution-bitrate-restriction.
+- `bufsize` = set ratecontrol buffer size (in kb/s) (from INT_MIN to INT_MAX) (default 0) - I usually set this to 2*average bitrate, but mileage will vary, this can also be controlled the same as resolution-bitrate-restriction.
 - `nvenc_encoder_gpu` = Selects which NVENC capable GPU to use for encoding. First GPU is 0, second is 1, and so on. Default is any
 - `nvenc_profile` = h264 options include: baseline, main, high, high444p - default is main, most clients support high but relatively few support high444p
 - `nvenc_preset` = Options include: slow, medium, fast, hp, hq, bd, ll, llhq, llhp, lossless, losslesshp - default is medium
@@ -33,14 +33,14 @@ Brief explanation of added settings:
 - `nvenc_temporal_aq` = (true/false) Improves output quality slightly, adds 2-5% extra processing time - default false
 - `nvenc_weighted_prediction` = (true/false) Reduces bitrate needed for scenes that fade to black - default false - **WARNING**: Currently broken with Nvidia drivers 387.xx and 388.xx, the encoder will eventually halt and throw an error.  385.69 are the most current drivers that work with this, otherwise leave it disabled.
 - `nvenc_rc_lookahead` = Number of frames to look ahead for rate-control (from -1 to 32) - default -1
-- `enable_nvenc_decoder` = (true/false) Enable NVDEC gpu decoding. Default is false - This is anywhere from 10-40% faster decoding than dxva2 but vastly more buggy - many dropped frames on certain videos.
-- `enable_nvenc_hevc_decoder` = (true/false) Enable NVDEC gpu decoding of HEVC/VP9. Only supported by Geforce 950/960/1050/1060/1070/1080 and Pascal quadros. Default is false
-- `nvenc_decoder_gpu` = Selects which NVENC capable GPU to use for decoding. First GPU is 0, second is 1, and so on. Default is any
+- `enable_nvenc_decoder` = (true/false) Enable NVDEC gpu decoding. Default is false - This is anywhere from 10-30% faster decoding than dxva2 but I have run into problems with dropped frames no matter what driver is being used. 
+- `enable_nvenc_hevc_decoder` = (true/false) Enable NVDEC gpu decoding of HEVC/VP9. Only supported by Geforce 950/960/1050/1060/1070/1080 and Pascal quadros. Default is false.
+- `nvenc_decoder_gpu` = Selects which NVENC capable GPU to use for decoding. First GPU is 0, second is 1, and so on. Default is any.
 - `nvenc_hevc_decoder_gpu` = Selects which NVENC capable GPU to use for hevc decoding. First GPU is 0, second is 1, and so on. Default is any. 
-- `opensubtitles` = This section is for opensubtitles login information, will be used in the future for downloading subs and burning them in.
-- `podnapisi` = Enables foreign only subtitles, to be used with burning in subs.
+- `opensubtitles` = This section is for opensubtitles login information, will be used in the future for downloading subs and burning them in. Doesn't really work at the moment.
+- `podnapisi` = Enables foreign only subtitles, to be used with burning in subs. Doesn't really work at the moment.
 
-If you have multiple nvidia cards you can decode on one and encode on the other, but it doesn't seem to speed up the process at all.
+If you have multiple nvidia cards you can decode on one and encode on the other, but it doesn't speed up the process at all.
 Decoding by itself does not count towards the nvenc 2 stream limit.
 
 Original README.md follows:
