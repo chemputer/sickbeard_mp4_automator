@@ -942,7 +942,7 @@ class MkvtoMp4:
         if self.preopts:
             options['preopts'].extend(self.preopts)
         
-        options['postopts'].extend(['-movflags', 'faststart'])
+        #options['postopts'].extend(['-movflags', 'faststart'])
         if self.postopts:
             options['postopts'].extend(self.postopts)
 
