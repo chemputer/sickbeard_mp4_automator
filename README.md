@@ -31,8 +31,8 @@ Brief explanation of added settings:
 - `nvenc_preset` = Options include: slow, medium, fast, hp, hq, bd, ll, llhq, llhp, lossless, losslesshp - default is medium
 - `nvenc_rate_control` = Options include: constqp, vbr, cbr, vbr_minqp, ll_2pass_quality, ll_2pass_size, vbr_2pass, cbr_ld_hq, cbr_hq, vbr_hq - default constqp
 - `nvenc_temporal_aq` = (true/false) Improves output quality slightly, adds 2-5% extra processing time - default false
-- `nvenc_weighted_prediction` = (true/false) Reduces bitrate needed for scenes that fade to black - default false - **WARNING**: Currently broken with Nvidia drivers 387.xx and 388.xx, the encoder will eventually halt and throw an error.  385.69 are the most current drivers that work with this, otherwise leave it disabled.
-- `nvenc_rc_lookahead` = Number of frames to look ahead for rate-control (from -1 to 32) - default -1
+- `nvenc_weighted_prediction` = (true/false) Reduces bitrate needed for scenes that fade to black - default false - **WARNING**: Broken in driver releases inbetween 387.xx and 398.xx. 
+- `nvenc_rc_lookahead` = Number of frames to look ahead for rate-control (from 0 to 32) - default 0 - **WARNING**: Broken in nvidia drivers 410.57 and onward. It will work for some files, but seg faults immediately on others.
 - `enable_nvenc_decoder` = (true/false) Enable NVDEC gpu decoding. Default is false - This is anywhere from 10-30% faster decoding than dxva2 but I have run into problems with dropped frames no matter what driver is being used. 
 - `enable_nvenc_hevc_decoder` = (true/false) Enable NVDEC gpu decoding of HEVC/VP9. Only supported by Geforce 950/960/1050/1060/1070/1080 and Pascal quadros. Default is false.
 - `nvenc_decoder_gpu` = Selects which NVENC capable GPU to use for decoding. First GPU is 0, second is 1, and so on. Default is any.
