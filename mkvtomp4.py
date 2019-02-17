@@ -505,6 +505,7 @@ class MkvtoMp4:
 
         audio_settings = {}
         blocked_audio_languages = []
+        disable_faststart = False
         l = 0
         for a in info.audio:
             try:
@@ -516,7 +517,13 @@ class MkvtoMp4:
             self.log.info("Audio detected for stream #%s: %s [%s]." % (a.index, a.codec, a.metadata['language']))
 
             if self.output_extension in valid_tagging_extensions and ( a.codec.lower() == 'truehd' or a.codec.startswith( 'pcm' ) ): #Truehd/pcm cannot be in a mp4 container
-                self.audio_copyoriginal = False 
+                self.audio_copyoriginal = False
+
+            if 'ac3' in a.codec.lower() and self.audio_copyoriginal: # EAC3 requires the moov atom to be at the end of the file, while ac3 requires delay_moov.
+                                         # https://patchwork.ffmpeg.org/patch/11972/  -- recently added in error checking for this
+                                         # I've had trouble making delay_moov work, so we're going to disable faststart on ac3/eac3 files.
+                                         # This seems to only be needed when copying audio streams. 
+                disable_faststart = True
 
             # Set undefined language to default language if specified
             if self.adl is not None and a.metadata['language'] == 'und':
@@ -941,8 +948,8 @@ class MkvtoMp4:
 
         if self.preopts:
             options['preopts'].extend(self.preopts)
-        
-        options['postopts'].extend(['-movflags', 'faststart'])
+        if disable_faststart == False:
+            options['postopts'].extend(['-movflags', 'faststart'])
         if self.postopts:
             options['postopts'].extend(self.postopts)
 
