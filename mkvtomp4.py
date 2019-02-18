@@ -738,7 +738,7 @@ class MkvtoMp4:
                 if vcodec == 'copy':
                     vcodec = self.video_codec[0]
             # Make sure its not an image based codec
-            if self.embedsubs and ( s.codec.lower() not in bad_subtitle_codecs or not( self.output_extension == 'mkv' and s.codec.lower() in bad_subtitle_codecs and subtitle_will_be_burned_in == True )):
+            if self.embedsubs and s.codec.lower() not in bad_subtitle_codecs:
                 # Proceed if no whitelist is set, or if the language is in the whitelist
                 if self.swl is None or s.metadata['language'].lower() in self.swl:
                     subtitle_settings.update({l: {
@@ -765,6 +765,17 @@ class MkvtoMp4:
                     overlay_stream = "[0:v][0:%s]overlay" % ( s.index )
                 else: # The resolution has changed, we must use scale2ref to resize the picture subtitles or they'll end up in weird places.
                     overlay_stream = "[0:%s][video]scale2ref[sub][video];[video][sub]overlay" % ( s.index )
+            elif s.codec.lower() in bad_subtitle_codecs and self.embedsubs == True and self.output_extension == "mkv":
+                # Proceed if no whitelist is set, or if the language is in the whitelist
+                if self.swl is None or s.metadata['language'].lower() in self.swl:
+                    subtitle_settings.update({l: {
+                        'map': s.index,
+                        'codec': 'copy',
+                        'language': s.metadata['language'],
+                        'forced': s.sub_forced,
+                        'default': s.sub_default
+                    }} )
+                    l = l + 1
             elif s.codec.lower() not in bad_subtitle_codecs and not self.embedsubs:
                 if self.swl is None or s.metadata['language'].lower() in self.swl:
                     for codec in self.scodec:
