@@ -506,6 +506,8 @@ class MkvtoMp4:
         audio_settings = {}
         blocked_audio_languages = []
         disable_faststart = False
+        if self.output_extension == 'mkv': # MKV has no moov atom 
+            disable_faststart = True
         l = 0
         for a in info.audio:
             try:
@@ -736,7 +738,7 @@ class MkvtoMp4:
                 if vcodec == 'copy':
                     vcodec = self.video_codec[0]
             # Make sure its not an image based codec
-            if self.embedsubs and ( s.codec.lower() not in bad_subtitle_codecs or self.output_extension == 'mkv' ):
+            if self.embedsubs and ( s.codec.lower() not in bad_subtitle_codecs or not( self.output_extension == 'mkv' and s.codec.lower() in bad_subtitle_codecs and subtitle_will_be_burned_in == True )):
                 # Proceed if no whitelist is set, or if the language is in the whitelist
                 if self.swl is None or s.metadata['language'].lower() in self.swl:
                     subtitle_settings.update({l: {
