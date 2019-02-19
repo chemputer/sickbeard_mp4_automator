@@ -392,6 +392,7 @@ class MkvtoMp4:
         input_dir, filename, input_extension = self.parseFile(inputfile)
         drive_letter, directory = os.path.splitdrive( input_dir )
         drive_letter_no_colon = drive_letter.replace( ":", "" )
+        output_dir = input_dir if self.output_dir is None else self.output_dir
         directory = directory.replace("\\", "\\\\"); #This part is necessary because the subtitle filter requires double escapes....
 
         info = Converter(self.FFMPEG_PATH, self.FFPROBE_PATH).probe(inputfile)
@@ -750,12 +751,13 @@ class MkvtoMp4:
                         'default': s.sub_default,
                         'burn_in_forced_subs': self.burn_in_forced_subs,
                         'subtitle_burn': drive_letter_no_colon + r"\:" + directory + "\\\\" + filename + "." + input_extension + \
-                            ":si=" + str( subtitle_used ) + "'" #FFmpeg requires a very specific string of letters for -vf subtitles=
+                            ( ".original:si=" if ( input_extension == self.output_extension and input_dir == output_dir ) else ":si=" ) + str( subtitle_used ) + "'" #FFmpeg requires a very specific string of letters for -vf subtitles=
                     }} )
                     if ( os.name != 'nt' ):  #TODO: Make this a bit less hacky... if possible?
                         temp_directory = directory
                         temp_directory = temp_directory.replace("\\", "//" )
-                        subtitle_settings[l]['subtitle_burn'] = temp_directory + "//" + filename + "." + input_extension + ":si=" + str( subtitle_used ) + "'"
+                        subtitle_settings[l]['subtitle_burn'] = temp_directory + "//" + filename + "." + input_extension + \
+                           ( ".original:si=" if ( input_extension == self.output_extension and input_dir == output_dir ) else ":si=" ) + str( subtitle_used ) + str( subtitle_used ) + "'"
                     self.log.info("Creating subtitle stream %s from source stream %s." % (l, s.index))
                     subtitle_burn = subtitle_settings[l]['subtitle_burn']
                     l = l + 1

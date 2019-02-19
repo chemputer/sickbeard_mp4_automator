@@ -2954,6 +2954,10 @@ nvenc_hevc AVOptions:
   -init_qpI          <int>        E..V..... Initial QP value for I frame (from -1 to 51) (default -1)
   -qp                <int>        E..V..... Constant quantization parameter rate control method (from -1 to 51) (default -1)
   -weighted_pred     <int>        E..V..... Set 1 to enable weighted prediction (from 0 to 1) (default 0)
+  -b_ref_mode        <int>        E..V..... Use B frames as references (from 0 to 2) (default disabled)
+     disabled                     E..V..... B frames will not be used for reference
+     each                         E..V..... Each B frame will be used for reference
+     middle                       E..V..... Only (number of B frames)/2 will be used for reference
 
 hevc_amf AVOptions:
   -usage             <int>        E..V..... Set the encoding usage (from 0 to 3) (default transcoding)
@@ -3089,6 +3093,10 @@ hevc_nvenc AVOptions:
   -init_qpI          <int>        E..V..... Initial QP value for I frame (from -1 to 51) (default -1)
   -qp                <int>        E..V..... Constant quantization parameter rate control method (from -1 to 51) (default -1)
   -weighted_pred     <int>        E..V..... Set 1 to enable weighted prediction (from 0 to 1) (default 0)
+  -b_ref_mode        <int>        E..V..... Use B frames as references (from 0 to 2) (default disabled)
+     disabled                     E..V..... B frames will not be used for reference
+     each                         E..V..... Each B frame will be used for reference
+     middle                       E..V..... Only (number of B frames)/2 will be used for reference
 
 hevc_qsv encoder AVOptions:
   -async_depth       <int>        E..V..... Maximum processing parallelism (from 1 to INT_MAX) (default 4)
@@ -14608,6 +14616,10 @@ nvenc_hevc AVOptions:
   -init_qpI          <int>        E..V..... Initial QP value for I frame (from -1 to 51) (default -1)
   -qp                <int>        E..V..... Constant quantization parameter rate control method (from -1 to 51) (default -1)
   -weighted_pred     <int>        E..V..... Set 1 to enable weighted prediction (from 0 to 1) (default 0)
+  -b_ref_mode        <int>        E..V..... Use B frames as references (from 0 to 2) (default disabled)
+     disabled                     E..V..... B frames will not be used for reference
+     each                         E..V..... Each B frame will be used for reference
+     middle                       E..V..... Only (number of B frames)/2 will be used for reference
 
 Decoder h264_cuvid [Nvidia CUVID H264 decoder]:
     General capabilities: delay avoidprobe hardware 
