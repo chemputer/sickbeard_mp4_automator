@@ -759,7 +759,7 @@ class MkvtoMp4:
                         subtitle_settings[l]['subtitle_burn'] = temp_directory + "//" + filename + "." + input_extension + \
                            ( ".original:si=" if ( input_extension == self.output_extension and input_dir == output_dir ) else ":si=" ) + str( subtitle_used ) + str( subtitle_used ) + "'"
                     self.log.info("Creating subtitle stream %s from source stream %s." % (l, s.index))
-                    subtitle_burn = subtitle_settings[l]['subtitle_burn']
+                    subtitle_burn = "subtitles=" + subtitle_settings[l]['subtitle_burn']
                     l = l + 1
             
             if s.codec.lower() in bad_subtitle_codecs and self.embedsubs == True and forced_sub > 0 and self.burn_in_forced_subs == True: # This overlays forced picture subtitles on top of the video stream. Slows down conversion significantly.
