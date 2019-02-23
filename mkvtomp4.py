@@ -751,15 +751,18 @@ class MkvtoMp4:
                         'default': s.sub_default,
                         'burn_in_forced_subs': self.burn_in_forced_subs,
                         'subtitle_burn': drive_letter_no_colon + r"\:" + directory + "\\\\" + filename + "." + input_extension + \
-                            ( ".original:si=" if ( input_extension == self.output_extension and input_dir == output_dir ) else ":si=" ) + str( subtitle_used ) + "'" #FFmpeg requires a very specific string of letters for -vf subtitles=
+                            ( ".original:si=" if ( input_extension == self.output_extension and input_dir == output_dir ) else ":si=" ) + str( subtitle_used )  #FFmpeg requires a very specific string of letters for -vf subtitles=
                     }} )
                     if ( os.name != 'nt' ):  #TODO: Make this a bit less hacky... if possible?
                         temp_directory = directory
                         temp_directory = temp_directory.replace("\\", "//" )
                         subtitle_settings[l]['subtitle_burn'] = temp_directory + "//" + filename + "." + input_extension + \
-                           ( ".original:si=" if ( input_extension == self.output_extension and input_dir == output_dir ) else ":si=" ) + str( subtitle_used ) + str( subtitle_used ) + "'"
+                           ( ".original:si=" if ( input_extension == self.output_extension and input_dir == output_dir ) else ":si=" ) + str( subtitle_used ) + str( subtitle_used )
                     self.log.info("Creating subtitle stream %s from source stream %s." % (l, s.index))
-                    subtitle_burn = "subtitles=" + subtitle_settings[l]['subtitle_burn']
+                    subtitle_temporary = subtitle_settings[l]['subtitle_burn']
+                    subtitle_temporary = subtitle_temporary.replace( "\\", "\\\\" )
+                    subtitle_temporary = subtitle_temporary.replace("'", "\\\\\\\'\\\\\\" ) # "Special character escapes are like violence: If they're not solving your problem, you're not using enough.
+                    subtitle_burn = "subtitles=" + subtitle_temporary
                     l = l + 1
             
             if s.codec.lower() in bad_subtitle_codecs and self.embedsubs == True and forced_sub > 0 and self.burn_in_forced_subs == True: # This overlays forced picture subtitles on top of the video stream. Slows down conversion significantly.
@@ -977,14 +980,14 @@ class MkvtoMp4:
                     options['preopts'].extend( ['-filter_hw_device', 'gpu' ] )
                     options['video']['color_space_convert'] = 'hwupload,tonemap_opencl=t=bt709:tonemap=hable:format=nv12,hwdownload,format=nv12'
                     if subtitle_will_be_burned_in:
-                        options['video']['color_space_convert'] = 'hwupload,tonemap_opencl=t=bt709:tonemap=hable:format=nv12,hwdownload,format=nv12,' + subtitle_burn
-                        del subtitle_settings[0]['subtitle_burn']
+                        options['video']['color_space_convert'] = 'hwupload,tonemap_opencl=t=bt709:tonemap=hable:format=nv12,hwdownload,format=nv12,' + subtitle_burn 
+                        del subtitle_settings[0]
             elif self.hdr_sdr_convert:
                 if len(overlay_stream) < 1:
-                    options['video']['color_space_convert'] = 'zscale=t=linear:npl=100,format=gbrpf32le,zscale=p=bt709,tonemap=tonemap=hable:desat=0,zscale=t=bt709:m=bt709:r=tv,format=nv12'
+                    options['video']['color_space_convert'] = "zscale=t=linear:npl=100,format=gbrpf32le,zscale=p=bt709,tonemap=tonemap=hable:desat=0,zscale=t=bt709:m=bt709:r=tv,format=nv12"
                     if subtitle_will_be_burned_in:
-                        options['video']['color_space_convert'] = 'zscale=t=linear:npl=100,format=gbrpf32le,zscale=p=bt709,tonemap=tonemap=hable:desat=0,zscale=t=bt709:m=bt709:r=tv,format=nv12,' + subtitle_burn
-                        del subtitle_settings[0]['subtitle_burn']
+                        options['video']['color_space_convert'] = "zscale=t=linear:npl=100,format=gbrpf32le,zscale=p=bt709,tonemap=tonemap=hable:desat=0,zscale=t=bt709:m=bt709:r=tv,format=nv12," + subtitle_burn
+                        del subtitle_settings[0]
 
         nvenc_cuvid_codecs = { "h264", "mjpeg", "mpeg1video", "mpeg2video", "mpeg4", "vc1", "vp8", "hevc", "vp9" }
 
