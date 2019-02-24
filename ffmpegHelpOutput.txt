@@ -7210,6 +7210,7 @@ amplify AVOptions:
   radius            <int>        ..FV..... set radius (from 1 to 63) (default 2)
   factor            <float>      ..FV..... set factor (from 0 to 65535) (default 2)
   threshold         <float>      ..FV..... set threshold (from 0 to 65535) (default 10)
+  tolerance         <float>      ..FV..... set tolerance (from 0 to 65535) (default 0)
   low               <int>        ..FV..... set low limit for amplification (from 0 to 65535) (default 65535)
   high              <int>        ..FV..... set high limit for amplification (from 0 to 65535) (default 65535)
   planes            <flags>      ..FV..... set what planes to filter (default 7)
