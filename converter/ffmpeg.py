@@ -565,8 +565,8 @@ class FFMpeg(object):
                 # So, we won't re-encode a video just because the last few seconds of audio are trash.
 
             if 'Non-monotonous DTS' in ret and ignore_non_monotonous == False: #engage kludge... but don't do it at the end of the audio stream.
-                p.terminate()
                 if alreadykludged == False:
+                    p.terminate()
                     for i in range( 3 ):
                         try:
                             os.remove(outfile)
