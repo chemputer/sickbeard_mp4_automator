@@ -109,6 +109,7 @@ class ReadSettings:
                         'nvenc_decoder_gpu':'',
                         'nvenc_hevc_decoder_gpu':'',
                         'burn_in_forced_subs':'False',
+                        'burn_in_full_subs':'False',
                         'handle_m2ts_files':'False',
                         'video-profile': '',
                         'h264-max-level': '',
@@ -489,6 +490,7 @@ class ReadSettings:
         self.nvenc_decoder_gpu = config.get(section, "nvenc_decoder_gpu")
         self.nvenc_decoder_hevc_gpu = config.get(section, "nvenc_hevc_decoder_gpu")
         self.burn_in_forced_subs = config.getboolean( section, "burn_in_forced_subs" )
+        self.burn_in_full_subs = config.getboolean( section, "burn_in_full_subs")
         self.pix_fmt = config.get(section, "pix-fmt").strip().lower()
         if self.pix_fmt == '':
             self.pix_fmt = None

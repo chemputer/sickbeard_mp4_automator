@@ -4706,6 +4706,7 @@ dash muxer AVOptions:
      webm                         E........ make segment file in WebM format
   -ignore_io_errors  <boolean>    E........ Ignore IO errors during open and write. Useful for long-duration runs with network output (default false)
   -lhls              <boolean>    E........ Enable Low-latency HLS(Experimental). Adds #EXT-X-PREFETCH tag with current segment's URI (default false)
+  -master_m3u8_publish_rate <int>        E........ Publish master playlist every after this many segment intervals (from 0 to UINT32_MAX) (default 0)
 
 f4v muxer AVOptions:
   -movflags          <flags>      E........ MOV muxer flags (default 0)

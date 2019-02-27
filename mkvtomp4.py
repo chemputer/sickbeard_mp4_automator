@@ -53,6 +53,7 @@ class MkvtoMp4:
                  nvenc_decoder_hevc_gpu=None,
                  nvenc_hwaccel_enabled=False,
                  burn_in_forced_subs=False,
+                 burn_in_full_subs=False,
                  audio_codec=['ac3'],
                  audio_bitrate=256,
                  audio_filter=None,
@@ -145,6 +146,7 @@ class MkvtoMp4:
         self.nvenc_decoder_hevc_gpu = nvenc_decoder_hevc_gpu
         self.nvenc_hwaccel_enabled = nvenc_hwaccel_enabled
         self.burn_in_forced_subs = burn_in_forced_subs
+        self.burn_in_full_subs = burn_in_full_subs
         self.pix_fmt = pix_fmt
         # Audio settings
         self.audio_codec = audio_codec
@@ -230,6 +232,7 @@ class MkvtoMp4:
         self.nvenc_decoder_hevc_gpu = settings.nvenc_decoder_hevc_gpu
         self.nvenc_hwaccel_enabled = settings.nvenc_hwaccel_enabled
         self.burn_in_forced_subs = settings.burn_in_forced_subs
+        self.burn_in_full_subs = settings.burn_in_full_subs
         self.pix_fmt = settings.pix_fmt
         # Audio settings
         self.audio_codec = settings.acodec
@@ -679,6 +682,8 @@ class MkvtoMp4:
         shortest_duration_subtitle_stream = 86400 # There probably aren't too many movies that are 24 hours long.
         longest_duration_subtitle_stream = 1
         desired_language_streams = 0
+        if self.burn_in_full_subs == True:
+            self.burn_in_forced_subs = True
         for s in info.subtitle:
             subtitle_number += 1
             try:
@@ -694,7 +699,12 @@ class MkvtoMp4:
             if self.swl is None or s.metadata['language'].lower() not in self.swl:
                 continue
             desired_language_streams += 1
-            if s.sub_forced == 2 and s.sub_default == 1: ## Prefer subs that are flagged forced AND default by their disposition
+
+            if self.burn_in_full_subs: # Generally the first sub works for full subs.
+                forced_sub = s.index
+                subtitle_used = subtitle_number
+                break
+            elif s.sub_forced == 2 and s.sub_default == 1: ## Prefer subs that are flagged forced AND default by their disposition
                 forced_sub = s.index
                 subtitle_used = subtitle_number
                 break
@@ -767,7 +777,7 @@ class MkvtoMp4:
             
             if s.codec.lower() in bad_subtitle_codecs and self.embedsubs == True and forced_sub > 0 and self.burn_in_forced_subs == True: # This overlays forced picture subtitles on top of the video stream. Slows down conversion significantly.
                 if vwidth == None:
-                    overlay_stream = "[0:v][0:%s]overlay" % ( s.index )
+                    overlay_stream = "[0:%s]overlay[video]" % ( s.index )
                 else: # The resolution has changed, we must use scale2ref to resize the picture subtitles or they'll end up in weird places.
                     overlay_stream = "[0:%s][video]scale2ref[sub][video];[video][sub]overlay" % ( s.index )
             elif s.codec.lower() in bad_subtitle_codecs and self.embedsubs == True and self.output_extension == "mkv":
@@ -960,8 +970,7 @@ class MkvtoMp4:
         if len(overlay_stream) > 0:
             options['preopts'].remove( '-fix_sub_duration' ) #fix_sub_duration really screws up the duration of overlaid "picture" subtitles,
                            #as they stay on the screen for less than a second. This doesn't have any negative consequences that I've noticed.
-            if vwidth != None:
-                del options['video']['map'] #The video stream formally known as [v:(number)] is remapped to [video] in order to support scaling picture subtitles to another resolution.
+            del options['video']['map'] #The video stream formally known as [v:(number)] is remapped to [video] in order to support scaling picture subtitles to another resolution.
             options['video']['filter_complex'] = overlay_stream # I couldn't quite get it to work correctly without doing this. 
 
         if self.preopts:
@@ -972,22 +981,32 @@ class MkvtoMp4:
             options['postopts'].extend(self.postopts)
 
         options['preopts'].extend(['-vsync', self.vsync ])
+        
         if info.video.color_space == 'bt2020nc':  # Thanks to https://stevens.li/guides/video/converting-hdr-to-sdr-with-ffmpeg/ 
-            #Currently this will not work with picture subtitles
             if self.enable_opencl_hdr_sdr_tonemapping:
-                if len(overlay_stream) < 1:
-                    options['preopts'].extend( ['-init_hw_device', self.init_hw_device ] )
-                    options['preopts'].extend( ['-filter_hw_device', 'gpu' ] )
-                    options['video']['color_space_convert'] = 'hwupload,tonemap_opencl=t=bt709:tonemap=hable:format=nv12,hwdownload,format=nv12'
+                options['preopts'].extend( ['-init_hw_device', self.init_hw_device ] )
+                options['preopts'].extend( ['-filter_hw_device', 'gpu' ] )
+                if len(overlay_stream) > 20:
+                    options['video']['filter_complex'] = "hwupload,tonemap_opencl=t=bt709:tonemap=hable:format=nv12,hwdownload,format=nv12[video];[video]" + overlay_stream
+                elif len(overlay_stream) > 1:
+                    options['video']['filter_complex'] = "hwupload,tonemap_opencl=t=bt709:tonemap=hable:format=nv12,hwdownload,format=nv12[base];[base]" + overlay_stream
+                else:
+                    options['video']['color_space_convert'] = "hwupload,tonemap_opencl=t=bt709:tonemap=hable:format=nv12,hwdownload,format=nv12"
                     if subtitle_will_be_burned_in:
-                        options['video']['color_space_convert'] = 'hwupload,tonemap_opencl=t=bt709:tonemap=hable:format=nv12,hwdownload,format=nv12,' + subtitle_burn 
+                        options['video']['color_space_convert'] = "hwupload,tonemap_opencl=t=bt709:tonemap=hable:format=nv12,hwdownload,format=nv12," + subtitle_burn 
                         del subtitle_settings[0]
             elif self.hdr_sdr_convert:
-                if len(overlay_stream) < 1:
+                if len(overlay_stream) > 20:
+                     options['video']['filter_complex'] = "zscale=t=linear:npl=100,format=gbrpf32le,zscale=p=bt709,tonemap=tonemap=hable:desat=0,zscale=t=bt709:m=bt709:r=tv,format=nv12[video];[video]" + overlay_stream
+                elif len(overlay_stream) > 1:
+                    options['video']['filter_complex'] = "zscale=t=linear:npl=100,format=gbrpf32le,zscale=p=bt709,tonemap=tonemap=hable:desat=0,zscale=t=bt709:m=bt709:r=tv,format=nv12[base];[base]" + overlay_stream
+                else:
                     options['video']['color_space_convert'] = "zscale=t=linear:npl=100,format=gbrpf32le,zscale=p=bt709,tonemap=tonemap=hable:desat=0,zscale=t=bt709:m=bt709:r=tv,format=nv12"
                     if subtitle_will_be_burned_in:
                         options['video']['color_space_convert'] = "zscale=t=linear:npl=100,format=gbrpf32le,zscale=p=bt709,tonemap=tonemap=hable:desat=0,zscale=t=bt709:m=bt709:r=tv,format=nv12," + subtitle_burn
                         del subtitle_settings[0]
+        elif len(overlay_stream) > 1:
+            options['video']['filter_complex'] = "[0:v]" + overlay_stream
 
         nvenc_cuvid_codecs = { "h264", "mjpeg", "mpeg1video", "mpeg2video", "mpeg4", "vc1", "vp8", "hevc", "vp9" }
 
