@@ -776,10 +776,13 @@ class MkvtoMp4:
                     l = l + 1
             
             if s.codec.lower() in bad_subtitle_codecs and self.embedsubs == True and forced_sub > 0 and self.burn_in_forced_subs == True: # This overlays forced picture subtitles on top of the video stream. Slows down conversion significantly.
-                if vwidth == None:
+                if s.video_width != None and ( s.video_width != info.video.video_width ) and vwidth == None:
+                    overlay_stream = "[0:%s][0:v]scale2ref[sub][video];[video][sub]overlay[video]" % ( s.index )
+                elif vwidth == None:
                     overlay_stream = "[0:%s]overlay[video]" % ( s.index )
-                else: # The resolution has changed, we must use scale2ref to resize the picture subtitles or they'll end up in weird places.
-                    overlay_stream = "[0:%s][video]scale2ref[sub][video];[video][sub]overlay" % ( s.index )
+                else:
+                    overlay_stream = "[0:%s][video]scale2ref[sub][video];[video][sub]overlay[video]" % ( s.index )
+
             elif s.codec.lower() in bad_subtitle_codecs and self.embedsubs == True and self.output_extension == "mkv":
                 # Proceed if no whitelist is set, or if the language is in the whitelist
                 if self.swl is None or s.metadata['language'].lower() in self.swl:
@@ -987,7 +990,7 @@ class MkvtoMp4:
                 options['preopts'].extend( ['-init_hw_device', self.init_hw_device ] )
                 options['preopts'].extend( ['-filter_hw_device', 'gpu' ] )
                 if len(overlay_stream) > 20:
-                    options['video']['filter_complex'] = "hwupload,tonemap_opencl=t=bt709:tonemap=hable:format=nv12,hwdownload,format=nv12[video];[video]" + overlay_stream
+                    options['video']['filter_complex'] = "hwupload,tonemap_opencl=t=bt709:tonemap=hable:format=nv12,hwdownload,format=nv12[video];" + overlay_stream
                 elif len(overlay_stream) > 1:
                     options['video']['filter_complex'] = "hwupload,tonemap_opencl=t=bt709:tonemap=hable:format=nv12,hwdownload,format=nv12[base];[base]" + overlay_stream
                 else:
@@ -997,7 +1000,7 @@ class MkvtoMp4:
                         del subtitle_settings[0]
             elif self.hdr_sdr_convert:
                 if len(overlay_stream) > 20:
-                     options['video']['filter_complex'] = "zscale=t=linear:npl=100,format=gbrpf32le,zscale=p=bt709,tonemap=tonemap=hable:desat=0,zscale=t=bt709:m=bt709:r=tv,format=nv12[video];[video]" + overlay_stream
+                     options['video']['filter_complex'] = "zscale=t=linear:npl=100,format=gbrpf32le,zscale=p=bt709,tonemap=tonemap=hable:desat=0,zscale=t=bt709:m=bt709:r=tv,format=nv12[video];" + overlay_stream
                 elif len(overlay_stream) > 1:
                     options['video']['filter_complex'] = "zscale=t=linear:npl=100,format=gbrpf32le,zscale=p=bt709,tonemap=tonemap=hable:desat=0,zscale=t=bt709:m=bt709:r=tv,format=nv12[base];[base]" + overlay_stream
                 else:
