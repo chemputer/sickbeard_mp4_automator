@@ -674,7 +674,9 @@ class MkvtoMp4:
         forced_sub = 0 # This is the index of the subtitle stream in the entire file, overlay uses this index
         guessed_forced_sub = 0
         guessed_subtitle_number  = -1
-        overlay_stream = ""
+        overlay_stream = None
+        use_overlay_stream = False
+        resize_overlay_stream = False
         subtitle_will_be_burned_in = False
         subtitle_burn = ""
         subtitle_number = -1 # Subtitle_used is the index of the subtitle stream compared to only other subtitles. -vf to overlay uses this.
@@ -775,13 +777,11 @@ class MkvtoMp4:
                     subtitle_burn = "subtitles=" + subtitle_temporary
                     l = l + 1
             
-            if s.codec.lower() in bad_subtitle_codecs and self.embedsubs == True and forced_sub > 0 and self.burn_in_forced_subs == True: # This overlays forced picture subtitles on top of the video stream. Slows down conversion significantly.
+            use_overlay_stream = ( s.codec.lower() in bad_subtitle_codecs and self.embedsubs == True and forced_sub > 0 and self.burn_in_forced_subs == True ) # This overlays forced picture subtitles on top of the video stream. Slows down conversion significantly.
+            if use_overlay_stream == True:
+                overlay_stream = s.index
                 if s.video_width != None and ( s.video_width != info.video.video_width ) and vwidth == None:
-                    overlay_stream = "[0:%s][0:v]scale2ref[sub][video];[video][sub]overlay[video]" % ( s.index )
-                elif vwidth == None:
-                    overlay_stream = "[0:%s]overlay[video]" % ( s.index )
-                else:
-                    overlay_stream = "[0:%s][video]scale2ref[sub][video];[video][sub]overlay[video]" % ( s.index )
+                    resize_overlay_stream = True
 
             elif s.codec.lower() in bad_subtitle_codecs and self.embedsubs == True and self.output_extension == "mkv":
                 # Proceed if no whitelist is set, or if the language is in the whitelist
@@ -970,11 +970,10 @@ class MkvtoMp4:
         # that I don't understand, but read about and nodded about on the ffmpeg mailing list.
         # Allowing a higher queue size fixes whatever wizardry is happening, and shouldn't be needed in a year or so. 02/11/2018
 
-        if len(overlay_stream) > 0:
+        if use_overlay_stream:
             options['preopts'].remove( '-fix_sub_duration' ) #fix_sub_duration really screws up the duration of overlaid "picture" subtitles,
                            #as they stay on the screen for less than a second. This doesn't have any negative consequences that I've noticed.
             del options['video']['map'] #The video stream formally known as [v:(number)] is remapped to [video] in order to support scaling picture subtitles to another resolution.
-            options['video']['filter_complex'] = overlay_stream # I couldn't quite get it to work correctly without doing this. 
 
         if self.preopts:
             options['preopts'].extend(self.preopts)
@@ -984,32 +983,41 @@ class MkvtoMp4:
             options['postopts'].extend(self.postopts)
 
         options['preopts'].extend(['-vsync', self.vsync ])
-        
+
         if info.video.color_space == 'bt2020nc':  # Thanks to https://stevens.li/guides/video/converting-hdr-to-sdr-with-ffmpeg/ 
             if self.enable_opencl_hdr_sdr_tonemapping:
                 options['preopts'].extend( ['-init_hw_device', self.init_hw_device ] )
                 options['preopts'].extend( ['-filter_hw_device', 'gpu' ] )
-                if len(overlay_stream) > 20:
-                    options['video']['filter_complex'] = "hwupload,tonemap_opencl=t=bt709:tonemap=hable:format=nv12,hwdownload,format=nv12[video];" + overlay_stream
-                elif len(overlay_stream) > 1:
-                    options['video']['filter_complex'] = "hwupload,tonemap_opencl=t=bt709:tonemap=hable:format=nv12,hwdownload,format=nv12[base];[base]" + overlay_stream
+                if use_overlay_stream:
+                    if resize_overlay_stream == True:
+                        options['video']['filter_complex'] = "hwupload,tonemap_opencl=t=bt709:tonemap=hable:format=nv12,hwdownload,format=nv12[video];[0:%s][video]scale2ref[sub][video];[video][sub]overlay[video]" % ( overlay_stream )
+                    elif vwidth == None:
+                        options['video']['filter_complex'] = "hwupload,tonemap_opencl=t=bt709:tonemap=hable:format=nv12,hwdownload,format=nv12[base];[base][0:%s]overlay[video]" % (overlay_stream)
+                    else:
+                        options['video']['filter_complex'] = "hwupload,tonemap_opencl=t=bt709:tonemap=hable:format=nv12,hwdownload,format=nv12[video];[0:%s][video]scale2ref[sub][video];[video][sub]overlay[video]" % ( overlay_stream )
                 else:
                     options['video']['color_space_convert'] = "hwupload,tonemap_opencl=t=bt709:tonemap=hable:format=nv12,hwdownload,format=nv12"
                     if subtitle_will_be_burned_in:
                         options['video']['color_space_convert'] = "hwupload,tonemap_opencl=t=bt709:tonemap=hable:format=nv12,hwdownload,format=nv12," + subtitle_burn 
                         del subtitle_settings[0]
             elif self.hdr_sdr_convert:
-                if len(overlay_stream) > 20:
-                     options['video']['filter_complex'] = "zscale=t=linear:npl=100,format=gbrpf32le,zscale=p=bt709,tonemap=tonemap=hable:desat=0,zscale=t=bt709:m=bt709:r=tv,format=nv12[video];" + overlay_stream
-                elif len(overlay_stream) > 1:
-                    options['video']['filter_complex'] = "zscale=t=linear:npl=100,format=gbrpf32le,zscale=p=bt709,tonemap=tonemap=hable:desat=0,zscale=t=bt709:m=bt709:r=tv,format=nv12[base];[base]" + overlay_stream
+                if use_overlay_stream:
+                    if resize_overlay_stream == True:
+                        options['video']['filter_complex'] = "zscale=t=linear:npl=100,format=gbrpf32le,zscale=p=bt709,tonemap=tonemap=hable:desat=0,zscale=t=bt709:m=bt709:r=tv,format=nv12[video];[0:%s][video]scale2ref[sub][video];[video][sub]overlay[video]" % ( overlay_stream )
+                    elif vwidth == None:
+                        options['video']['filter_complex'] = "zscale=t=linear:npl=100,format=gbrpf32le,zscale=p=bt709,tonemap=tonemap=hable:desat=0,zscale=t=bt709:m=bt709:r=tv,format=nv12[base];[base][0:%s]overlay[video]" % (overlay_stream)
+                    else:
+                        options['video']['filter_complex'] = "zscale=t=linear:npl=100,format=gbrpf32le,zscale=p=bt709,tonemap=tonemap=hable:desat=0,zscale=t=bt709:m=bt709:r=tv,format=nv12[video];[0:%s][video]scale2ref[sub][video];[video][sub]overlay[video]" % ( overlay_stream )
                 else:
                     options['video']['color_space_convert'] = "zscale=t=linear:npl=100,format=gbrpf32le,zscale=p=bt709,tonemap=tonemap=hable:desat=0,zscale=t=bt709:m=bt709:r=tv,format=nv12"
                     if subtitle_will_be_burned_in:
                         options['video']['color_space_convert'] = "zscale=t=linear:npl=100,format=gbrpf32le,zscale=p=bt709,tonemap=tonemap=hable:desat=0,zscale=t=bt709:m=bt709:r=tv,format=nv12," + subtitle_burn
                         del subtitle_settings[0]
-        elif len(overlay_stream) > 1:
-            options['video']['filter_complex'] = "[0:v]" + overlay_stream
+        elif use_overlay_stream:
+            if vwidth == None:
+                options['video']['filter_complex'] = "[0:v][0:%s]overlay[video]" %s ( overlay_stream )
+            else:
+                options['video']['filter_complex'] = "[video][0:%s]overlay[video]" %s ( overlay_stream )
 
         nvenc_cuvid_codecs = { "h264", "mjpeg", "mpeg1video", "mpeg2video", "mpeg4", "vc1", "vp8", "hevc", "vp9" }
 
