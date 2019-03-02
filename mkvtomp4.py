@@ -704,6 +704,7 @@ class MkvtoMp4:
 
             if self.burn_in_full_subs: # Generally the first sub works for full subs.
                 forced_sub = s.index
+                s.sub_forced = 1
                 subtitle_used = subtitle_number
                 break
             elif s.sub_forced == 2 and s.sub_default == 1: ## Prefer subs that are flagged forced AND default by their disposition
