@@ -53,6 +53,7 @@ class MkvtoMp4:
                  nvenc_decoder_hevc_gpu=None,
                  nvenc_hwaccel_enabled=False,
                  burn_in_forced_subs=False,
+                 burn_in_full_subs=False,
                  audio_codec=['ac3'],
                  audio_bitrate=256,
                  audio_filter=None,
@@ -145,6 +146,7 @@ class MkvtoMp4:
         self.nvenc_decoder_hevc_gpu = nvenc_decoder_hevc_gpu
         self.nvenc_hwaccel_enabled = nvenc_hwaccel_enabled
         self.burn_in_forced_subs = burn_in_forced_subs
+        self.burn_in_full_subs = burn_in_full_subs
         self.pix_fmt = pix_fmt
         # Audio settings
         self.audio_codec = audio_codec
@@ -230,6 +232,7 @@ class MkvtoMp4:
         self.nvenc_decoder_hevc_gpu = settings.nvenc_decoder_hevc_gpu
         self.nvenc_hwaccel_enabled = settings.nvenc_hwaccel_enabled
         self.burn_in_forced_subs = settings.burn_in_forced_subs
+        self.burn_in_full_subs = settings.burn_in_full_subs
         self.pix_fmt = settings.pix_fmt
         # Audio settings
         self.audio_codec = settings.acodec
@@ -392,6 +395,7 @@ class MkvtoMp4:
         input_dir, filename, input_extension = self.parseFile(inputfile)
         drive_letter, directory = os.path.splitdrive( input_dir )
         drive_letter_no_colon = drive_letter.replace( ":", "" )
+        output_dir = input_dir if self.output_dir is None else self.output_dir
         directory = directory.replace("\\", "\\\\"); #This part is necessary because the subtitle filter requires double escapes....
 
         info = Converter(self.FFMPEG_PATH, self.FFPROBE_PATH).probe(inputfile)
@@ -505,6 +509,9 @@ class MkvtoMp4:
 
         audio_settings = {}
         blocked_audio_languages = []
+        disable_faststart = False
+        if self.output_extension == 'mkv': # MKV has no moov atom 
+            disable_faststart = True
         l = 0
         for a in info.audio:
             try:
@@ -516,7 +523,13 @@ class MkvtoMp4:
             self.log.info("Audio detected for stream #%s: %s [%s]." % (a.index, a.codec, a.metadata['language']))
 
             if self.output_extension in valid_tagging_extensions and ( a.codec.lower() == 'truehd' or a.codec.startswith( 'pcm' ) ): #Truehd/pcm cannot be in a mp4 container
-                self.audio_copyoriginal = False 
+                self.audio_copyoriginal = False
+
+            if 'ac3' in a.codec.lower() and self.audio_copyoriginal: # EAC3 requires the moov atom to be at the end of the file, while ac3 requires delay_moov.
+                                         # https://patchwork.ffmpeg.org/patch/11972/  -- recently added in error checking for this
+                                         # I've had trouble making delay_moov work, so we're going to disable faststart on ac3/eac3 files.
+                                         # This seems to only be needed when copying audio streams. 
+                disable_faststart = True
 
             # Set undefined language to default language if specified
             if self.adl is not None and a.metadata['language'] == 'und':
@@ -661,7 +674,9 @@ class MkvtoMp4:
         forced_sub = 0 # This is the index of the subtitle stream in the entire file, overlay uses this index
         guessed_forced_sub = 0
         guessed_subtitle_number  = -1
-        overlay_stream = ""
+        overlay_stream = None
+        use_overlay_stream = False
+        resize_overlay_stream = False
         subtitle_will_be_burned_in = False
         subtitle_burn = ""
         subtitle_number = -1 # Subtitle_used is the index of the subtitle stream compared to only other subtitles. -vf to overlay uses this.
@@ -669,6 +684,8 @@ class MkvtoMp4:
         shortest_duration_subtitle_stream = 86400 # There probably aren't too many movies that are 24 hours long.
         longest_duration_subtitle_stream = 1
         desired_language_streams = 0
+        if self.burn_in_full_subs == True:
+            self.burn_in_forced_subs = True
         for s in info.subtitle:
             subtitle_number += 1
             try:
@@ -684,7 +701,13 @@ class MkvtoMp4:
             if self.swl is None or s.metadata['language'].lower() not in self.swl:
                 continue
             desired_language_streams += 1
-            if s.sub_forced == 2 and s.sub_default == 1: ## Prefer subs that are flagged forced AND default by their disposition
+
+            if self.burn_in_full_subs: # Generally the first sub works for full subs.
+                forced_sub = s.index
+                s.sub_forced = 1
+                subtitle_used = subtitle_number
+                break
+            elif s.sub_forced == 2 and s.sub_default == 1: ## Prefer subs that are flagged forced AND default by their disposition
                 forced_sub = s.index
                 subtitle_used = subtitle_number
                 break
@@ -729,7 +752,7 @@ class MkvtoMp4:
                 if vcodec == 'copy':
                     vcodec = self.video_codec[0]
             # Make sure its not an image based codec
-            if self.embedsubs and ( s.codec.lower() not in bad_subtitle_codecs or self.output_extension == 'mkv' ):
+            if self.embedsubs and s.codec.lower() not in bad_subtitle_codecs:
                 # Proceed if no whitelist is set, or if the language is in the whitelist
                 if self.swl is None or s.metadata['language'].lower() in self.swl:
                     subtitle_settings.update({l: {
@@ -741,21 +764,37 @@ class MkvtoMp4:
                         'default': s.sub_default,
                         'burn_in_forced_subs': self.burn_in_forced_subs,
                         'subtitle_burn': drive_letter_no_colon + r"\:" + directory + "\\\\" + filename + "." + input_extension + \
-                            ":si=" + str( subtitle_used ) + "'" #FFmpeg requires a very specific string of letters for -vf subtitles=
+                            ( ".original:si=" if ( input_extension == self.output_extension and input_dir == output_dir ) else ":si=" ) + str( subtitle_used )  #FFmpeg requires a very specific string of letters for -vf subtitles=
                     }} )
                     if ( os.name != 'nt' ):  #TODO: Make this a bit less hacky... if possible?
                         temp_directory = directory
                         temp_directory = temp_directory.replace("\\", "//" )
-                        subtitle_settings[l]['subtitle_burn'] = temp_directory + "//" + filename + "." + input_extension + ":si=" + str( subtitle_used ) + "'"
+                        subtitle_settings[l]['subtitle_burn'] = temp_directory + "//" + filename + "." + input_extension + \
+                           ( ".original:si=" if ( input_extension == self.output_extension and input_dir == output_dir ) else ":si=" ) + str( subtitle_used ) + str( subtitle_used )
                     self.log.info("Creating subtitle stream %s from source stream %s." % (l, s.index))
-                    subtitle_burn = subtitle_settings[l]['subtitle_burn']
+                    subtitle_temporary = subtitle_settings[l]['subtitle_burn']
+                    subtitle_temporary = subtitle_temporary.replace( "\\", "\\\\" )
+                    subtitle_temporary = subtitle_temporary.replace("'", "\\\\\\\'\\\\\\" ) # "Special character escapes are like violence: If they're not solving your problem, you're not using enough.
+                    subtitle_burn = "subtitles=" + subtitle_temporary
                     l = l + 1
             
-            if s.codec.lower() in bad_subtitle_codecs and self.embedsubs == True and forced_sub > 0 and self.burn_in_forced_subs == True: # This overlays forced picture subtitles on top of the video stream. Slows down conversion significantly.
-                if vwidth == None:
-                    overlay_stream = "[0:v][0:%s]overlay" % ( s.index )
-                else: # The resolution has changed, we must use scale2ref to resize the picture subtitles or they'll end up in weird places.
-                    overlay_stream = "[0:%s][video]scale2ref[sub][video];[video][sub]overlay" % ( s.index )
+            use_overlay_stream = ( s.codec.lower() in bad_subtitle_codecs and self.embedsubs == True and forced_sub > 0 and self.burn_in_forced_subs == True ) # This overlays forced picture subtitles on top of the video stream. Slows down conversion significantly.
+            if use_overlay_stream == True:
+                overlay_stream = s.index
+                if s.video_width != None and ( s.video_width != info.video.video_width ) and vwidth == None:
+                    resize_overlay_stream = True
+
+            elif s.codec.lower() in bad_subtitle_codecs and self.embedsubs == True and self.output_extension == "mkv":
+                # Proceed if no whitelist is set, or if the language is in the whitelist
+                if self.swl is None or s.metadata['language'].lower() in self.swl:
+                    subtitle_settings.update({l: {
+                        'map': s.index,
+                        'codec': 'copy',
+                        'language': s.metadata['language'],
+                        'forced': s.sub_forced,
+                        'default': s.sub_default
+                    }} )
+                    l = l + 1
             elif s.codec.lower() not in bad_subtitle_codecs and not self.embedsubs:
                 if self.swl is None or s.metadata['language'].lower() in self.swl:
                     for codec in self.scodec:
@@ -932,37 +971,54 @@ class MkvtoMp4:
         # that I don't understand, but read about and nodded about on the ffmpeg mailing list.
         # Allowing a higher queue size fixes whatever wizardry is happening, and shouldn't be needed in a year or so. 02/11/2018
 
-        if len(overlay_stream) > 0:
+        if use_overlay_stream:
             options['preopts'].remove( '-fix_sub_duration' ) #fix_sub_duration really screws up the duration of overlaid "picture" subtitles,
                            #as they stay on the screen for less than a second. This doesn't have any negative consequences that I've noticed.
-            if vwidth != None:
-                del options['video']['map'] #The video stream formally known as [v:(number)] is remapped to [video] in order to support scaling picture subtitles to another resolution.
-            options['video']['filter_complex'] = overlay_stream # I couldn't quite get it to work correctly without doing this. 
+            del options['video']['map'] #The video stream formally known as [v:(number)] is remapped to [video] in order to support scaling picture subtitles to another resolution.
 
         if self.preopts:
             options['preopts'].extend(self.preopts)
-        
-        options['postopts'].extend(['-movflags', 'faststart'])
+        if disable_faststart == False:
+            options['postopts'].extend(['-movflags', 'faststart'])
         if self.postopts:
             options['postopts'].extend(self.postopts)
 
         options['preopts'].extend(['-vsync', self.vsync ])
+
         if info.video.color_space == 'bt2020nc':  # Thanks to https://stevens.li/guides/video/converting-hdr-to-sdr-with-ffmpeg/ 
-            #Currently this will not work with picture subtitles
             if self.enable_opencl_hdr_sdr_tonemapping:
-                if len(overlay_stream) < 1:
-                    options['preopts'].extend( ['-init_hw_device', self.init_hw_device ] )
-                    options['preopts'].extend( ['-filter_hw_device', 'gpu' ] )
-                    options['video']['color_space_convert'] = 'hwupload,tonemap_opencl=t=bt709:tonemap=hable:format=nv12,hwdownload,format=nv12'
+                options['preopts'].extend( ['-init_hw_device', self.init_hw_device ] )
+                options['preopts'].extend( ['-filter_hw_device', 'gpu' ] )
+                if use_overlay_stream:
+                    if resize_overlay_stream == True:
+                        options['video']['filter_complex'] = "hwupload,tonemap_opencl=t=bt709:tonemap=hable:format=nv12,hwdownload,format=nv12[video];[0:%s][video]scale2ref[sub][video];[video][sub]overlay[video]" % ( overlay_stream )
+                    elif vwidth == None:
+                        options['video']['filter_complex'] = "hwupload,tonemap_opencl=t=bt709:tonemap=hable:format=nv12,hwdownload,format=nv12[base];[base][0:%s]overlay[video]" % (overlay_stream)
+                    else:
+                        options['video']['filter_complex'] = "hwupload,tonemap_opencl=t=bt709:tonemap=hable:format=nv12,hwdownload,format=nv12[video];[0:%s][video]scale2ref[sub][video];[video][sub]overlay[video]" % ( overlay_stream )
+                else:
+                    options['video']['color_space_convert'] = "hwupload,tonemap_opencl=t=bt709:tonemap=hable:format=nv12,hwdownload,format=nv12"
                     if subtitle_will_be_burned_in:
-                        options['video']['color_space_convert'] = 'hwupload,tonemap_opencl=t=bt709:tonemap=hable:format=nv12,hwdownload,format=nv12,' + subtitle_burn
-                        del subtitle_settings[0]['subtitle_burn']
+                        options['video']['color_space_convert'] = "hwupload,tonemap_opencl=t=bt709:tonemap=hable:format=nv12,hwdownload,format=nv12," + subtitle_burn 
+                        del subtitle_settings[0]
             elif self.hdr_sdr_convert:
-                if len(overlay_stream) < 1:
-                    options['video']['color_space_convert'] = 'zscale=t=linear:npl=100,format=gbrpf32le,zscale=p=bt709,tonemap=tonemap=hable:desat=0,zscale=t=bt709:m=bt709:r=tv,format=nv12'
+                if use_overlay_stream:
+                    if resize_overlay_stream == True:
+                        options['video']['filter_complex'] = "zscale=t=linear:npl=100,format=gbrpf32le,zscale=p=bt709,tonemap=tonemap=hable:desat=0,zscale=t=bt709:m=bt709:r=tv,format=nv12[video];[0:%s][video]scale2ref[sub][video];[video][sub]overlay[video]" % ( overlay_stream )
+                    elif vwidth == None:
+                        options['video']['filter_complex'] = "zscale=t=linear:npl=100,format=gbrpf32le,zscale=p=bt709,tonemap=tonemap=hable:desat=0,zscale=t=bt709:m=bt709:r=tv,format=nv12[base];[base][0:%s]overlay[video]" % (overlay_stream)
+                    else:
+                        options['video']['filter_complex'] = "zscale=t=linear:npl=100,format=gbrpf32le,zscale=p=bt709,tonemap=tonemap=hable:desat=0,zscale=t=bt709:m=bt709:r=tv,format=nv12[video];[0:%s][video]scale2ref[sub][video];[video][sub]overlay[video]" % ( overlay_stream )
+                else:
+                    options['video']['color_space_convert'] = "zscale=t=linear:npl=100,format=gbrpf32le,zscale=p=bt709,tonemap=tonemap=hable:desat=0,zscale=t=bt709:m=bt709:r=tv,format=nv12"
                     if subtitle_will_be_burned_in:
-                        options['video']['color_space_convert'] = 'zscale=t=linear:npl=100,format=gbrpf32le,zscale=p=bt709,tonemap=tonemap=hable:desat=0,zscale=t=bt709:m=bt709:r=tv,format=nv12,' + subtitle_burn
-                        del subtitle_settings[0]['subtitle_burn']
+                        options['video']['color_space_convert'] = "zscale=t=linear:npl=100,format=gbrpf32le,zscale=p=bt709,tonemap=tonemap=hable:desat=0,zscale=t=bt709:m=bt709:r=tv,format=nv12," + subtitle_burn
+                        del subtitle_settings[0]
+        elif use_overlay_stream:
+            if vwidth == None:
+                options['video']['filter_complex'] = "[0:v][0:%s]overlay[video]" %s ( overlay_stream )
+            else:
+                options['video']['filter_complex'] = "[video][0:%s]overlay[video]" %s ( overlay_stream )
 
         nvenc_cuvid_codecs = { "h264", "mjpeg", "mpeg1video", "mpeg2video", "mpeg4", "vc1", "vp8", "hevc", "vp9" }
 

@@ -672,6 +672,7 @@ AVCodecContext AVOptions:
      allow_high_depth              .D.V..... allow to output YUV pixel formats with a different chroma sampling than 4:2:0 and/or other than 8 bits per component
      allow_profile_mismatch              .D.V..... attempt to decode anyway if HW accelerated decoder's supported profiles do not exactly match the stream
   -extra_hw_frames   <int>        .D.V..... Number of extra hardware frames to allocate for the user (from -1 to INT_MAX) (default -1)
+  -discard_damaged_percentage <int>        .D.V..... Percentage of damaged samples to discard a frame (from 0 to 100) (default 95)
 
 amv encoder AVOptions:
   -mpv_flags         <flags>      E..V..... Flags common for all mpegvideo-based encoders. (default 0)
@@ -2953,6 +2954,10 @@ nvenc_hevc AVOptions:
   -init_qpI          <int>        E..V..... Initial QP value for I frame (from -1 to 51) (default -1)
   -qp                <int>        E..V..... Constant quantization parameter rate control method (from -1 to 51) (default -1)
   -weighted_pred     <int>        E..V..... Set 1 to enable weighted prediction (from 0 to 1) (default 0)
+  -b_ref_mode        <int>        E..V..... Use B frames as references (from 0 to 2) (default disabled)
+     disabled                     E..V..... B frames will not be used for reference
+     each                         E..V..... Each B frame will be used for reference
+     middle                       E..V..... Only (number of B frames)/2 will be used for reference
 
 hevc_amf AVOptions:
   -usage             <int>        E..V..... Set the encoding usage (from 0 to 3) (default transcoding)
@@ -3088,6 +3093,10 @@ hevc_nvenc AVOptions:
   -init_qpI          <int>        E..V..... Initial QP value for I frame (from -1 to 51) (default -1)
   -qp                <int>        E..V..... Constant quantization parameter rate control method (from -1 to 51) (default -1)
   -weighted_pred     <int>        E..V..... Set 1 to enable weighted prediction (from 0 to 1) (default 0)
+  -b_ref_mode        <int>        E..V..... Use B frames as references (from 0 to 2) (default disabled)
+     disabled                     E..V..... B frames will not be used for reference
+     each                         E..V..... Each B frame will be used for reference
+     middle                       E..V..... Only (number of B frames)/2 will be used for reference
 
 hevc_qsv encoder AVOptions:
   -async_depth       <int>        E..V..... Maximum processing parallelism (from 1 to INT_MAX) (default 4)
@@ -3595,9 +3604,9 @@ http AVOptions:
   -http_proxy        <string>     ED....... set HTTP proxy to tunnel through
   -headers           <string>     ED....... set custom HTTP headers, can override built in default headers
   -content_type      <string>     ED....... set a specific content type for the POST messages
-  -user_agent        <string>     .D....... override User-Agent header (default "Lavf/58.26.100")
+  -user_agent        <string>     .D....... override User-Agent header (default "Lavf/58.26.101")
   -referer           <string>     .D....... override referer header
-  -user-agent        <string>     .D....... use the "user_agent" option instead (default "Lavf/58.26.100")
+  -user-agent        <string>     .D....... use the "user_agent" option instead (default "Lavf/58.26.101")
   -multiple_requests <boolean>    ED....... use persistent connections (default false)
   -post_data         <binary>     ED....... set custom HTTP post data
   -cookies           <string>     .D....... set cookies to be sent in applicable future requests, use newline delimited Set-Cookie HTTP field value syntax
@@ -3624,9 +3633,9 @@ https AVOptions:
   -http_proxy        <string>     ED....... set HTTP proxy to tunnel through
   -headers           <string>     ED....... set custom HTTP headers, can override built in default headers
   -content_type      <string>     ED....... set a specific content type for the POST messages
-  -user_agent        <string>     .D....... override User-Agent header (default "Lavf/58.26.100")
+  -user_agent        <string>     .D....... override User-Agent header (default "Lavf/58.26.101")
   -referer           <string>     .D....... override referer header
-  -user-agent        <string>     .D....... use the "user_agent" option instead (default "Lavf/58.26.100")
+  -user-agent        <string>     .D....... use the "user_agent" option instead (default "Lavf/58.26.101")
   -multiple_requests <boolean>    ED....... use persistent connections (default false)
   -post_data         <binary>     ED....... set custom HTTP post data
   -cookies           <string>     .D....... set cookies to be sent in applicable future requests, use newline delimited Set-Cookie HTTP field value syntax
@@ -4021,76 +4030,62 @@ iCE Draw File demuxer AVOptions:
   -framerate         <video_rate> .D....... set framerate (frames per second) (default "25")
 
 image2 demuxer AVOptions:
-  -framerate         <video_rate> .D....... set the video framerate (default "25")
-  -loop              <boolean>    .D....... force loop over input file sequence (default false)
   -pattern_type      <int>        .D....... set pattern type (from 0 to INT_MAX) (default 4)
      glob_sequence                .D....... select glob/sequence pattern type
      glob                         .D....... select glob pattern type
      sequence                     .D....... select sequence pattern type
      none                         .D....... disable pattern matching
-  -pixel_format      <string>     .D....... set video pixel format
   -start_number      <int>        .D....... set first number in the sequence (from INT_MIN to INT_MAX) (default 0)
   -start_number_range <int>        .D....... set range for looking at the first sequence number (from 1 to INT_MAX) (default 5)
-  -video_size        <image_size> .D....... set video size
-  -frame_size        <int>        .D....... force frame size in bytes (from 0 to INT_MAX) (default 0)
   -ts_from_file      <int>        .D....... set frame timestamp from file's one (from 0 to 2) (default none)
      none                         .D....... none
      sec                          .D....... second precision
      ns                           .D....... nano second precision
+  -framerate         <video_rate> .D....... set the video framerate (default "25")
+  -pixel_format      <string>     .D....... set video pixel format
+  -video_size        <image_size> .D....... set video size
+  -loop              <boolean>    .D....... force loop over input file sequence (default false)
 
 image2pipe demuxer AVOptions:
-  -framerate         <video_rate> .D....... set the video framerate (default "25")
-  -loop              <boolean>    .D....... force loop over input file sequence (default false)
-  -pattern_type      <int>        .D....... set pattern type (from 0 to INT_MAX) (default 4)
-     glob_sequence                .D....... select glob/sequence pattern type
-     glob                         .D....... select glob pattern type
-     sequence                     .D....... select sequence pattern type
-     none                         .D....... disable pattern matching
-  -pixel_format      <string>     .D....... set video pixel format
-  -start_number      <int>        .D....... set first number in the sequence (from INT_MIN to INT_MAX) (default 0)
-  -start_number_range <int>        .D....... set range for looking at the first sequence number (from 1 to INT_MAX) (default 5)
-  -video_size        <image_size> .D....... set video size
   -frame_size        <int>        .D....... force frame size in bytes (from 0 to INT_MAX) (default 0)
-  -ts_from_file      <int>        .D....... set frame timestamp from file's one (from 0 to 2) (default none)
-     none                         .D....... none
-     sec                          .D....... second precision
-     ns                           .D....... nano second precision
+  -framerate         <video_rate> .D....... set the video framerate (default "25")
+  -pixel_format      <string>     .D....... set video pixel format
+  -video_size        <image_size> .D....... set video size
+  -loop              <boolean>    .D....... force loop over input file sequence (default false)
 
 alias_pix demuxer AVOptions:
-  -framerate         <video_rate> .D....... set the video framerate (default "25")
-  -loop              <boolean>    .D....... force loop over input file sequence (default false)
   -pattern_type      <int>        .D....... set pattern type (from 0 to INT_MAX) (default 4)
      glob_sequence                .D....... select glob/sequence pattern type
      glob                         .D....... select glob pattern type
      sequence                     .D....... select sequence pattern type
      none                         .D....... disable pattern matching
-  -pixel_format      <string>     .D....... set video pixel format
   -start_number      <int>        .D....... set first number in the sequence (from INT_MIN to INT_MAX) (default 0)
   -start_number_range <int>        .D....... set range for looking at the first sequence number (from 1 to INT_MAX) (default 5)
-  -video_size        <image_size> .D....... set video size
-  -frame_size        <int>        .D....... force frame size in bytes (from 0 to INT_MAX) (default 0)
   -ts_from_file      <int>        .D....... set frame timestamp from file's one (from 0 to 2) (default none)
      none                         .D....... none
      sec                          .D....... second precision
      ns                           .D....... nano second precision
+  -framerate         <video_rate> .D....... set the video framerate (default "25")
+  -pixel_format      <string>     .D....... set video pixel format
+  -video_size        <image_size> .D....... set video size
+  -loop              <boolean>    .D....... force loop over input file sequence (default false)
 
 brender_pix demuxer AVOptions:
-  -framerate         <video_rate> .D....... set the video framerate (default "25")
-  -loop              <boolean>    .D....... force loop over input file sequence (default false)
   -pattern_type      <int>        .D....... set pattern type (from 0 to INT_MAX) (default 4)
      glob_sequence                .D....... select glob/sequence pattern type
      glob                         .D....... select glob pattern type
      sequence                     .D....... select sequence pattern type
      none                         .D....... disable pattern matching
-  -pixel_format      <string>     .D....... set video pixel format
   -start_number      <int>        .D....... set first number in the sequence (from INT_MIN to INT_MAX) (default 0)
   -start_number_range <int>        .D....... set range for looking at the first sequence number (from 1 to INT_MAX) (default 5)
-  -video_size        <image_size> .D....... set video size
-  -frame_size        <int>        .D....... force frame size in bytes (from 0 to INT_MAX) (default 0)
   -ts_from_file      <int>        .D....... set frame timestamp from file's one (from 0 to 2) (default none)
      none                         .D....... none
      sec                          .D....... second precision
      ns                           .D....... nano second precision
+  -framerate         <video_rate> .D....... set the video framerate (default "25")
+  -pixel_format      <string>     .D....... set video pixel format
+  -video_size        <image_size> .D....... set video size
+  -loop              <boolean>    .D....... force loop over input file sequence (default false)
 
 ingenient demuxer AVOptions:
   -framerate         <video_rate> .D.......  (default "25")
@@ -4273,8 +4268,8 @@ RTSP demuxer AVOptions:
   -stimeout          <int>        .D....... set timeout (in microseconds) of socket TCP I/O operations (from INT_MIN to INT_MAX) (default 0)
   -reorder_queue_size <int>        .D....... set number of packets to buffer for handling of reordered packets (from -1 to INT_MAX) (default -1)
   -buffer_size       <int>        ED....... Underlying protocol send/receive buffer size (from -1 to INT_MAX) (default -1)
-  -user_agent        <string>     .D....... override User-Agent header (default "Lavf58.26.100")
-  -user-agent        <string>     .D....... override User-Agent header (deprecated, use user_agent) (default "Lavf58.26.100")
+  -user_agent        <string>     .D....... override User-Agent header (default "Lavf58.26.101")
+  -user-agent        <string>     .D....... override User-Agent header (deprecated, use user_agent) (default "Lavf58.26.101")
 
 sbg_demuxer AVOptions:
   -sample_rate       <int>        .D.......  (from 0 to INT_MAX) (default 0)
@@ -4338,454 +4333,179 @@ eXtended BINary text (XBIN) demuxer AVOptions:
   -framerate         <video_rate> .D....... set framerate (frames per second) (default "25")
 
 bmp demuxer AVOptions:
-  -framerate         <video_rate> .D....... set the video framerate (default "25")
-  -loop              <boolean>    .D....... force loop over input file sequence (default false)
-  -pattern_type      <int>        .D....... set pattern type (from 0 to INT_MAX) (default 4)
-     glob_sequence                .D....... select glob/sequence pattern type
-     glob                         .D....... select glob pattern type
-     sequence                     .D....... select sequence pattern type
-     none                         .D....... disable pattern matching
-  -pixel_format      <string>     .D....... set video pixel format
-  -start_number      <int>        .D....... set first number in the sequence (from INT_MIN to INT_MAX) (default 0)
-  -start_number_range <int>        .D....... set range for looking at the first sequence number (from 1 to INT_MAX) (default 5)
-  -video_size        <image_size> .D....... set video size
   -frame_size        <int>        .D....... force frame size in bytes (from 0 to INT_MAX) (default 0)
-  -ts_from_file      <int>        .D....... set frame timestamp from file's one (from 0 to 2) (default none)
-     none                         .D....... none
-     sec                          .D....... second precision
-     ns                           .D....... nano second precision
+  -framerate         <video_rate> .D....... set the video framerate (default "25")
+  -pixel_format      <string>     .D....... set video pixel format
+  -video_size        <image_size> .D....... set video size
+  -loop              <boolean>    .D....... force loop over input file sequence (default false)
 
 dds demuxer AVOptions:
-  -framerate         <video_rate> .D....... set the video framerate (default "25")
-  -loop              <boolean>    .D....... force loop over input file sequence (default false)
-  -pattern_type      <int>        .D....... set pattern type (from 0 to INT_MAX) (default 4)
-     glob_sequence                .D....... select glob/sequence pattern type
-     glob                         .D....... select glob pattern type
-     sequence                     .D....... select sequence pattern type
-     none                         .D....... disable pattern matching
-  -pixel_format      <string>     .D....... set video pixel format
-  -start_number      <int>        .D....... set first number in the sequence (from INT_MIN to INT_MAX) (default 0)
-  -start_number_range <int>        .D....... set range for looking at the first sequence number (from 1 to INT_MAX) (default 5)
-  -video_size        <image_size> .D....... set video size
   -frame_size        <int>        .D....... force frame size in bytes (from 0 to INT_MAX) (default 0)
-  -ts_from_file      <int>        .D....... set frame timestamp from file's one (from 0 to 2) (default none)
-     none                         .D....... none
-     sec                          .D....... second precision
-     ns                           .D....... nano second precision
+  -framerate         <video_rate> .D....... set the video framerate (default "25")
+  -pixel_format      <string>     .D....... set video pixel format
+  -video_size        <image_size> .D....... set video size
+  -loop              <boolean>    .D....... force loop over input file sequence (default false)
 
 dpx demuxer AVOptions:
-  -framerate         <video_rate> .D....... set the video framerate (default "25")
-  -loop              <boolean>    .D....... force loop over input file sequence (default false)
-  -pattern_type      <int>        .D....... set pattern type (from 0 to INT_MAX) (default 4)
-     glob_sequence                .D....... select glob/sequence pattern type
-     glob                         .D....... select glob pattern type
-     sequence                     .D....... select sequence pattern type
-     none                         .D....... disable pattern matching
-  -pixel_format      <string>     .D....... set video pixel format
-  -start_number      <int>        .D....... set first number in the sequence (from INT_MIN to INT_MAX) (default 0)
-  -start_number_range <int>        .D....... set range for looking at the first sequence number (from 1 to INT_MAX) (default 5)
-  -video_size        <image_size> .D....... set video size
   -frame_size        <int>        .D....... force frame size in bytes (from 0 to INT_MAX) (default 0)
-  -ts_from_file      <int>        .D....... set frame timestamp from file's one (from 0 to 2) (default none)
-     none                         .D....... none
-     sec                          .D....... second precision
-     ns                           .D....... nano second precision
+  -framerate         <video_rate> .D....... set the video framerate (default "25")
+  -pixel_format      <string>     .D....... set video pixel format
+  -video_size        <image_size> .D....... set video size
+  -loop              <boolean>    .D....... force loop over input file sequence (default false)
 
 exr demuxer AVOptions:
-  -framerate         <video_rate> .D....... set the video framerate (default "25")
-  -loop              <boolean>    .D....... force loop over input file sequence (default false)
-  -pattern_type      <int>        .D....... set pattern type (from 0 to INT_MAX) (default 4)
-     glob_sequence                .D....... select glob/sequence pattern type
-     glob                         .D....... select glob pattern type
-     sequence                     .D....... select sequence pattern type
-     none                         .D....... disable pattern matching
-  -pixel_format      <string>     .D....... set video pixel format
-  -start_number      <int>        .D....... set first number in the sequence (from INT_MIN to INT_MAX) (default 0)
-  -start_number_range <int>        .D....... set range for looking at the first sequence number (from 1 to INT_MAX) (default 5)
-  -video_size        <image_size> .D....... set video size
   -frame_size        <int>        .D....... force frame size in bytes (from 0 to INT_MAX) (default 0)
-  -ts_from_file      <int>        .D....... set frame timestamp from file's one (from 0 to 2) (default none)
-     none                         .D....... none
-     sec                          .D....... second precision
-     ns                           .D....... nano second precision
+  -framerate         <video_rate> .D....... set the video framerate (default "25")
+  -pixel_format      <string>     .D....... set video pixel format
+  -video_size        <image_size> .D....... set video size
+  -loop              <boolean>    .D....... force loop over input file sequence (default false)
 
 gif demuxer AVOptions:
-  -framerate         <video_rate> .D....... set the video framerate (default "25")
-  -loop              <boolean>    .D....... force loop over input file sequence (default false)
-  -pattern_type      <int>        .D....... set pattern type (from 0 to INT_MAX) (default 4)
-     glob_sequence                .D....... select glob/sequence pattern type
-     glob                         .D....... select glob pattern type
-     sequence                     .D....... select sequence pattern type
-     none                         .D....... disable pattern matching
-  -pixel_format      <string>     .D....... set video pixel format
-  -start_number      <int>        .D....... set first number in the sequence (from INT_MIN to INT_MAX) (default 0)
-  -start_number_range <int>        .D....... set range for looking at the first sequence number (from 1 to INT_MAX) (default 5)
-  -video_size        <image_size> .D....... set video size
   -frame_size        <int>        .D....... force frame size in bytes (from 0 to INT_MAX) (default 0)
-  -ts_from_file      <int>        .D....... set frame timestamp from file's one (from 0 to 2) (default none)
-     none                         .D....... none
-     sec                          .D....... second precision
-     ns                           .D....... nano second precision
+  -framerate         <video_rate> .D....... set the video framerate (default "25")
+  -pixel_format      <string>     .D....... set video pixel format
+  -video_size        <image_size> .D....... set video size
+  -loop              <boolean>    .D....... force loop over input file sequence (default false)
 
 j2k demuxer AVOptions:
-  -framerate         <video_rate> .D....... set the video framerate (default "25")
-  -loop              <boolean>    .D....... force loop over input file sequence (default false)
-  -pattern_type      <int>        .D....... set pattern type (from 0 to INT_MAX) (default 4)
-     glob_sequence                .D....... select glob/sequence pattern type
-     glob                         .D....... select glob pattern type
-     sequence                     .D....... select sequence pattern type
-     none                         .D....... disable pattern matching
-  -pixel_format      <string>     .D....... set video pixel format
-  -start_number      <int>        .D....... set first number in the sequence (from INT_MIN to INT_MAX) (default 0)
-  -start_number_range <int>        .D....... set range for looking at the first sequence number (from 1 to INT_MAX) (default 5)
-  -video_size        <image_size> .D....... set video size
   -frame_size        <int>        .D....... force frame size in bytes (from 0 to INT_MAX) (default 0)
-  -ts_from_file      <int>        .D....... set frame timestamp from file's one (from 0 to 2) (default none)
-     none                         .D....... none
-     sec                          .D....... second precision
-     ns                           .D....... nano second precision
+  -framerate         <video_rate> .D....... set the video framerate (default "25")
+  -pixel_format      <string>     .D....... set video pixel format
+  -video_size        <image_size> .D....... set video size
+  -loop              <boolean>    .D....... force loop over input file sequence (default false)
 
 jpeg demuxer AVOptions:
-  -framerate         <video_rate> .D....... set the video framerate (default "25")
-  -loop              <boolean>    .D....... force loop over input file sequence (default false)
-  -pattern_type      <int>        .D....... set pattern type (from 0 to INT_MAX) (default 4)
-     glob_sequence                .D....... select glob/sequence pattern type
-     glob                         .D....... select glob pattern type
-     sequence                     .D....... select sequence pattern type
-     none                         .D....... disable pattern matching
-  -pixel_format      <string>     .D....... set video pixel format
-  -start_number      <int>        .D....... set first number in the sequence (from INT_MIN to INT_MAX) (default 0)
-  -start_number_range <int>        .D....... set range for looking at the first sequence number (from 1 to INT_MAX) (default 5)
-  -video_size        <image_size> .D....... set video size
   -frame_size        <int>        .D....... force frame size in bytes (from 0 to INT_MAX) (default 0)
-  -ts_from_file      <int>        .D....... set frame timestamp from file's one (from 0 to 2) (default none)
-     none                         .D....... none
-     sec                          .D....... second precision
-     ns                           .D....... nano second precision
+  -framerate         <video_rate> .D....... set the video framerate (default "25")
+  -pixel_format      <string>     .D....... set video pixel format
+  -video_size        <image_size> .D....... set video size
+  -loop              <boolean>    .D....... force loop over input file sequence (default false)
 
 jpegls demuxer AVOptions:
-  -framerate         <video_rate> .D....... set the video framerate (default "25")
-  -loop              <boolean>    .D....... force loop over input file sequence (default false)
-  -pattern_type      <int>        .D....... set pattern type (from 0 to INT_MAX) (default 4)
-     glob_sequence                .D....... select glob/sequence pattern type
-     glob                         .D....... select glob pattern type
-     sequence                     .D....... select sequence pattern type
-     none                         .D....... disable pattern matching
-  -pixel_format      <string>     .D....... set video pixel format
-  -start_number      <int>        .D....... set first number in the sequence (from INT_MIN to INT_MAX) (default 0)
-  -start_number_range <int>        .D....... set range for looking at the first sequence number (from 1 to INT_MAX) (default 5)
-  -video_size        <image_size> .D....... set video size
   -frame_size        <int>        .D....... force frame size in bytes (from 0 to INT_MAX) (default 0)
-  -ts_from_file      <int>        .D....... set frame timestamp from file's one (from 0 to 2) (default none)
-     none                         .D....... none
-     sec                          .D....... second precision
-     ns                           .D....... nano second precision
+  -framerate         <video_rate> .D....... set the video framerate (default "25")
+  -pixel_format      <string>     .D....... set video pixel format
+  -video_size        <image_size> .D....... set video size
+  -loop              <boolean>    .D....... force loop over input file sequence (default false)
 
 pam demuxer AVOptions:
-  -framerate         <video_rate> .D....... set the video framerate (default "25")
-  -loop              <boolean>    .D....... force loop over input file sequence (default false)
-  -pattern_type      <int>        .D....... set pattern type (from 0 to INT_MAX) (default 4)
-     glob_sequence                .D....... select glob/sequence pattern type
-     glob                         .D....... select glob pattern type
-     sequence                     .D....... select sequence pattern type
-     none                         .D....... disable pattern matching
-  -pixel_format      <string>     .D....... set video pixel format
-  -start_number      <int>        .D....... set first number in the sequence (from INT_MIN to INT_MAX) (default 0)
-  -start_number_range <int>        .D....... set range for looking at the first sequence number (from 1 to INT_MAX) (default 5)
-  -video_size        <image_size> .D....... set video size
   -frame_size        <int>        .D....... force frame size in bytes (from 0 to INT_MAX) (default 0)
-  -ts_from_file      <int>        .D....... set frame timestamp from file's one (from 0 to 2) (default none)
-     none                         .D....... none
-     sec                          .D....... second precision
-     ns                           .D....... nano second precision
+  -framerate         <video_rate> .D....... set the video framerate (default "25")
+  -pixel_format      <string>     .D....... set video pixel format
+  -video_size        <image_size> .D....... set video size
+  -loop              <boolean>    .D....... force loop over input file sequence (default false)
 
 pbm demuxer AVOptions:
-  -framerate         <video_rate> .D....... set the video framerate (default "25")
-  -loop              <boolean>    .D....... force loop over input file sequence (default false)
-  -pattern_type      <int>        .D....... set pattern type (from 0 to INT_MAX) (default 4)
-     glob_sequence                .D....... select glob/sequence pattern type
-     glob                         .D....... select glob pattern type
-     sequence                     .D....... select sequence pattern type
-     none                         .D....... disable pattern matching
-  -pixel_format      <string>     .D....... set video pixel format
-  -start_number      <int>        .D....... set first number in the sequence (from INT_MIN to INT_MAX) (default 0)
-  -start_number_range <int>        .D....... set range for looking at the first sequence number (from 1 to INT_MAX) (default 5)
-  -video_size        <image_size> .D....... set video size
   -frame_size        <int>        .D....... force frame size in bytes (from 0 to INT_MAX) (default 0)
-  -ts_from_file      <int>        .D....... set frame timestamp from file's one (from 0 to 2) (default none)
-     none                         .D....... none
-     sec                          .D....... second precision
-     ns                           .D....... nano second precision
+  -framerate         <video_rate> .D....... set the video framerate (default "25")
+  -pixel_format      <string>     .D....... set video pixel format
+  -video_size        <image_size> .D....... set video size
+  -loop              <boolean>    .D....... force loop over input file sequence (default false)
 
 pcx demuxer AVOptions:
-  -framerate         <video_rate> .D....... set the video framerate (default "25")
-  -loop              <boolean>    .D....... force loop over input file sequence (default false)
-  -pattern_type      <int>        .D....... set pattern type (from 0 to INT_MAX) (default 4)
-     glob_sequence                .D....... select glob/sequence pattern type
-     glob                         .D....... select glob pattern type
-     sequence                     .D....... select sequence pattern type
-     none                         .D....... disable pattern matching
-  -pixel_format      <string>     .D....... set video pixel format
-  -start_number      <int>        .D....... set first number in the sequence (from INT_MIN to INT_MAX) (default 0)
-  -start_number_range <int>        .D....... set range for looking at the first sequence number (from 1 to INT_MAX) (default 5)
-  -video_size        <image_size> .D....... set video size
   -frame_size        <int>        .D....... force frame size in bytes (from 0 to INT_MAX) (default 0)
-  -ts_from_file      <int>        .D....... set frame timestamp from file's one (from 0 to 2) (default none)
-     none                         .D....... none
-     sec                          .D....... second precision
-     ns                           .D....... nano second precision
+  -framerate         <video_rate> .D....... set the video framerate (default "25")
+  -pixel_format      <string>     .D....... set video pixel format
+  -video_size        <image_size> .D....... set video size
+  -loop              <boolean>    .D....... force loop over input file sequence (default false)
 
 pgmyuv demuxer AVOptions:
-  -framerate         <video_rate> .D....... set the video framerate (default "25")
-  -loop              <boolean>    .D....... force loop over input file sequence (default false)
-  -pattern_type      <int>        .D....... set pattern type (from 0 to INT_MAX) (default 4)
-     glob_sequence                .D....... select glob/sequence pattern type
-     glob                         .D....... select glob pattern type
-     sequence                     .D....... select sequence pattern type
-     none                         .D....... disable pattern matching
-  -pixel_format      <string>     .D....... set video pixel format
-  -start_number      <int>        .D....... set first number in the sequence (from INT_MIN to INT_MAX) (default 0)
-  -start_number_range <int>        .D....... set range for looking at the first sequence number (from 1 to INT_MAX) (default 5)
-  -video_size        <image_size> .D....... set video size
   -frame_size        <int>        .D....... force frame size in bytes (from 0 to INT_MAX) (default 0)
-  -ts_from_file      <int>        .D....... set frame timestamp from file's one (from 0 to 2) (default none)
-     none                         .D....... none
-     sec                          .D....... second precision
-     ns                           .D....... nano second precision
+  -framerate         <video_rate> .D....... set the video framerate (default "25")
+  -pixel_format      <string>     .D....... set video pixel format
+  -video_size        <image_size> .D....... set video size
+  -loop              <boolean>    .D....... force loop over input file sequence (default false)
 
 pgm demuxer AVOptions:
-  -framerate         <video_rate> .D....... set the video framerate (default "25")
-  -loop              <boolean>    .D....... force loop over input file sequence (default false)
-  -pattern_type      <int>        .D....... set pattern type (from 0 to INT_MAX) (default 4)
-     glob_sequence                .D....... select glob/sequence pattern type
-     glob                         .D....... select glob pattern type
-     sequence                     .D....... select sequence pattern type
-     none                         .D....... disable pattern matching
-  -pixel_format      <string>     .D....... set video pixel format
-  -start_number      <int>        .D....... set first number in the sequence (from INT_MIN to INT_MAX) (default 0)
-  -start_number_range <int>        .D....... set range for looking at the first sequence number (from 1 to INT_MAX) (default 5)
-  -video_size        <image_size> .D....... set video size
   -frame_size        <int>        .D....... force frame size in bytes (from 0 to INT_MAX) (default 0)
-  -ts_from_file      <int>        .D....... set frame timestamp from file's one (from 0 to 2) (default none)
-     none                         .D....... none
-     sec                          .D....... second precision
-     ns                           .D....... nano second precision
+  -framerate         <video_rate> .D....... set the video framerate (default "25")
+  -pixel_format      <string>     .D....... set video pixel format
+  -video_size        <image_size> .D....... set video size
+  -loop              <boolean>    .D....... force loop over input file sequence (default false)
 
 pictor demuxer AVOptions:
-  -framerate         <video_rate> .D....... set the video framerate (default "25")
-  -loop              <boolean>    .D....... force loop over input file sequence (default false)
-  -pattern_type      <int>        .D....... set pattern type (from 0 to INT_MAX) (default 4)
-     glob_sequence                .D....... select glob/sequence pattern type
-     glob                         .D....... select glob pattern type
-     sequence                     .D....... select sequence pattern type
-     none                         .D....... disable pattern matching
-  -pixel_format      <string>     .D....... set video pixel format
-  -start_number      <int>        .D....... set first number in the sequence (from INT_MIN to INT_MAX) (default 0)
-  -start_number_range <int>        .D....... set range for looking at the first sequence number (from 1 to INT_MAX) (default 5)
-  -video_size        <image_size> .D....... set video size
   -frame_size        <int>        .D....... force frame size in bytes (from 0 to INT_MAX) (default 0)
-  -ts_from_file      <int>        .D....... set frame timestamp from file's one (from 0 to 2) (default none)
-     none                         .D....... none
-     sec                          .D....... second precision
-     ns                           .D....... nano second precision
+  -framerate         <video_rate> .D....... set the video framerate (default "25")
+  -pixel_format      <string>     .D....... set video pixel format
+  -video_size        <image_size> .D....... set video size
+  -loop              <boolean>    .D....... force loop over input file sequence (default false)
 
 png demuxer AVOptions:
-  -framerate         <video_rate> .D....... set the video framerate (default "25")
-  -loop              <boolean>    .D....... force loop over input file sequence (default false)
-  -pattern_type      <int>        .D....... set pattern type (from 0 to INT_MAX) (default 4)
-     glob_sequence                .D....... select glob/sequence pattern type
-     glob                         .D....... select glob pattern type
-     sequence                     .D....... select sequence pattern type
-     none                         .D....... disable pattern matching
-  -pixel_format      <string>     .D....... set video pixel format
-  -start_number      <int>        .D....... set first number in the sequence (from INT_MIN to INT_MAX) (default 0)
-  -start_number_range <int>        .D....... set range for looking at the first sequence number (from 1 to INT_MAX) (default 5)
-  -video_size        <image_size> .D....... set video size
   -frame_size        <int>        .D....... force frame size in bytes (from 0 to INT_MAX) (default 0)
-  -ts_from_file      <int>        .D....... set frame timestamp from file's one (from 0 to 2) (default none)
-     none                         .D....... none
-     sec                          .D....... second precision
-     ns                           .D....... nano second precision
+  -framerate         <video_rate> .D....... set the video framerate (default "25")
+  -pixel_format      <string>     .D....... set video pixel format
+  -video_size        <image_size> .D....... set video size
+  -loop              <boolean>    .D....... force loop over input file sequence (default false)
 
 ppm demuxer AVOptions:
-  -framerate         <video_rate> .D....... set the video framerate (default "25")
-  -loop              <boolean>    .D....... force loop over input file sequence (default false)
-  -pattern_type      <int>        .D....... set pattern type (from 0 to INT_MAX) (default 4)
-     glob_sequence                .D....... select glob/sequence pattern type
-     glob                         .D....... select glob pattern type
-     sequence                     .D....... select sequence pattern type
-     none                         .D....... disable pattern matching
-  -pixel_format      <string>     .D....... set video pixel format
-  -start_number      <int>        .D....... set first number in the sequence (from INT_MIN to INT_MAX) (default 0)
-  -start_number_range <int>        .D....... set range for looking at the first sequence number (from 1 to INT_MAX) (default 5)
-  -video_size        <image_size> .D....... set video size
   -frame_size        <int>        .D....... force frame size in bytes (from 0 to INT_MAX) (default 0)
-  -ts_from_file      <int>        .D....... set frame timestamp from file's one (from 0 to 2) (default none)
-     none                         .D....... none
-     sec                          .D....... second precision
-     ns                           .D....... nano second precision
+  -framerate         <video_rate> .D....... set the video framerate (default "25")
+  -pixel_format      <string>     .D....... set video pixel format
+  -video_size        <image_size> .D....... set video size
+  -loop              <boolean>    .D....... force loop over input file sequence (default false)
 
 psd demuxer AVOptions:
-  -framerate         <video_rate> .D....... set the video framerate (default "25")
-  -loop              <boolean>    .D....... force loop over input file sequence (default false)
-  -pattern_type      <int>        .D....... set pattern type (from 0 to INT_MAX) (default 4)
-     glob_sequence                .D....... select glob/sequence pattern type
-     glob                         .D....... select glob pattern type
-     sequence                     .D....... select sequence pattern type
-     none                         .D....... disable pattern matching
-  -pixel_format      <string>     .D....... set video pixel format
-  -start_number      <int>        .D....... set first number in the sequence (from INT_MIN to INT_MAX) (default 0)
-  -start_number_range <int>        .D....... set range for looking at the first sequence number (from 1 to INT_MAX) (default 5)
-  -video_size        <image_size> .D....... set video size
   -frame_size        <int>        .D....... force frame size in bytes (from 0 to INT_MAX) (default 0)
-  -ts_from_file      <int>        .D....... set frame timestamp from file's one (from 0 to 2) (default none)
-     none                         .D....... none
-     sec                          .D....... second precision
-     ns                           .D....... nano second precision
+  -framerate         <video_rate> .D....... set the video framerate (default "25")
+  -pixel_format      <string>     .D....... set video pixel format
+  -video_size        <image_size> .D....... set video size
+  -loop              <boolean>    .D....... force loop over input file sequence (default false)
 
 qdraw demuxer AVOptions:
-  -framerate         <video_rate> .D....... set the video framerate (default "25")
-  -loop              <boolean>    .D....... force loop over input file sequence (default false)
-  -pattern_type      <int>        .D....... set pattern type (from 0 to INT_MAX) (default 4)
-     glob_sequence                .D....... select glob/sequence pattern type
-     glob                         .D....... select glob pattern type
-     sequence                     .D....... select sequence pattern type
-     none                         .D....... disable pattern matching
-  -pixel_format      <string>     .D....... set video pixel format
-  -start_number      <int>        .D....... set first number in the sequence (from INT_MIN to INT_MAX) (default 0)
-  -start_number_range <int>        .D....... set range for looking at the first sequence number (from 1 to INT_MAX) (default 5)
-  -video_size        <image_size> .D....... set video size
   -frame_size        <int>        .D....... force frame size in bytes (from 0 to INT_MAX) (default 0)
-  -ts_from_file      <int>        .D....... set frame timestamp from file's one (from 0 to 2) (default none)
-     none                         .D....... none
-     sec                          .D....... second precision
-     ns                           .D....... nano second precision
+  -framerate         <video_rate> .D....... set the video framerate (default "25")
+  -pixel_format      <string>     .D....... set video pixel format
+  -video_size        <image_size> .D....... set video size
+  -loop              <boolean>    .D....... force loop over input file sequence (default false)
 
 sgi demuxer AVOptions:
-  -framerate         <video_rate> .D....... set the video framerate (default "25")
-  -loop              <boolean>    .D....... force loop over input file sequence (default false)
-  -pattern_type      <int>        .D....... set pattern type (from 0 to INT_MAX) (default 4)
-     glob_sequence                .D....... select glob/sequence pattern type
-     glob                         .D....... select glob pattern type
-     sequence                     .D....... select sequence pattern type
-     none                         .D....... disable pattern matching
-  -pixel_format      <string>     .D....... set video pixel format
-  -start_number      <int>        .D....... set first number in the sequence (from INT_MIN to INT_MAX) (default 0)
-  -start_number_range <int>        .D....... set range for looking at the first sequence number (from 1 to INT_MAX) (default 5)
-  -video_size        <image_size> .D....... set video size
   -frame_size        <int>        .D....... force frame size in bytes (from 0 to INT_MAX) (default 0)
-  -ts_from_file      <int>        .D....... set frame timestamp from file's one (from 0 to 2) (default none)
-     none                         .D....... none
-     sec                          .D....... second precision
-     ns                           .D....... nano second precision
+  -framerate         <video_rate> .D....... set the video framerate (default "25")
+  -pixel_format      <string>     .D....... set video pixel format
+  -video_size        <image_size> .D....... set video size
+  -loop              <boolean>    .D....... force loop over input file sequence (default false)
 
 svg demuxer AVOptions:
-  -framerate         <video_rate> .D....... set the video framerate (default "25")
-  -loop              <boolean>    .D....... force loop over input file sequence (default false)
-  -pattern_type      <int>        .D....... set pattern type (from 0 to INT_MAX) (default 4)
-     glob_sequence                .D....... select glob/sequence pattern type
-     glob                         .D....... select glob pattern type
-     sequence                     .D....... select sequence pattern type
-     none                         .D....... disable pattern matching
-  -pixel_format      <string>     .D....... set video pixel format
-  -start_number      <int>        .D....... set first number in the sequence (from INT_MIN to INT_MAX) (default 0)
-  -start_number_range <int>        .D....... set range for looking at the first sequence number (from 1 to INT_MAX) (default 5)
-  -video_size        <image_size> .D....... set video size
   -frame_size        <int>        .D....... force frame size in bytes (from 0 to INT_MAX) (default 0)
-  -ts_from_file      <int>        .D....... set frame timestamp from file's one (from 0 to 2) (default none)
-     none                         .D....... none
-     sec                          .D....... second precision
-     ns                           .D....... nano second precision
+  -framerate         <video_rate> .D....... set the video framerate (default "25")
+  -pixel_format      <string>     .D....... set video pixel format
+  -video_size        <image_size> .D....... set video size
+  -loop              <boolean>    .D....... force loop over input file sequence (default false)
 
 sunrast demuxer AVOptions:
-  -framerate         <video_rate> .D....... set the video framerate (default "25")
-  -loop              <boolean>    .D....... force loop over input file sequence (default false)
-  -pattern_type      <int>        .D....... set pattern type (from 0 to INT_MAX) (default 4)
-     glob_sequence                .D....... select glob/sequence pattern type
-     glob                         .D....... select glob pattern type
-     sequence                     .D....... select sequence pattern type
-     none                         .D....... disable pattern matching
-  -pixel_format      <string>     .D....... set video pixel format
-  -start_number      <int>        .D....... set first number in the sequence (from INT_MIN to INT_MAX) (default 0)
-  -start_number_range <int>        .D....... set range for looking at the first sequence number (from 1 to INT_MAX) (default 5)
-  -video_size        <image_size> .D....... set video size
   -frame_size        <int>        .D....... force frame size in bytes (from 0 to INT_MAX) (default 0)
-  -ts_from_file      <int>        .D....... set frame timestamp from file's one (from 0 to 2) (default none)
-     none                         .D....... none
-     sec                          .D....... second precision
-     ns                           .D....... nano second precision
+  -framerate         <video_rate> .D....... set the video framerate (default "25")
+  -pixel_format      <string>     .D....... set video pixel format
+  -video_size        <image_size> .D....... set video size
+  -loop              <boolean>    .D....... force loop over input file sequence (default false)
 
 tiff demuxer AVOptions:
-  -framerate         <video_rate> .D....... set the video framerate (default "25")
-  -loop              <boolean>    .D....... force loop over input file sequence (default false)
-  -pattern_type      <int>        .D....... set pattern type (from 0 to INT_MAX) (default 4)
-     glob_sequence                .D....... select glob/sequence pattern type
-     glob                         .D....... select glob pattern type
-     sequence                     .D....... select sequence pattern type
-     none                         .D....... disable pattern matching
-  -pixel_format      <string>     .D....... set video pixel format
-  -start_number      <int>        .D....... set first number in the sequence (from INT_MIN to INT_MAX) (default 0)
-  -start_number_range <int>        .D....... set range for looking at the first sequence number (from 1 to INT_MAX) (default 5)
-  -video_size        <image_size> .D....... set video size
   -frame_size        <int>        .D....... force frame size in bytes (from 0 to INT_MAX) (default 0)
-  -ts_from_file      <int>        .D....... set frame timestamp from file's one (from 0 to 2) (default none)
-     none                         .D....... none
-     sec                          .D....... second precision
-     ns                           .D....... nano second precision
+  -framerate         <video_rate> .D....... set the video framerate (default "25")
+  -pixel_format      <string>     .D....... set video pixel format
+  -video_size        <image_size> .D....... set video size
+  -loop              <boolean>    .D....... force loop over input file sequence (default false)
 
 webp demuxer AVOptions:
-  -framerate         <video_rate> .D....... set the video framerate (default "25")
-  -loop              <boolean>    .D....... force loop over input file sequence (default false)
-  -pattern_type      <int>        .D....... set pattern type (from 0 to INT_MAX) (default 4)
-     glob_sequence                .D....... select glob/sequence pattern type
-     glob                         .D....... select glob pattern type
-     sequence                     .D....... select sequence pattern type
-     none                         .D....... disable pattern matching
-  -pixel_format      <string>     .D....... set video pixel format
-  -start_number      <int>        .D....... set first number in the sequence (from INT_MIN to INT_MAX) (default 0)
-  -start_number_range <int>        .D....... set range for looking at the first sequence number (from 1 to INT_MAX) (default 5)
-  -video_size        <image_size> .D....... set video size
   -frame_size        <int>        .D....... force frame size in bytes (from 0 to INT_MAX) (default 0)
-  -ts_from_file      <int>        .D....... set frame timestamp from file's one (from 0 to 2) (default none)
-     none                         .D....... none
-     sec                          .D....... second precision
-     ns                           .D....... nano second precision
+  -framerate         <video_rate> .D....... set the video framerate (default "25")
+  -pixel_format      <string>     .D....... set video pixel format
+  -video_size        <image_size> .D....... set video size
+  -loop              <boolean>    .D....... force loop over input file sequence (default false)
 
 xpm demuxer AVOptions:
-  -framerate         <video_rate> .D....... set the video framerate (default "25")
-  -loop              <boolean>    .D....... force loop over input file sequence (default false)
-  -pattern_type      <int>        .D....... set pattern type (from 0 to INT_MAX) (default 4)
-     glob_sequence                .D....... select glob/sequence pattern type
-     glob                         .D....... select glob pattern type
-     sequence                     .D....... select sequence pattern type
-     none                         .D....... disable pattern matching
-  -pixel_format      <string>     .D....... set video pixel format
-  -start_number      <int>        .D....... set first number in the sequence (from INT_MIN to INT_MAX) (default 0)
-  -start_number_range <int>        .D....... set range for looking at the first sequence number (from 1 to INT_MAX) (default 5)
-  -video_size        <image_size> .D....... set video size
   -frame_size        <int>        .D....... force frame size in bytes (from 0 to INT_MAX) (default 0)
-  -ts_from_file      <int>        .D....... set frame timestamp from file's one (from 0 to 2) (default none)
-     none                         .D....... none
-     sec                          .D....... second precision
-     ns                           .D....... nano second precision
+  -framerate         <video_rate> .D....... set the video framerate (default "25")
+  -pixel_format      <string>     .D....... set video pixel format
+  -video_size        <image_size> .D....... set video size
+  -loop              <boolean>    .D....... force loop over input file sequence (default false)
 
 xwd demuxer AVOptions:
-  -framerate         <video_rate> .D....... set the video framerate (default "25")
-  -loop              <boolean>    .D....... force loop over input file sequence (default false)
-  -pattern_type      <int>        .D....... set pattern type (from 0 to INT_MAX) (default 4)
-     glob_sequence                .D....... select glob/sequence pattern type
-     glob                         .D....... select glob pattern type
-     sequence                     .D....... select sequence pattern type
-     none                         .D....... disable pattern matching
-  -pixel_format      <string>     .D....... set video pixel format
-  -start_number      <int>        .D....... set first number in the sequence (from INT_MIN to INT_MAX) (default 0)
-  -start_number_range <int>        .D....... set range for looking at the first sequence number (from 1 to INT_MAX) (default 5)
-  -video_size        <image_size> .D....... set video size
   -frame_size        <int>        .D....... force frame size in bytes (from 0 to INT_MAX) (default 0)
-  -ts_from_file      <int>        .D....... set frame timestamp from file's one (from 0 to 2) (default none)
-     none                         .D....... none
-     sec                          .D....... second precision
-     ns                           .D....... nano second precision
+  -framerate         <video_rate> .D....... set the video framerate (default "25")
+  -pixel_format      <string>     .D....... set video pixel format
+  -video_size        <image_size> .D....... set video size
+  -loop              <boolean>    .D....... force loop over input file sequence (default false)
 
 Game Music Emu demuxer AVOptions:
   -track_index       <int>        .D..A.... set track that should be played (from 0 to INT_MAX) (default 0)
@@ -4986,6 +4706,7 @@ dash muxer AVOptions:
      webm                         E........ make segment file in WebM format
   -ignore_io_errors  <boolean>    E........ Ignore IO errors during open and write. Useful for long-duration runs with network output (default false)
   -lhls              <boolean>    E........ Enable Low-latency HLS(Experimental). Adds #EXT-X-PREFETCH tag with current segment's URI (default false)
+  -master_m3u8_publish_rate <int>        E........ Publish master playlist every after this many segment intervals (from 0 to UINT32_MAX) (default 0)
 
 f4v muxer AVOptions:
   -movflags          <flags>      E........ MOV muxer flags (default 0)
@@ -5614,8 +5335,8 @@ RTSP muxer AVOptions:
   -stimeout          <int>        .D....... set timeout (in microseconds) of socket TCP I/O operations (from INT_MIN to INT_MAX) (default 0)
   -reorder_queue_size <int>        .D....... set number of packets to buffer for handling of reordered packets (from -1 to INT_MAX) (default -1)
   -buffer_size       <int>        ED....... Underlying protocol send/receive buffer size (from -1 to INT_MAX) (default -1)
-  -user_agent        <string>     .D....... override User-Agent header (default "Lavf58.26.100")
-  -user-agent        <string>     .D....... override User-Agent header (deprecated, use user_agent) (default "Lavf58.26.100")
+  -user_agent        <string>     .D....... override User-Agent header (default "Lavf58.26.101")
+  -user-agent        <string>     .D....... override User-Agent header (deprecated, use user_agent) (default "Lavf58.26.101")
 
 segment muxer AVOptions:
   -reference_stream  <string>     E........ set reference stream (default "auto")
@@ -6071,7 +5792,7 @@ acrossfade AVOptions:
   d                 <duration>   ..F.A.... set cross fade duration (default 0)
   overlap           <boolean>    ..F.A.... overlap 1st stream end with 2nd stream start (default true)
   o                 <boolean>    ..F.A.... overlap 1st stream end with 2nd stream start (default true)
-  curve1            <int>        ..F.A.... set fade curve type for 1st stream (from 0 to 16) (default tri)
+  curve1            <int>        ..F.A.... set fade curve type for 1st stream (from 0 to 17) (default tri)
      tri                          ..F.A.... linear slope
      qsin                         ..F.A.... quarter of sine wave
      esin                         ..F.A.... exponential sine wave
@@ -6089,7 +5810,8 @@ acrossfade AVOptions:
      dese                         ..F.A.... double-exponential seat
      desi                         ..F.A.... double-exponential sigmoid
      losi                         ..F.A.... logistic sigmoid
-  c1                <int>        ..F.A.... set fade curve type for 1st stream (from 0 to 16) (default tri)
+     nofade                       ..F.A.... no fade; keep audio as-is
+  c1                <int>        ..F.A.... set fade curve type for 1st stream (from 0 to 17) (default tri)
      tri                          ..F.A.... linear slope
      qsin                         ..F.A.... quarter of sine wave
      esin                         ..F.A.... exponential sine wave
@@ -6107,7 +5829,8 @@ acrossfade AVOptions:
      dese                         ..F.A.... double-exponential seat
      desi                         ..F.A.... double-exponential sigmoid
      losi                         ..F.A.... logistic sigmoid
-  curve2            <int>        ..F.A.... set fade curve type for 2nd stream (from 0 to 16) (default tri)
+     nofade                       ..F.A.... no fade; keep audio as-is
+  curve2            <int>        ..F.A.... set fade curve type for 2nd stream (from 0 to 17) (default tri)
      tri                          ..F.A.... linear slope
      qsin                         ..F.A.... quarter of sine wave
      esin                         ..F.A.... exponential sine wave
@@ -6125,7 +5848,8 @@ acrossfade AVOptions:
      dese                         ..F.A.... double-exponential seat
      desi                         ..F.A.... double-exponential sigmoid
      losi                         ..F.A.... logistic sigmoid
-  c2                <int>        ..F.A.... set fade curve type for 2nd stream (from 0 to 16) (default tri)
+     nofade                       ..F.A.... no fade; keep audio as-is
+  c2                <int>        ..F.A.... set fade curve type for 2nd stream (from 0 to 17) (default tri)
      tri                          ..F.A.... linear slope
      qsin                         ..F.A.... quarter of sine wave
      esin                         ..F.A.... exponential sine wave
@@ -6143,6 +5867,7 @@ acrossfade AVOptions:
      dese                         ..F.A.... double-exponential seat
      desi                         ..F.A.... double-exponential sigmoid
      losi                         ..F.A.... logistic sigmoid
+     nofade                       ..F.A.... no fade; keep audio as-is
 
 acrossover AVOptions:
   split             <string>     ..F.A.... set split frequencies (default "500")
@@ -6232,7 +5957,7 @@ afade AVOptions:
   st                <duration>   ..F.A.... set time to start fading (default 0)
   duration          <duration>   ..F.A.... set fade duration (default 0)
   d                 <duration>   ..F.A.... set fade duration (default 0)
-  curve             <int>        ..F.A.... set fade curve type (from 0 to 16) (default tri)
+  curve             <int>        ..F.A.... set fade curve type (from 0 to 17) (default tri)
      tri                          ..F.A.... linear slope
      qsin                         ..F.A.... quarter of sine wave
      esin                         ..F.A.... exponential sine wave
@@ -6250,7 +5975,8 @@ afade AVOptions:
      dese                         ..F.A.... double-exponential seat
      desi                         ..F.A.... double-exponential sigmoid
      losi                         ..F.A.... logistic sigmoid
-  c                 <int>        ..F.A.... set fade curve type (from 0 to 16) (default tri)
+     nofade                       ..F.A.... no fade; keep audio as-is
+  c                 <int>        ..F.A.... set fade curve type (from 0 to 17) (default tri)
      tri                          ..F.A.... linear slope
      qsin                         ..F.A.... quarter of sine wave
      esin                         ..F.A.... exponential sine wave
@@ -6268,6 +5994,7 @@ afade AVOptions:
      dese                         ..F.A.... double-exponential seat
      desi                         ..F.A.... double-exponential sigmoid
      losi                         ..F.A.... logistic sigmoid
+     nofade                       ..F.A.... no fade; keep audio as-is
 
 afftdn AVOptions:
   nr                <float>      ..F.A.... set the noise reduction (from 0.01 to 97) (default 12)
@@ -6479,6 +6206,10 @@ anlmdn AVOptions:
   s                 <float>      ..F.A.... set denoising strength (from 1e-05 to 10) (default 1e-05)
   p                 <duration>   ..F.A.... set patch duration (default 0.002)
   r                 <duration>   ..F.A.... set research duration (default 0.006)
+  o                 <int>        ..F.A.... set output mode (from 0 to 2) (default o)
+     i                            ..F.A.... input
+     o                            ..F.A.... output
+     n                            ..F.A.... noise
 
 apad AVOptions:
   packet_size       <int>        ..F.A.... set silence packet size (from 0 to INT_MAX) (default 4096)
@@ -7484,6 +7215,7 @@ amplify AVOptions:
   radius            <int>        ..FV..... set radius (from 1 to 63) (default 2)
   factor            <float>      ..FV..... set factor (from 0 to 65535) (default 2)
   threshold         <float>      ..FV..... set threshold (from 0 to 65535) (default 10)
+  tolerance         <float>      ..FV..... set tolerance (from 0 to 65535) (default 0)
   low               <int>        ..FV..... set low limit for amplification (from 0 to 65535) (default 65535)
   high              <int>        ..FV..... set high limit for amplification (from 0 to 65535) (default 65535)
   planes            <flags>      ..FV..... set what planes to filter (default 7)
@@ -10406,7 +10138,7 @@ tlut2 AVOptions:
   c3                <string>     ..FV..... set component #3 expression (default "x")
 
 tmix AVOptions:
-  frames            <int>        ..FV..... set number of successive frames to mix (from 2 to 128) (default 3)
+  frames            <int>        ..FV..... set number of successive frames to mix (from 1 to 128) (default 3)
   weights           <string>     ..FV..... set weight for each frame (default "1 1 1")
   scale             <float>      ..FV..... set scale (from 0 to 32767) (default 0)
 
@@ -12337,6 +12069,7 @@ Decoders:
  V....D anm                  Deluxe Paint Animation
  V....D ansi                 ASCII/ANSI art
  VF...D apng                 APNG (Animated Portable Network Graphics) image
+ V....D arbc                 Gryphon's Anim Compressor
  V....D asv1                 ASUS V1
  V....D asv2                 ASUS V2
  V....D aura                 Auravision AURA
@@ -12812,6 +12545,7 @@ Codecs:
  D.V.L. anm                  Deluxe Paint Animation
  D.V.L. ansi                 ASCII/ANSI art
  DEV..S apng                 APNG (Animated Portable Network Graphics) image
+ D.V.L. arbc                 Gryphon's Anim Compressor
  DEVIL. asv1                 ASUS V1
  DEVIL. asv2                 ASUS V2
  D.VIL. aura                 Auravision AURA
@@ -13222,6 +12956,7 @@ Codecs:
  ..D... scte_35              SCTE 35 Message Queue
  ..D... timed_id3            timed ID3 metadata
  ..D... ttf                  TrueType font
+ ..S... arib_caption         ARIB STD-B24 caption
  DES... ass                  ASS (Advanced SSA) subtitle (decoders: ssa ass ) (encoders: ssa ass )
  DES... dvb_subtitle         DVB subtitles (decoders: dvbsub ) (encoders: dvbsub )
  D.S... dvb_teletext         DVB teletext (decoders: libzvbi_teletextdec )
@@ -14634,7 +14369,7 @@ Filters:
  ... tile              V->V       Tile several successive frames together.
  ... tinterlace        V->V       Perform temporal field interlacing.
  T.. tlut2             V->V       Compute and apply a lookup table from two successive frames.
- .S. tmix              V->V       Mix successive video frames.
+ TS. tmix              V->V       Mix successive video frames.
  ... tonemap           V->V       Conversion to/from different dynamic ranges.
  ... tonemap_opencl    V->V       perform HDR to SDR conversion with tonemapping
  ... tpad              V->V       Temporarily pad video frames.
@@ -14887,6 +14622,10 @@ nvenc_hevc AVOptions:
   -init_qpI          <int>        E..V..... Initial QP value for I frame (from -1 to 51) (default -1)
   -qp                <int>        E..V..... Constant quantization parameter rate control method (from -1 to 51) (default -1)
   -weighted_pred     <int>        E..V..... Set 1 to enable weighted prediction (from 0 to 1) (default 0)
+  -b_ref_mode        <int>        E..V..... Use B frames as references (from 0 to 2) (default disabled)
+     disabled                     E..V..... B frames will not be used for reference
+     each                         E..V..... Each B frame will be used for reference
+     middle                       E..V..... Only (number of B frames)/2 will be used for reference
 
 Decoder h264_cuvid [Nvidia CUVID H264 decoder]:
     General capabilities: delay avoidprobe hardware 

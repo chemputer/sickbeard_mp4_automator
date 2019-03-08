@@ -189,7 +189,7 @@ class SubtitleCodec(BaseCodec):
             optlist.extend(['-sub_charenc', str(safe['encoding'])])
         if 'forced' in safe and 'burn_in_forced_subs' in safe and safe['burn_in_forced_subs'] == True:
             subtitles_ = str(safe['subtitle_burn'])
-            optlist.extend(['-vf', "subtitles=" + "'" + subtitles_ ])
+            optlist.extend(['-vf', "subtitles=" + "'" + subtitles_ + "'" ])
             optlist.extend(self._codec_specific_produce_ffmpeg_list(safe))
             return optlist
         optlist.extend(['-c:s:' + stream, self.ffmpeg_codec_name])
@@ -544,9 +544,8 @@ class SubtitleCopyCodec(BaseCodec):
     encoder_options = {'map': int,
                        'source': str}
 
-    optlist = []
-
     def parse_options(self, opt, stream=0):
+        optlist = []
         safe = self.safe_options(opt)
         stream = str(stream)
         if 'source' in safe:
@@ -555,7 +554,7 @@ class SubtitleCopyCodec(BaseCodec):
             s = str(0)
         if 'map' in safe:
             optlist.extend(['-map', s + ':' + str(safe['map'])])
-        optlist.extend(['-c:s:' + stream, copy])
+        optlist.extend(['-c:s:' + stream, 'copy'])
         return optlist
 
 
@@ -765,15 +764,16 @@ class H264Codec(VideoCodec):
         if 'filter_complex' in safe:
             if 'wscale' in safe and 'hscale' in safe:
                 optlist.extend(['-filter_complex', '[0:v]scale=%s:%s[video]' % (safe['wscale'], safe['hscale'] ) + ';' + safe['filter_complex'] ] )
-                optlist.extend(['-map', 'video' ]);
+                optlist.extend(['-map', '[video]' ]);
             elif 'wscale' in safe:
                 optlist.extend(['-filter_complex', '[0:v]scale=%s:-1[video]' % (safe['wscale']) + ';' + safe['filter_complex'] ] )
-                optlist.extend(['-map', 'video' ]);
+                optlist.extend(['-map', '[video]' ]);
             elif 'hscale' in safe:
                 optlist.extend(['-filter_complex', '[0:v]scale=-1:%s[video]' % (safe['hscale']) + ';' + safe['filter_complex'] ] )
-                optlist.extend(['-map', 'video' ]);
+                optlist.extend(['-map', '[video]' ]);
             else:
                 optlist.extend(['-filter_complex', safe['filter_complex'] ])
+                optlist.extend(['-map', '[video]'])
         else:
             if 'wscale' in safe and 'hscale' in safe:
                 optlist.extend(['-vf', 'scale=%s:%s' % (safe['wscale'], safe['hscale'])])
@@ -789,7 +789,7 @@ class NVEncH264(H264Codec):
     Nvidia H.264/AVC video codec.
     """
     codec_name = 'nvenc_h264'
-    ffmpeg_codec_name = 'nvenc_h264'
+    ffmpeg_codec_name = 'h264_nvenc'
     encoder_options = H264Codec.encoder_options.copy()
     encoder_options.update({
         'nvenc_profile': str,  # Options include: baseline, main, high, high444p - default is main
@@ -841,15 +841,16 @@ class NVEncH264(H264Codec):
         if 'filter_complex' in safe:
             if 'wscale' in safe and 'hscale' in safe:
                 optlist.extend(['-filter_complex', '[0:v]scale=%s:%s[video]' % (safe['wscale'], safe['hscale'] ) + ';' + safe['filter_complex'] ] )
-                optlist.extend(['-map', 'video' ]);
+                optlist.extend(['-map', '[video]' ]);
             elif 'wscale' in safe:
                 optlist.extend(['-filter_complex', '[0:v]scale=%s:-1[video]' % (safe['wscale']) + ';' + safe['filter_complex'] ] )
-                optlist.extend(['-map', 'video' ]);
+                optlist.extend(['-map', '[video]' ]);
             elif 'hscale' in safe:
                 optlist.extend(['-filter_complex', '[0:v]scale=-1:%s[video]' % (safe['hscale']) + ';' + safe['filter_complex'] ] )
-                optlist.extend(['-map', 'video' ]);
+                optlist.extend(['-map', '[video]' ]);
             else:
                 optlist.extend(['-filter_complex', safe['filter_complex'] ])
+                optlist.extend(['-map', '[video]']);
         else:
             if 'wscale' in safe and 'hscale' in safe:
                 optlist.extend(['-vf', 'scale=%s:%s' % (safe['wscale'], safe['hscale'])])
@@ -948,15 +949,16 @@ class H265Codec(VideoCodec):
         if 'filter_complex' in safe:
             if 'wscale' in safe and 'hscale' in safe:
                 optlist.extend(['-filter_complex', '[0:v]scale=%s:%s[video]' % (safe['wscale'], safe['hscale'] ) + ';' + safe['filter_complex'] ] )
-                optlist.extend(['-map', 'video' ]);
+                optlist.extend(['-map', '[video]' ]);
             elif 'wscale' in safe:
                 optlist.extend(['-filter_complex', '[0:v]scale=%s:-1[video]' % (safe['wscale']) + ';' + safe['filter_complex'] ] )
-                optlist.extend(['-map', 'video' ]);
+                optlist.extend(['-map', '[video]' ]);
             elif 'hscale' in safe:
                 optlist.extend(['-filter_complex', '[0:v]scale=-1:%s[video]' % (safe['hscale']) + ';' + safe['filter_complex'] ] )
-                optlist.extend(['-map', 'video' ]);
+                optlist.extend(['-map', '[video]' ]);
             else:
                 optlist.extend(['-filter_complex', safe['filter_complex'] ])
+                optlist.extend(['-map', '[video]'])
         else:
             if 'wscale' in safe and 'hscale' in safe:
                 optlist.extend(['-vf', 'scale=%s:%s' % (safe['wscale'], safe['hscale'])])
@@ -981,7 +983,7 @@ class NVEncH265(H265Codec):
     Nvidia H.265/AVC video codec.
     """
     codec_name = 'nvenc_h265'
-    ffmpeg_codec_name = 'hevc_nvenc'
+    ffmpeg_codec_name = 'nvenc_hevc'
 
     encoder_options = H265Codec.encoder_options.copy()
     encoder_options.update({
@@ -1032,15 +1034,16 @@ class NVEncH265(H265Codec):
         if 'filter_complex' in safe:
             if 'wscale' in safe and 'hscale' in safe:
                 optlist.extend(['-filter_complex', '[0:v]scale=%s:%s[video]' % (safe['wscale'], safe['hscale'] ) + ';' + safe['filter_complex'] ] )
-                optlist.extend(['-map', 'video' ]);
+                optlist.extend(['-map', '[video]' ]);
             elif 'wscale' in safe:
                 optlist.extend(['-filter_complex', '[0:v]scale=%s:-1[video]' % (safe['wscale']) + ';' + safe['filter_complex'] ] )
-                optlist.extend(['-map', 'video' ]);
+                optlist.extend(['-map', '[video]' ]);
             elif 'hscale' in safe:
                 optlist.extend(['-filter_complex', '[0:v]scale=-1:%s[video]' % (safe['hscale']) + ';' + safe['filter_complex'] ] )
-                optlist.extend(['-map', 'video' ]);
+                optlist.extend(['-map', '[video]' ]);
             else:
                 optlist.extend(['-filter_complex', safe['filter_complex'] ])
+                optlist.extend(['-map', '[video]'])
         else:
             if 'wscale' in safe and 'hscale' in safe:
                 optlist.extend(['-vf', 'scale=%s:%s' % (safe['wscale'], safe['hscale'])])
