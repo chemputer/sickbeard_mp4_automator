@@ -6206,6 +6206,10 @@ anlmdn AVOptions:
   s                 <float>      ..F.A.... set denoising strength (from 1e-05 to 10) (default 1e-05)
   p                 <duration>   ..F.A.... set patch duration (default 0.002)
   r                 <duration>   ..F.A.... set research duration (default 0.006)
+  o                 <int>        ..F.A.... set output mode (from 0 to 2) (default o)
+     i                            ..F.A.... input
+     o                            ..F.A.... output
+     n                            ..F.A.... noise
 
 apad AVOptions:
   packet_size       <int>        ..F.A.... set silence packet size (from 0 to INT_MAX) (default 4096)

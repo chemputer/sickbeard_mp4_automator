@@ -789,7 +789,7 @@ class NVEncH264(H264Codec):
     Nvidia H.264/AVC video codec.
     """
     codec_name = 'nvenc_h264'
-    ffmpeg_codec_name = 'nvenc_h264'
+    ffmpeg_codec_name = 'h264_nvenc'
     encoder_options = H264Codec.encoder_options.copy()
     encoder_options.update({
         'nvenc_profile': str,  # Options include: baseline, main, high, high444p - default is main
@@ -983,7 +983,7 @@ class NVEncH265(H265Codec):
     Nvidia H.265/AVC video codec.
     """
     codec_name = 'nvenc_h265'
-    ffmpeg_codec_name = 'hevc_nvenc'
+    ffmpeg_codec_name = 'nvenc_hevc'
 
     encoder_options = H265Codec.encoder_options.copy()
     encoder_options.update({

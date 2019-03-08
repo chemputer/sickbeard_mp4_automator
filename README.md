@@ -2,7 +2,7 @@ Same as the original with better Nvidia support and some other things to make au
 
 Nightly builds from https://ffmpeg.zeranoe.com/builds/ will work with all added options **EXCEPT enable_opencl_hdr_sdr_tonemapping -- You MUST compile your own ffmpeg to use this option.** If you are on windows I recommend using https://github.com/jb-alvarado/media-autobuild_suite "full build" for this purpose. The computer that does the compiling must have a OpenCL compliant video card in it.
 
-Cuvid/NVDEC only support pixel formats with 420 chroma, so it will not work with yuv444p, yuv422p, etc. When these formats are encountered, NVDEC will be disabled. 
+NVDEC only supports pixel formats with 420 chroma, so it will not work with yuv444p, yuv422p, etc. When these formats are encountered, NVDEC will be disabled. 
 
 Brief explanation of added settings:
 
