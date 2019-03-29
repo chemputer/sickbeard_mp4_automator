@@ -54,10 +54,6 @@ try:
                 except:
                     log.error("Unable to tag file")
 
-            # QTFS
-            if settings.relocate_moov and output['output_extension'] in valid_tagging_extensions:
-                converter.QTFS(output['output'])
-
             # Copy to additional locations
             output_files = converter.replicate(output['output'])
 
