@@ -558,7 +558,7 @@ class FFMpeg(object):
             # new option to force re-encoding.
             # The script will wait here until the subprocess is finished, in which it then exits this function and
             # pretends that everything is a-okay so that sabn/nzbget/etc scripts will properly autoimport the file.
-            ignore_non_monotonous = False #Temporarily disabling this as it's causing some odd issues.
+            ignore_non_monotonous = True #Temporarily disabling this as it's causing some odd issues.
             if 'Queue input is backward in time' in ret: # This warning tends to come up at the very end of a file
                 ignore_non_monotonous = True # generally it's because the audio stream ends a few seconds before the video.
                 # After this, it will spam warnings about non-monotonous DTS, but it doesn't matter since it's during the credits.
