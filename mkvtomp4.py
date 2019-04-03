@@ -978,7 +978,7 @@ class MkvtoMp4:
 
         if self.preopts:
             options['preopts'].extend(self.preopts)
-        if disable_faststart == False:
+        if disable_faststart == False and self.relocate_moov is True:
             options['postopts'].extend(['-movflags', 'faststart'])
         if self.postopts:
             options['postopts'].extend(self.postopts)
@@ -1164,41 +1164,6 @@ class MkvtoMp4:
         filename, input_extension = os.path.splitext(filename)
         input_extension = input_extension[1:]
         return input_dir, filename, input_extension
-
-    # Process a file with QTFastStart, removing the original file
-    def QTFS(self, inputfile):
-        input_dir, filename, input_extension = self.parseFile(inputfile)
-        temp_ext = '.QTFS'
-        # Relocate MOOV atom to the very beginning. Can double the time it takes to convert a file but makes streaming faster
-        if self.parseFile(inputfile)[2] in valid_output_extensions and os.path.isfile(inputfile) and self.relocate_moov:
-            from qtfaststart import processor, exceptions
-
-            self.log.info("Relocating MOOV atom to start of file.")
-
-            try:
-                outputfile = inputfile.decode(sys.getfilesystemencoding()) + temp_ext
-            except:
-                outputfile = inputfile + temp_ext
-
-            # Clear out the temp file if it exists
-            if os.path.exists(outputfile):
-                self.removeFile(outputfile, 0, 0)
-
-            try:
-                processor.process(inputfile, outputfile)
-                try:
-                    os.chmod(outputfile, self.permissions)
-                except:
-                    self.log.exception("Unable to set file permissions.")
-                # Cleanup
-                if self.removeFile(inputfile, replacement=outputfile):
-                    return outputfile
-                else:
-                    self.log.error("Error cleaning up QTFS temp files.")
-                    return False
-            except exceptions.FastStartException:
-                self.log.warning("QT FastStart did not run - perhaps moov atom was at the start already.")
-                return inputfile
 
     # Makes additional copies of the input file in each directory specified in the copy_to option
     def replicate(self, inputfile, relativePath=None):

@@ -40,7 +40,6 @@ log = logging.getLogger("MANUAL")
 logging.getLogger("subliminal").setLevel(logging.CRITICAL)
 logging.getLogger("requests").setLevel(logging.WARNING)
 logging.getLogger("enzyme").setLevel(logging.WARNING)
-logging.getLogger("qtfaststart").setLevel(logging.WARNING)
 
 log.info("Manual processor started.")
 
@@ -227,8 +226,6 @@ def processFile(inputfile, tagdata, relativePath=None):
                 except Exception as e:
                     print("There was an error tagging the file")
                     print(e)
-            if settings.relocate_moov and output['output_extension'] in valid_tagging_extensions:
-                converter.QTFS(output['output'])
             output_files = converter.replicate(output['output'], relativePath=relativePath)
             if settings.postprocess:
                 post_processor = PostProcessor(output_files)
